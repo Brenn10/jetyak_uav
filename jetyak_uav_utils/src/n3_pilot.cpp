@@ -16,7 +16,10 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
-	isM100 = true;//versionCheckM100();
+	isM100 = true; //versionCheckM100();
+	
+	// Initialize RC
+	setupRCCallback();
 
 	// Initialize joy command
 	joyCommand.axes.clear();

@@ -64,7 +64,7 @@ private:
     DJISDK::HORIZONTAL_VELOCITY |
     DJISDK::YAW_RATE            |
     DJISDK::HORIZONTAL_BODY     |
-    DJISDK::STABLE_ENABLE);
+    DJISDK::STABLE_DISABLE);
 
   char worldPositionCmdFlag_ = (
     DJISDK::VERTICAL_POSITION   |
