@@ -16,8 +16,8 @@ void behaviors::takeoffBehavior() {
     armSrv_.call(srv);
     if(srv.response.result) {
       ROS_INFO("Propellors running");
-      behaviorChanged_=true;
-      currentMode_=Mode::FOLLOW;
+      //behaviorChanged_=true;
+      //currentMode_=Mode::FOLLOW;
       propellorsRunning=true;
 
       xpid_->reset();
@@ -34,7 +34,7 @@ void behaviors::takeoffBehavior() {
     }
   }
   else {
-    if(takeoff_.boatz-simpleTag_.z>takeoff_.height-takeoff_.threshold) {
+    if(takeoff_.boatz-simpleTag_.z>takeoff_.height) {
       ROS_WARN("Switching to Following");
       behaviorChanged_=true;
       this->currentMode_=Mode::FOLLOW;
@@ -313,7 +313,7 @@ void behaviors::landBehavior() {
     if(follow_.lastSpotted!=simpleTag_.t) { //if time changed
 
       // If pose is within a cylinder of radius .1 and height .1
-      if((land_.land_pose.z-simpleTag_.z)<.1 and
+      if((land_.land_pose.z-simpleTag_.z)<.2 and
         pow(land_.land_pose.x-simpleTag_.x,2)+
         pow(land_.land_pose.y-simpleTag_.y,2)<pow(.1,2))
       {

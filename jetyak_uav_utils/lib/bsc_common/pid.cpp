@@ -79,6 +79,7 @@ void PID::reset()
   last_error_=0;
   last_time_=0;
   integral_=0;
+  last_d_=0;
   if(!past_integral_contributions.empty())
     past_integral_contributions.clear();
 }
