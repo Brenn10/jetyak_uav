@@ -15,18 +15,18 @@
     </marker>
 
     <marker index="3" status="1">
-        <corner x="-44.5" y="-50" z="91" />
-        <corner x="-1.5" y="-50" z="91" />
-        <corner x="-1.5" y="-50" z="48" />
-        <corner x="-44.5" y="-50" z="48" />
+        <corner x="-37.5" y="-54" z="127" />
+        <corner x="5.5" y="-54" z="127" />
+        <corner x="5.5" y="-54" z="82" />
+        <corner x="-37.5" y="-54" z="82" />
     </marker>
 
     <marker index="4" status="1">
 
-        <corner x="1.5" y="-50" z="91" />
-        <corner x="44.5" y="-50" z="91" />
-        <corner x="44.5" y="-50" z="48" />
-        <corner x="1.5" y="-50" z="48" />
+        <corner x="8.5" y="-54" z="127" />
+        <corner x="51.5" y="-54" z="127" />
+        <corner x="51.5" y="-54" z="82" />
+        <corner x="8.5" y="-54" z="82" />
     </marker>
 </multimarker>
 
@@ -34,4 +34,4 @@
 big markers - 45.5cm, gap - 2.95 
 small markers - 
 -->
-
+USRLHexH20

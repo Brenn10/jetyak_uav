@@ -37,16 +37,16 @@ class SpiralGenerator():
 
 	def spiral_callback(self,srv):
 		maxR = 10.0
-		turns = 4.0
+
 		r = 1.0
-		rmult = .5
+		rmult = .3
 
 		x=[]
 		y=[]
 
 		while(r<maxR):
 			r=r+(1.0/r)*rmult
-			t = (r/maxR)*turns*2*pi
+			t = (r/maxR)*self.turns*2*pi
 			x.append(r*cos(t))
 			y.append(r*sin(t))
 
@@ -75,10 +75,10 @@ class SpiralGenerator():
 		
 		
 
-wp_radius = 1
-endradius = .0005
+wp_radius = .1
+endradius = .00005
 turns = 5
-points = 1000
+points = 30
 altitude = 10
 
 spiraler = SpiralGenerator(wp_radius, endradius, turns, points, altitude)
