@@ -24,13 +24,15 @@ def clip(val,low,high):
 
 class WaypointFollow():	
 	def __init__(self,):
+		self.deb_f = open("dump.cvs","w+")
 		self.hover_alt=10
-		self.flag = 0b01  # world frame and position commands
+		self.flag = 0b00  # world frame and position commands
 		self.wps = []
 		self.yaw = 0
 		self.lat = 0
 		self.lon = 0
 		self.height = 0
+		self.max_speed=3
 		self.in_waypoint = False
 		self.time_entered_wp = 0
 
@@ -73,6 +75,7 @@ class WaypointFollow():
 			#If this is our first time noticing we are in a waypoint
 			if self.time_entered_wp == 0:
 				self.time_entered_wp = rospy.Time.now().to_sec()
+				self.deb_f.write("%f,%f\n"%(self.lon,self.lat))
 				print("Entered waypoint")
 			elif rospy.Time.now().to_sec() - self.time_entered_wp > self.wps[0].loiter_time:
 				self.wps.pop(0)
@@ -80,12 +83,12 @@ class WaypointFollow():
 				self.in_waypoint = False
 				if(len(self.wps)==0):
 					cmd = Joy()
-					cmd.axes = [0,0, self.hover_alt, 0, self.flag]
+					cmd.axes = [0,0, 0, 0, self.flag]
 					#cmd.axes=[east,0,height_diff,0,self.flag]
 					self.cmd_pub.publish(cmd)
 					print("Mission Complete")
 				else:
-					print("Moving to next objective")
+					print("Moving to next objective: %f left"%len(self.wps))
 				return
 		
 		east = lat_lon_to_m(0, self.wps[0].lon, 0, self.lon)
@@ -97,8 +100,15 @@ class WaypointFollow():
 		#print("N: %1.5f, E: %1.5f"%(north,east))
 		self.hover_alt = self.wps[0].alt
 
+		height_diff=self.wps[0].alt-self.height
+
+		mag= sqrt(east**2+north**2)
+		if(mag>self.max_speed):
+			east = (east/mag)*self.max_speed
+			north= (north/mag)*self.max_speed
+
 		cmd = Joy()
-		cmd.axes = [east, north, self.wps[0].alt, self.wps[0].heading, self.flag]
+		cmd.axes = [east, north, height_diff, self.wps[0].heading, self.flag]
 		#cmd.axes=[east,0,height_diff,0,self.flag]
 		self.cmd_pub.publish(cmd)
 
