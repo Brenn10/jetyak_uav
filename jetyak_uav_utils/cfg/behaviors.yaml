@@ -1,6 +1,7 @@
 #
 # takeoff
 #
+
 takeoff_height: 1
 takeoff_threshold: .25
 
@@ -28,24 +29,22 @@ follow_w_kp: 0
 follow_w_kd: 0
 follow_w_ki: 0
 
-follow_deadzone_radius: .1
-
 #
 # Land Parameters
 #
 
 #These parameters specify the center of the landing area
-land_x: 1.45
+land_x: 1.06
 land_x_kp: .3
-land_x_kd: .15
+land_x_kd: .2
 land_x_ki: 0
 
 land_y: 0
 land_y_kp: .3
-land_y_kd: .15
+land_y_kd: .2
 land_y_ki: 0
 
-land_z: -0.1 # this should be .1-.2m over the tag to allow the uav to maneuver
+land_z: .1 # this should be .1-.2m over the tag to allow the uav to maneuver
 land_z_kp: .2
 land_z_kd: 0
 land_z_ki: 0
@@ -54,8 +53,6 @@ land_w: 0
 land_w_kp: 0
 land_w_kd: 0
 land_w_ki: 0
-
-land_deadzone_radius: .05
 
 # The following parameters form a cylinder of height (land_height+land_height_threshold)
 # and radius (land_radius) which the UAV may land if located in. The drone will hover

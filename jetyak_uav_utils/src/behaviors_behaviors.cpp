@@ -103,7 +103,7 @@ void Behaviors::followBehavior()
 		{	// if time is same
 			follow_.lostTagCounter++;
 
-			if (follow_.lostTagCounter > 3)
+			if (follow_.lostTagCounter > 10)
 			{	// if time has been same for over 3 tick
 
 				ROS_WARN("Tag Lost");
@@ -151,6 +151,8 @@ void Behaviors::returnBehavior()
 	find one elif stage=settle Yaw or elevate or translate to recover tags If lost
 	for too long, return to gps following
 	*/
+
+	
 	double east = bsc_common::util::latlondist(0, boatGPS_.longitude, 0, uavGPS_.longitude);
 	double north = bsc_common::util::latlondist(boatGPS_.latitude, 0, uavGPS_.latitude, 0);
 
@@ -215,6 +217,8 @@ void Behaviors::returnBehavior()
 		behaviorChanged_ = false;
 		return_.stage = return_.UP;
 		ROS_WARN("Going Up");
+		std_srvs::Trigger downSrvTmp;
+		lookdownSrv_.call(downSrvTmp);
 	}
 
 	else if (return_.stage == return_.UP)
@@ -242,6 +246,8 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
 			cmdPub_.publish(cmd);
 		}
+		std_srvs::Trigger downSrvTmp;
+		lookdownSrv_.call(downSrvTmp);
 	}
 	else if (return_.stage == return_.OVER)
 	{
@@ -270,6 +276,8 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
 			cmdPub_.publish(cmd);
 		}
+		std_srvs::Trigger downSrvTmp;
+		lookdownSrv_.call(downSrvTmp);
 	}
 	else if (return_.stage = return_.DOWN)
 	{
@@ -289,6 +297,8 @@ void Behaviors::returnBehavior()
 		cmd.axes.push_back(0);
 		cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
 		cmdPub_.publish(cmd);
+		std_srvs::Trigger downSrvTmp;
+		lookdownSrv_.call(downSrvTmp);
 	}
 	else
 	{
@@ -366,7 +376,7 @@ void Behaviors::landBehavior()
 		wpid_->update(land_.goal_pose.w - simpleTag_.w, simpleTag_.t);
 
 		if (pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) <
-				pow(land_.deadzone_radius,2))
+				pow(land_.deadzone_radius, 2))
 		{
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(0);
