@@ -50,12 +50,9 @@ void Behaviors::downloadParams(std::string ns_param)
 		if (!ros::param::get(ns + name, param))
 			ROS_WARN("FAILED: %s", name.c_str());
 	};
-
-	// clean up the namespace variable if needed
-	std::string ns;
-	if (ns_param.length() == 0 or (ns_param.back() != '/' and ns_param.compare("~") != 0))
-		ns = ns_param + "/";
-
+	
+	std::string ns=ns_param;	
+	
 	/**********************
 	 * LANDING PARAMETERS *
 	 *********************/
@@ -210,6 +207,7 @@ void Behaviors::assignServiceClients()
 	propSrv_ = nh.serviceClient<jetyak_uav_utils::SetBoolean>("prop_enable");
 	takeoffSrv_ = nh.serviceClient<std_srvs::Trigger>("takeoff");
 	landSrv_ = nh.serviceClient<std_srvs::Trigger>("land");
+	lookdownSrv_ = nh.serviceClient<std_srvs::Trigger>("/jetyak_uav_vision/facedown");
 }
 
 void Behaviors::assignServiceServers()

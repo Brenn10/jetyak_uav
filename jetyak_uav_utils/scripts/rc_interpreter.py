@@ -1,8 +1,8 @@
-#!python
+#!/usr/bin/python
 
 import rospy as rp
-from sensor_msgs.msg import Joy
-from jetyak_uav_utils.msg import SetString
+from mavros_msgs.msg import RCIn
+from jetyak_uav_utils.srv import SetString
 
 
 class RC_Interpreter():
@@ -10,9 +10,10 @@ class RC_Interpreter():
 	def __init__(self, minD, maxD, parts):
 
 		self.modeTable = ["land", "takeoff", "leave",
-				  "land", "follow", "return",
-				  "hover", "follow", "hover"]
+				  "", "hover", "",
+				  "land", "follow", "return"]
 
+		self.lastPublished = self.modeTable[0]
 		# parameter stuff
 		self.minD = minD
 		self.maxD = maxD
@@ -21,16 +22,19 @@ class RC_Interpreter():
 
 		# ros stuff
 		rp.init_node("rc_interpreter")
-		self.joySub = rp.Subscriber("/mavros/rc/in", joyCallback, queue_size=1)
-		rp.wait_for_service("/jetyak_uav_utils/setMode"
-		self.modeCient=rp.ServiceProxy("/jetyak_uav_utils/setMode", SetString)
+		self.joySub = rp.Subscriber("/jetyak2/rc/in", RCIn, self.joyCallback)
+		rp.wait_for_service("/jetyak_uav_utils/setMode")
+		self.modeClient=rp.ServiceProxy("/jetyak_uav_utils/setMode", SetString)
 		rp.spin()
 
 	def joyCallback(self, msg):
-		part=int(round((float(msg.axes[8]-self.minD)/self.range)*parts))
-		srv=SetString
-		srv.data=self.modeTable[part]
-		print(self.modeClient(srv))
+		part=int((float(msg.channels[7]-self.minD)/self.range)*self.parts)
+
+		if self.modeTable[part] != self.lastPublished and self.modeTable[part] !="":
+			self.lastPublished=self.modeTable[part]
+			#print("Mode: %s, \tpart: %i" % (self.modeTable[part],part))
+			while(not self.modeClient(self.modeTable[part])):
+				print("Trying to change to %s"%self.modeTable[part])
 
 if __name__ == "__main__":
-	rc=RC_Interpreter(900, 2000, 9)
+	rc=RC_Interpreter(900, 2000, 8)

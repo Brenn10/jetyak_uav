@@ -28,7 +28,7 @@ void PID::update(double error, double utime)
 	signal_ = error * kp_;
 	if (utime == 0)
 	{
-		std::cout << "Time is 0, error " << error << std::endl;
+		std::cout << "PID NEVER RECEIVED TIMESTAMPED ERROR"<< std::endl;
 	}
 	else if (last_time_ != 0)	// if not first time
 	{
