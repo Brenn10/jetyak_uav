@@ -22,8 +22,7 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	qConstant = tf::Quaternion(0.7071, 0.7071, 0.0, 0.0);
 	qConstant.normalize();
 	qCamera2Gimbal = tf::Quaternion(0.5, 0.5, 0.5, 0.5);
-	qTag2Gimbal = tf::Quaternion(-1.0, 0.0, 0.0, 0.0);
-	//qTag2Gimbal = tf::Quaternion(-0.5, -0.5, 0.5, -0.5);
+	qTagFix = tf::Quaternion(0.5, -0.5, -0.5, -0.5);
 }
 
 bool gimbal_tag::versionCheckM100()
@@ -46,12 +45,7 @@ void gimbal_tag::publishTagPose()
 		qOffset.normalize();
 
 		// Apply rotation to go from gimbal frame to body frame
-		tf::Matrix3x3 m(qTag);
-		double t_r, t_p, t_y;
-		m.getRPY(t_r, t_p, t_y);
-		tf::Quaternion qTagBody = tf::createQuaternionFromRPY(-t_y, -t_r, t_p);
-		//tf::Quaternion qTagBody = qTag; //qOffset*qTag;
-		qTagBody = qOffset*qTagBody;
+		tf::Quaternion qTagBody = qTagFix*qOffset*qTag;
 		qTagBody.normalize();
 		tf::Quaternion positonTagBody = qOffset*posTag*qOffset.inverse();
 		geometry_msgs::PoseStamped tagPoseBody;
@@ -67,9 +61,9 @@ void gimbal_tag::publishTagPose()
 		tagPoseBody.header.stamp = time;
 		tagPoseBody.header.frame_id = "body_FLU";
 
-		tagPoseBody.pose.position.x = positonTagBody[0];
-		tagPoseBody.pose.position.y = positonTagBody[1];
-		tagPoseBody.pose.position.z = positonTagBody[2];
+		tagPoseBody.pose.position.x = RAD2DEG(t_rf); //positonTagBody[0];
+		tagPoseBody.pose.position.y = RAD2DEG(t_pf); //positonTagBody[1];
+		tagPoseBody.pose.position.z = RAD2DEG(t_yf); //positonTagBody[2];
 
 		tf::quaternionTFToMsg(qTagBody, tagPoseBody.pose.orientation);
 
@@ -84,7 +78,6 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 	{
 		// Update Tag quaternion
 		tf::quaternionMsgToTF(msg.markers[0].pose.pose.orientation, qTag);
-		qTag.normalize();
 
 		// Update Tag position as quaternion
 		posTag[0] = msg.markers[0].pose.pose.position.x;
@@ -93,8 +86,8 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 		posTag[3] = 0;
 
 		// Go from Camera frame to Gimbal frame
-		//qTag = qCamera2Gimbal*qTag;
-		//qTag = qTag2Gimbal*qTag;
+		qTag = qCamera2Gimbal*qTag;
+		qTag.normalize();
 		posTag = qCamera2Gimbal*posTag*qCamera2Gimbal.inverse();
 
 		tagFound = true;
