@@ -3,6 +3,6 @@
 
 ## Nodes
 * uav_manuever
-		* maneuver
-			* tells controller when to switch modes
-			* implements some pattern for quad to follow
+	* maneuver
+		* tells controller when to switch modes
+		* implements some pattern for quad to follow
