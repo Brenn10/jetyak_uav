@@ -28,8 +28,3 @@
 		* keep tag f_x meters to the left, f_y meters ahead, and f_z meters above
 * cooperative_localization
 	* Use shannons cl code
-* joy_control
-	* Overrides other control
-	* be able to
-		* Land
-		* give x,y,z,angular_z commands
