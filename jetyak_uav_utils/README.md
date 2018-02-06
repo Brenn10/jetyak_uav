@@ -12,6 +12,7 @@
 	* broadcasts which jetyak is in view
 	* listens for which jetyak to search for
 	* searches for mast ar tags
+		* if mast detected, ensure it's pose matches the pose of the goal kayak
 	* uses tags to line up for landing
 	* uses downward facing camera to line up perfectly
 	* sets down at certain height
