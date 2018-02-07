@@ -14,7 +14,10 @@ Manages the high level methods of the system.
 #include "jetyak_uav_utils/Mode.h"
 
 #include <cstdlib>
+#include <vector>
 
+#include "dji_sdk/Gimbal.h"
+#include "dji_sdk/SDKControlAuthority.h"
 
 #include "geometry_msgs/Twist.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
@@ -23,16 +26,24 @@ Manages the high level methods of the system.
 
 class controller {
   private:
+
     ros::Subscriber joySub_, arTagSub_, modeSub_, cmdSub_;
     ros::Publisher cmdPub_, modePub_;
-    unsigned char currentMode_;
+    ros::ServiceClient controlRequestSrv_;
+    char currentMode_;
+
+    sensor_msgs::Joy cmdVel_; //ONLY USE WITH publishCommand METHOD
 
     // Levels of control priority, lower is stronger
-    enum ControllerPriorityLevels {ObstacleAvoidance, JoystickControl, Package, External};
-    ControllerPriorityLevels control_priority_;
+    enum CommandPriorityLevels {JOYSTICKCONTROL, OBSTACLEAVOIDANCE, EXTERNAL, NOINPUT};
 
     double arTagSafetyDistance_, maxSpeed_;
 
+    //Keeps the command we will use with its priority
+    struct CommandAndPriority {
+      CommandPriorityLevels priority;
+      geometry_msgs::Twist vels;
+    } command_;
 
     /** arTagCallback
     * Safety controller that activates if the quad gets too close to an ar tag.
@@ -48,14 +59,17 @@ class controller {
     *
     * @param msg gets the mode from the broadcast
     */
-    void modeCallback(const std_msgs::Int8::ConstPtr& msg);
+    void modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg);
 
     /** joyCallback
     * http://wiki.ros.org/dji_sdk#Details_on_flight_control_setpoint
     * 0x4B as control flag (Horizontal velocity, vertical velocity, yaw velocity, body ENU frame, active break)
     * RT OR LT: deadswitch
     * Y: takeoff
-    * left stick Y:
+    * left stick Y: z vel
+    * left stick X: z ang
+    * right stick Y: x vel
+    * right stick X: y vel
     */
     void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
 
@@ -74,6 +88,11 @@ class controller {
     * @param nh node handler
     */
     controller(ros::NodeHandle& nh);
+
+    /** publishCommand
+    * Calls the cmdPub on the highest priority command passed in
+    */
+    void publishCommand();
 };
 
 #endif
