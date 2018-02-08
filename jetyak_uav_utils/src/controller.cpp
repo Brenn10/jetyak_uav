@@ -4,7 +4,7 @@ controller::controller(ros::NodeHandle& nh) {
   ros::param::get("~arTagSafetyDistance",arTagSafetyDistance_);
   ros::param::get("~maxSpeed",maxSpeed_);
 
-  joySub_ = nh.subscribe("joy_raw_input",1,&controller::joyCallback,this);
+  joySub_ = nh.subscribe("joy",1,&controller::joyCallback,this);
   arTagSub_ = nh.subscribe("ar_track_alvar",1,&controller::arTagCallback, this);
   modeSub_ = nh.subscribe("uav_mode",1,&controller::modeCallback,this);
   cmdSub_ = nh.subscribe("raw_cmd",1,&controller::cmdCallback,this);
@@ -13,22 +13,14 @@ controller::controller(ros::NodeHandle& nh) {
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
   controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("sdk_control_authority");
+
+  currentMode_ = 0;
 }
 
 void controller::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {}
+
 void controller::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   this->currentMode_ = msg->mode;
-  dji_sdk::SDKControlAuthority auth;
-  if(this->currentMode_ == msg->AWAY) { //release control
-    auth.request.control_enable=0;
-    while(!controlRequestSrv_.call(auth))
-      ROS_WARN("Unable to release authority");
-  }
-  else { //check that we have control and/or take control
-    auth.request.control_enable=0;
-    while(!controlRequestSrv_.call(auth))
-      ROS_WARN("Unable to release authority");
-  }
 }
 void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
   if(msg->buttons[6] or msg->buttons[7]) //LT or RT (deadswitch)
@@ -58,14 +50,21 @@ void controller::publishCommand() {
     0x4B
   };
   cmdVel_.axes = axes;
-  command_.vels =geometry_msgs::Twist(); //reset command
+  command_.vels = geometry_msgs::Twist(); //reset command
   command_.priority = NOINPUT;
   cmdPub_.publish(cmdVel_);
 }
 
 void controller::cmdCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-
+  if(command_.priority>=EXTERNAL) // If this has a stronger or equal priority, overwrite
+  {
+    command_.priority=EXTERNAL;
+    command_.vels.linear.x=msg->linear.x;
+    command_.vels.linear.y=msg->linear.y;
+    command_.vels.linear.z=msg->linear.z;
+    command_.vels.angular.z=msg->angular.z;
+  }
 }
 
 int main(int argc, char **argv) {

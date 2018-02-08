@@ -1,5 +1,5 @@
 /** Base controller for the uav
-Manages the high level methods of the system.
+* Manages the high level methods of the system.
 * Sends commands to the UAV
 * implements a joystick ovveride
 * implements a safety controller for if the drone is too close to an object
@@ -16,7 +16,6 @@ Manages the high level methods of the system.
 #include <cstdlib>
 #include <vector>
 
-#include "dji_sdk/Gimbal.h"
 #include "dji_sdk/SDKControlAuthority.h"
 
 #include "geometry_msgs/Twist.h"
