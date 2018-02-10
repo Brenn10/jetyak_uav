@@ -29,3 +29,10 @@
 		* keep tag f_x meters to the left, f_y meters ahead, and f_z meters above
 * cooperative_localization
 	* Use shannons cl code
+
+## External Libraries
+* ar_track_alvar
+	* find tags on boat
+* robot_localization
+	* Keep track of the pose of the quadcopter in relation to the kayak
+	* integrate ar tag poses, imu, vo
