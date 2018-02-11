@@ -12,8 +12,6 @@
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Quaternion.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
-#include "std_msgs/Int8.h"
-#include "sensor_msgs/Joy.h"
 
 class land {
   private:
@@ -28,10 +26,13 @@ class land {
     bool wasLastLanded_=true;
 
     /** arTagCallback
+    * If APPROACH
+    *   use mast tags to get in the correct orientation about the jetyak
+    *   if close to correct orientation, change to LANDING
     * If mode is LANDING
-    * Use tf from jetyak to tags and info on tags to determine position relative to kayak
-    * Slowly move to the landing platform and drop when within threshhold
-    * Switch to LANDED when throttle is cut
+    *   Use tf from jetyak to tags and info on tags to determine position relative to kayak
+    *   Slowly move to the landing platform and drop when within threshhold
+    *   Switch to LANDED when throttle is cut
     *
     * @param msg vector of marker info
     */

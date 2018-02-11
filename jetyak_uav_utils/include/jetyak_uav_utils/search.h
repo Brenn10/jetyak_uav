@@ -12,10 +12,13 @@
 #ifndef JETYAK_UAV_UTILS_SEARCH_AND_LAND
 #define JETYAK_UAV_UTILS_SEARCH_AND_LAND
 
-#include "ros/ros.h"
-#include "std_msgs/String.h"
+#include "geometry_msgs/Twist.h"
+#include "geometry_msgs/Quaternion.h"
+#include "ar_track_alvar_msgs/AlvarMarkers.h"
+#include "std_msgs/Int8.h"
+#incluse "std_msgs/String.h"
 
-class search_and_land {
+class search {
   private:
     ros::Subscriber arTagSub_, modeSub_, uavGpsSub_ ,jetyakGpsSub_, jetyakToPursueSub_;
     ros::Publisher cmdPub_, modePub_, gimbalAnglePub_;
@@ -24,10 +27,7 @@ class search_and_land {
     /** arTagCallback
     * If in SEARCHING mode
     *   If the tag is within some threshold of teh gps coordinates of the jetyak being searched for, enter APPROACH.
-    * If APPROACH
-    *   use mast tags to get in the correct orientation about the jetyak
-    *   if close to correct orientation, change to landing
-    *
+    *     *
     * @param msg List of alvar tag info
     */
     void arTagCallback(const ar_track_alvar::AlvarMarkers::ConstPtr& msg);
@@ -60,6 +60,11 @@ class search_and_land {
     */
     void jetyakToPursueCallback(const std_msgs::String::ConstPtr& msg);
   public:
+    /** Constructor
+    * Creates the publishers, subscribers, and service clients
+    *
+    * @param nh Node handler
+    */
     Controller(ros::NodeHandle& nh);
 
 };
