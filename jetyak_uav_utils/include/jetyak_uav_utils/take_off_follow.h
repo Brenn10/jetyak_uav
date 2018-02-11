@@ -24,29 +24,32 @@ class take_off_follow {
     ros::Publisher cmdPub_, modePub_;
 
     // x: x dist, y: y dist, z: z dist, w: yaw
-    geometry_msgs::Quaternion followPose;
+    geometry_msgs::Quaternion followPose_;
 
     char currentMode_=0;
 
-    bool wasLastLanded=true;
+    bool wasLastLanded_=true;
 
     /** arTagCallback
-    * I will be giving x,y,z,w examples
-    * if takeoff
-    *   move to -2,0,2,0 relative to tag0 or until tag1 spotted
-    *   move to -2,0,2,0 relative to tag1 or until tag2 spotted
-    *   move to -2,0,2,0 relative to tag2 or until tag3 spotted
-    *   set to following when tag 3 in view
-    * if following
-    *   pid to followPose
+    * Use tf from jetyak to tags and info on tags to determine position relative to kayak
+    * PID immediatelty to follow position
+    *   Prevents needing seperate cases for follow and takeoff
+    *   Should avoid hitting the mast as it will move directly away from it at the start
+    *
+    * @param msg vector of marker info
     */
     void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg);
+
+    /** modeCallback
+    * receives the mode change
+    *
+    * @param msg Mode that has been activated
+    */
     void modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg);
 
 
   public:
     /** Constructor
-    * Starts up the node disabled
     * Creates the publishers, subscribers, and service clients
     *
     * @param nh Node handler

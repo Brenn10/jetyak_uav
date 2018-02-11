@@ -36,3 +36,4 @@
 * robot_localization
 	* Keep track of the pose of the quadcopter in relation to the kayak
 	* integrate ar tag poses, imu, vo
+	* Somehow gotta disable when dispatched and reset when landing
