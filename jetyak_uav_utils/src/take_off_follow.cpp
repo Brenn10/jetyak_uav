@@ -2,10 +2,10 @@
 
 take_off_follow::take_off_follow(ros::NodeHandle& nh)
 {
-  ros::param::get("~followx",followPose.x);
-  ros::param::get("~followy",followPose.y);
-  ros::param::get("~followz",followPose.z);
-  ros::param::get("~followyaw",followPose.w);
+  ros::param::get("~followx",followPose_.x);
+  ros::param::get("~followy",followPose_.y);
+  ros::param::get("~followz",followPose_.z);
+  ros::param::get("~followyaw",followPose_.w);
 
   cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);

@@ -32,9 +32,13 @@ class take_off_follow {
 
     /** arTagCallback
     * Use tf from jetyak to tags and info on tags to determine position relative to kayak
-    * PID immediatelty to follow position
-    *   Prevents needing seperate cases for follow and takeoff
-    *   Should avoid hitting the mast as it will move directly away from it at the start
+    * If wasLastLanded_
+    *   Set vertical velocity to K m/s to get off the platform.
+    *   reset pid controllers
+    *   set wasLastLanded_ to false
+    * else
+    *   PID to follow position
+    * if position is within a meter and state is TAKINGOFF, set mode to FOLLOWING
     *
     * @param msg vector of marker info
     */
@@ -42,6 +46,7 @@ class take_off_follow {
 
     /** modeCallback
     * receives the mode change
+    * if state changed to TAKINGOFF, set wasLastLanded_ to true
     *
     * @param msg Mode that has been activated
     */

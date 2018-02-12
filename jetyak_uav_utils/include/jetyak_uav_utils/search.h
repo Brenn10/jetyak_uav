@@ -16,7 +16,7 @@
 #include "geometry_msgs/Quaternion.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
 #include "std_msgs/Int8.h"
-#incluse "std_msgs/String.h"
+#include "std_msgs/String.h"
 
 class search {
   private:
@@ -24,9 +24,12 @@ class search {
     ros::Publisher cmdPub_, modePub_, gimbalAnglePub_;
     ros::ServiceClient uploadMissionWaypointSrv_, waypointActionSrv_;
 
+    geometry_msgs::Point lastJetyakGpsCoord_; // x: longitude, y: latitude, z: altitude
+    geometry_msgs
+
     /** arTagCallback
     * If in SEARCHING mode
-    *   If the tag is within some threshold of teh gps coordinates of the jetyak being searched for, enter APPROACH.
+    *   If the tag is within some threshold of the gps coordinates of the jetyak being searched for, enter APPROACH.
     *     *
     * @param msg List of alvar tag info
     */
