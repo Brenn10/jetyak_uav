@@ -27,6 +27,7 @@ class take_off_follow {
     geometry_msgs::Quaternion followPose_;
 
     char currentMode_=0;
+    double tag_confidence_threshhold_ = .8;
 
     bool wasLastLanded_=true;
 

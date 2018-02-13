@@ -69,6 +69,8 @@ class controller {
     * left stick X: z ang
     * right stick Y: x vel
     * right stick X: y vel
+    *
+    * @param msg Joy message from joy node
     */
     void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
 
