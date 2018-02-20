@@ -30,6 +30,7 @@ class search {
     /** arTagCallback
     * If in SEARCHING mode
     *   If the tag is within some threshold of where the jetyak should be, set to APPROACH
+    *   Else move toward the jetyak and yaw to face it
     * If in APPROACH
     *   If tag 3 in view, enter follow mode
     *   Else maintain k meter seperation and move left (move CW to find 3)

@@ -15,16 +15,15 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh)
 }
 
 void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {
-  if(wasLastLanded_)
-  {
-    geometry_msgs::Twist cmd;
-    cmd.linear.z=0;
-    wasLastLanded_=false;
-  }
-  else {
-    double x,y,z,w;
-    for(int i =0; i < msg->markers.size();++i){
-      if(msg->markers[i].id<4 and confidence > tag_confidence_threshhold_)
+  if(!msg->markers.empty()){
+    if(wasLastLanded_)
+    {
+      geometry_msgs::Twist cmd;
+      cmd.linear.z=0;
+      wasLastLanded_=false;
+    }
+    else {
+
     }
   }
 }

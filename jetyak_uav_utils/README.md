@@ -8,14 +8,21 @@
 	* Implements a safety controller if mast becomes too close - TODO
 	* Implements joystick override of other Nodes
 	* listens to commands to switch modes
-* search_and_land
+	* TODO
+		* Implement ar tag safety controller
+		* make a button to release and regain control on the joystick
+* search
 	* broadcasts which jetyak is in view
 	* listens for which jetyak to search for
 	* searches for mast ar tags
 		* if mast detected, ensure it's pose matches the pose of the goal kayak
 	* uses tags to line up for landing
-	* uses downward facing camera to line up perfectly
-	* sets down at certain height
+	* TODO
+		* Full implementation
+* land
+	* descends using ar tag bundle
+	* TODO
+		* Full implementation
 * take_off_and_follow
 	* lifts off
 		* give a z velocity
@@ -27,8 +34,8 @@
 		* safely move around the mast using the tags
 	* follow above the jetyak
 		* keep tag f_x meters to the left, f_y meters ahead, and f_z meters above
-* cooperative_localization
-	* Use shannons cl code
+	* TODO
+		* full implementation
 
 ## External Libraries
 * ar_track_alvar
