@@ -17,10 +17,11 @@ find_package(catkin REQUIRED COMPONENTS
   dji_sdk
   visualization_msgs
   message_generation
+  actionlib_msgs
 )
 
 ## Custom message files to be created
-add_message_files(
+add_message_files(DIRECTORY msg
   FILES
   Mode.msg
 )
@@ -39,7 +40,7 @@ generate_messages(
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES jetyak_uav_utils
-  CATKIN_DEPENDS ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf dji_sdk visualization_msgs
+  CATKIN_DEPENDS ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf dji_sdk visualization_msgs message_runtime
   DEPENDS system_lib
 )
 
@@ -57,6 +58,10 @@ add_library(${PROJECT_NAME}
 ## Add executables
 add_executable(controller_node src/controller.cpp)
 add_executable(take_off_follow_node src/take_off_follow.cpp)
+
+#add dependencies
+add_dependencies(controller_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS})
 
 ## Link executables
 target_link_libraries(controller_node

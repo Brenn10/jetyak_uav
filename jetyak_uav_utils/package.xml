@@ -67,6 +67,7 @@
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>message_runtime</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>tf</build_export_depend>
   <build_export_depend>visualization_msgs</build_export_depend>
