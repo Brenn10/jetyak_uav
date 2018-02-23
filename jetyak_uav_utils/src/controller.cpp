@@ -9,11 +9,11 @@ controller::controller(ros::NodeHandle& nh) {
   modeSub_ = nh.subscribe("uav_mode",1,&controller::modeCallback,this);
   cmdSub_ = nh.subscribe("raw_cmd",1,&controller::cmdCallback,this);
 
-  cmdPub_ = nh.advertise<sensor_msgs::Joy>("flight_control_setpoint_generic",1);
+  cmdPub_ = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
-  controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("sdk_control_authority");
-
+  controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("dji_sdk/sdk_control_authority");
+  taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("dji_sdk/drone_task_control");
   currentMode_ = 0;
 }
 
@@ -23,11 +23,31 @@ void controller::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   this->currentMode_ = msg->mode;
 }
 void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
+
   if(msg->buttons[6] or msg->buttons[7]) //LT or RT (deadswitch)
   {
     command_.priority=JOYSTICKCONTROL;
-    if(msg->buttons[1]) {} //land
-    else if(msg->buttons[3]) {} //take off
+
+    if(msg->buttons[2]) { //give control
+      dji_sdk::SDKControlAuthority srv;
+      srv.request.control_enable=0;
+      controlRequestSrv_.call(srv);
+    }
+    else if(msg->buttons[0]){ //take control
+      dji_sdk::SDKControlAuthority srv;
+      srv.request.control_enable=1;
+      controlRequestSrv_.call(srv);
+    }
+    else if(msg->buttons[1]) { //land
+      dji_sdk::DroneTaskControl srv;
+      srv.request.task=6;
+      taskSrv_.call(srv);
+    }
+    else if(msg->buttons[3]) { //take off
+      dji_sdk::DroneTaskControl srv;
+      srv.request.task=6;
+      taskSrv_.call(srv);
+    }
     else { //set vels
 
       command_.vels.linear.x=-msg->axes[3];

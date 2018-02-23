@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "dji_sdk/SDKControlAuthority.h"
+#include "dji_sdk/DroneTaskControl.h"
 
 #include "geometry_msgs/Twist.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
@@ -28,7 +29,7 @@ class controller {
 
     ros::Subscriber joySub_, arTagSub_, modeSub_, cmdSub_;
     ros::Publisher cmdPub_, modePub_;
-    ros::ServiceClient controlRequestSrv_;
+    ros::ServiceClient controlRequestSrv_,taskSrv_;
     char currentMode_;
 
     sensor_msgs::Joy cmdVel_; //ONLY USE WITH publishCommand METHOD
