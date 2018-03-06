@@ -40,14 +40,21 @@
 * ar_track_alvar
 	* find tags on boat
 	* Uses tag bundle
-		5
-	 4 6
-		3
-		|
-		1
-		|
-		0
+			5
+		 4 6
+			3
+			|
+			1
+			|
+			0
 * robot_localization
 	* Keep track of the pose of the quadcopter in relation to the kayak
 	* integrate the 6 ar tag poses
 	* Somehow gotta disable when dispatched and restart when landing
+
+## Needs
+* Tags need to be mounted to the masts
+* Strong router needed to connect the jetyaks GPS and UAV
+* implementation needed for search and land Nodes
+* Testing is needed for all current implementation
+* for takeoff and follow, i am trying to figure out the transforms from ar_track_alvar to GROUND_ELU or BODY_FLU
