@@ -47,6 +47,7 @@
 			1
 			|
 			0
+	* tag 0 is master and reduces the effects of boat roll on measurements
 * robot_localization
 	* Keep track of the pose of the quadcopter in relation to the kayak
 	* integrate the 6 ar tag poses
@@ -55,6 +56,7 @@
 ## Needs
 * Tags need to be mounted to the masts
 * Strong router needed to connect the jetyaks GPS and UAV
+	* test out configurations
 * implementation needed for search and land Nodes
 * Testing is needed for all current implementation
 * for takeoff and follow, i am trying to figure out the transforms from ar_track_alvar to GROUND_ELU or BODY_FLU
