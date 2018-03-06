@@ -10,7 +10,6 @@
 	* listens to commands to switch modes
 	* TODO
 		* Implement ar tag safety controller
-		* make a button to release and regain control on the joystick
 * search
 	* broadcasts which jetyak is in view
 	* listens for which jetyak to search for
@@ -40,6 +39,14 @@
 ## External Libraries
 * ar_track_alvar
 	* find tags on boat
+	* Uses tag bundle
+		5
+	 4 6
+		3
+		|
+		1
+		|
+		0
 * robot_localization
 	* Keep track of the pose of the quadcopter in relation to the kayak
 	* integrate the 6 ar tag poses
