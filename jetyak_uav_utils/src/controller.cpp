@@ -62,14 +62,14 @@ void controller::publishCommand() {
 
   // Hex code says to use horizontal speeds, vertical speeds,
   // and yaw rate relative to the body and active breaking
-  std::vector<float> axes {
+
+  cmdVel_.axes = {
     (float)command_.vels.linear.y,
     (float)command_.vels.linear.x,
     (float)command_.vels.linear.z,
     (float)command_.vels.angular.z,
     0x4B
   };
-  cmdVel_.axes = axes;
   command_.vels = geometry_msgs::Twist(); //reset command
   command_.priority = NOINPUT;
   cmdPub_.publish(cmdVel_);
