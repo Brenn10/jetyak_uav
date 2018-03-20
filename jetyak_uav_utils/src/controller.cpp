@@ -67,9 +67,9 @@ void controller::publishCommand() {
     (float)command_.vels.linear.y,
     (float)command_.vels.linear.x,
     (float)command_.vels.linear.z,
-    (float)command_.vels.angular.z,
-    0x4B
+    (float)command_.vels.angular.z
   };
+  
   command_.vels = geometry_msgs::Twist(); //reset command
   command_.priority = NOINPUT;
   cmdPub_.publish(cmdVel_);
