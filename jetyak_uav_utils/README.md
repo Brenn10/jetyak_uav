@@ -60,3 +60,13 @@
 * implementation needed for search and land Nodes
 * Testing is needed for all current implementation
 * for takeoff and follow, i am trying to figure out the transforms from ar_track_alvar to GROUND_ELU or BODY_FLU
+
+## Joy reference
+* B - Give Control
+* A-land
+* Y- Takeoff
+* X - take control
+* Right stick X - linear y
+* Right stick Y - linear x
+* left stick Y - linear z
+* left stick X - Angular z

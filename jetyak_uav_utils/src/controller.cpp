@@ -9,7 +9,7 @@ controller::controller(ros::NodeHandle& nh) {
   modeSub_ = nh.subscribe("uav_mode",1,&controller::modeCallback,this);
   cmdSub_ = nh.subscribe("raw_cmd",1,&controller::cmdCallback,this);
 
-  cmdPub_ = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic",1);
+  cmdPub_ = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_ENUvelocity_yawrate",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
   controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("dji_sdk/sdk_control_authority");
