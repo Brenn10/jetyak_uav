@@ -23,7 +23,7 @@ void controller::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   this->currentMode_ = msg->mode;
 }
 void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
-
+  ROS_ERROR("%f",msg->axes[4]);
   if(msg->buttons[6] or msg->buttons[7]) //LT or RT (deadswitch)
   {
     command_.priority=JOYSTICKCONTROL;
