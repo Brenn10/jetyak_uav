@@ -18,13 +18,13 @@ controller::controller(ros::NodeHandle& nh) {
 
   currentMode_ = 0;
   dji_sdk::Activation actSrvMsg;
-  ROS_ERROR("Activation Response: %d",activateSrv_.call(actSrvMsg));
+  ROS_ERROR("Activation Response: %s",activateSrv_.call(actSrvMsg)? "Success": "Fail");
 }
 
 controller::~controller() {
   dji_sdk::SDKControlAuthority srv;
   srv.request.control_enable=0;
-  ROS_WARN("Release Response: %d",controlRequestSrv_.call(srv));
+  ROS_WARN("Release Response: %d",controlRequestSrv_.call(srv)? "Success": "Fail");
 }
 
 void controller::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {}
@@ -41,28 +41,28 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     if(msg->buttons[2]) { //give control
       dji_sdk::SDKControlAuthority srv;
       srv.request.control_enable=0;
-      controlRequestSrv_.call(srv);
+      ROS_WARN("Release Response: %d",controlRequestSrv_.call(srv)? "Success": "Fail");
     }
     else if(msg->buttons[0]){ //take control
       dji_sdk::SDKControlAuthority srv;
       srv.request.control_enable=1;
-      controlRequestSrv_.call(srv);
+      ROS_WARN("Release Response: %d",controlRequestSrv_.call(srv)? "Success": "Fail");
     }
     else if(msg->buttons[1]) { //land
       dji_sdk::DroneTaskControl srv;
       srv.request.task=6;
-      taskSrv_.call(srv);
+      ROS_WARN("Release Response: %d",taskSrv_.call(srv)? "Success": "Fail");
     }
     else if(msg->buttons[3]) { //take off
       dji_sdk::DroneTaskControl srv;
       srv.request.task=4;
-      taskSrv_.call(srv);
+      ROS_WARN("Release Response: %d",taskSrv_.call(srv)? "Success": "Fail");
     }
     else { //set vels
 
-      command_.vels.linear.x=-msg->axes[3];
-      command_.vels.linear.y=msg->axes[2];
-      command_.vels.linear.z=-msg->axes[1];
+      command_.vels.linear.x=msg->axes[3];
+      command_.vels.linear.y=-msg->axes[2];
+      command_.vels.linear.z=msg->axes[1];
       command_.vels.angular.z=msg->axes[0];
     }
   }
