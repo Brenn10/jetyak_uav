@@ -18,7 +18,7 @@ controller::controller(ros::NodeHandle& nh) {
 
   currentMode_ = 0;
   dji_sdk::Activation actSrvMsg;
-  ROS_WARN("Activation Response: %d",activateSrv_.call(actSrvMsg));
+  ROS_ERROR("Activation Response: %d",activateSrv_.call(actSrvMsg));
 }
 
 controller::~controller() {
@@ -55,7 +55,7 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     }
     else if(msg->buttons[3]) { //take off
       dji_sdk::DroneTaskControl srv;
-      srv.request.task=6;
+      srv.request.task=4;
       taskSrv_.call(srv);
     }
     else { //set vels
