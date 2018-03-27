@@ -14,7 +14,11 @@ controller::controller(ros::NodeHandle& nh) {
 
   controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("dji_sdk/sdk_control_authority");
   taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("dji_sdk/drone_task_control");
+  activateSrv_ = nh.serviceClient<dji_sdk::Activation>("dji_sdk/activation");
+
   currentMode_ = 0;
+
+  ROS_WARN("Activation Response: %d",activateSrv_.call(dji_sdk::Activation()));
 }
 
 void controller::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {}
@@ -69,7 +73,7 @@ void controller::publishCommand() {
     (float)command_.vels.linear.z,
     (float)command_.vels.angular.z
   };
-  
+
   command_.vels = geometry_msgs::Twist(); //reset command
   command_.priority = NOINPUT;
   cmdPub_.publish(cmdVel_);
