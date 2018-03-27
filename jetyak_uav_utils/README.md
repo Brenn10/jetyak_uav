@@ -62,6 +62,7 @@
 * for takeoff and follow, i am trying to figure out the transforms from ar_track_alvar to GROUND_ELU or BODY_FLU
 
 ## Joy reference
+* LT or RT deadswitch
 * B - Give Control
 * A-land
 * Y- Takeoff

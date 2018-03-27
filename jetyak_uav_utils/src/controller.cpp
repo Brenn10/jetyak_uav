@@ -17,8 +17,14 @@ controller::controller(ros::NodeHandle& nh) {
   activateSrv_ = nh.serviceClient<dji_sdk::Activation>("dji_sdk/activation");
 
   currentMode_ = 0;
+  dji_sdk::Activation actSrvMsg;
+  ROS_WARN("Activation Response: %d",activateSrv_.call(actSrvMsg));
+}
 
-  ROS_WARN("Activation Response: %d",activateSrv_.call(dji_sdk::Activation()));
+controller::~controller() {
+  dji_sdk::SDKControlAuthority srv;
+  srv.request.control_enable=0;
+  ROS_WARN("Release Response: %d",controlRequestSrv_.call(srv));
 }
 
 void controller::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {}
