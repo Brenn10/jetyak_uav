@@ -62,8 +62,8 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
 
       command_.vels.linear.x=msg->axes[3];
       command_.vels.linear.y=msg->axes[2];
-      command_.vels.linear.z=-msg->axes[1];
-      command_.vels.angular.z=-msg->axes[0];
+      command_.vels.linear.z=msg->axes[1];
+      command_.vels.angular.z=msg->axes[0];
     }
   }
 }
@@ -75,8 +75,8 @@ void controller::publishCommand() {
   cmdVel_.axes = {
     (float)command_.vels.linear.x,
     (float)command_.vels.linear.y,
-    -(float)command_.vels.linear.z,
-    -(float)command_.vels.angular.z,
+    (float)command_.vels.linear.z,
+    (float)command_.vels.angular.z,
     0x4B
   };
 
