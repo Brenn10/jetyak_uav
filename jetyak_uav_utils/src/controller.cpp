@@ -60,8 +60,8 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     }
     else { //set vels
 
-      command_.vels.linear.x=-msg->axes[3];
-      command_.vels.linear.y=-msg->axes[2];
+      command_.vels.linear.x=msg->axes[3];
+      command_.vels.linear.y=msg->axes[2];
       command_.vels.linear.z=-msg->axes[1];
       command_.vels.angular.z=-msg->axes[0];
     }
