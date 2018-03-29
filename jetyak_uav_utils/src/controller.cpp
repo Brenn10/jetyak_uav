@@ -73,10 +73,10 @@ void controller::publishCommand() {
   //{Left,Forward,Up,CCW}
 
   cmdVel_.axes = {
-    (float)command_.vels.linear.y,
     (float)command_.vels.linear.x,
-    (float)command_.vels.linear.z,
-    (float)command_.vels.angular.z,
+    (float)command_.vels.linear.y,
+    -(float)command_.vels.linear.z,
+    -(float)command_.vels.angular.z,
     0x4B
   };
 
