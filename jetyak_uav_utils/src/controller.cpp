@@ -1,11 +1,9 @@
 #include "jetyak_uav_utils/controller.h"
 
 controller::controller(ros::NodeHandle& nh) {
-  ros::param::get("~arTagSafetyDistance",arTagSafetyDistance_);
   ros::param::get("~maxSpeed",maxSpeed_);
 
   joySub_ = nh.subscribe("joy",1,&controller::joyCallback,this);
-  arTagSub_ = nh.subscribe("ar_track_alvar",1,&controller::arTagCallback, this);
   modeSub_ = nh.subscribe("uav_mode",1,&controller::modeCallback,this);
   cmdSub_ = nh.subscribe("raw_cmd",1,&controller::cmdCallback,this);
 
@@ -26,8 +24,6 @@ controller::~controller() {
   srv.request.control_enable=0;
   ROS_WARN("Release Response: %s",controlRequestSrv_.call(srv)? "Success": "Fail");
 }
-
-void controller::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {}
 
 void controller::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   this->currentMode_ = msg->mode;

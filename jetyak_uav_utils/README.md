@@ -4,8 +4,8 @@
 
 ## Nodes
 * controller
-	* used to send commands to the quad
-	* Implements a safety controller if mast becomes too close - TODO
+	* used to send commands to the quad (y forward, x left, z-up)
+	* Implements a safety controller if mast becomes too close
 	* Implements joystick override of other Nodes
 	* listens to commands to switch modes
 	* TODO

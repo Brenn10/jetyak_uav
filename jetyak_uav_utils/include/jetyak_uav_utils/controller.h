@@ -21,7 +21,6 @@
 #include "dji_sdk/Activation.h"
 
 #include "geometry_msgs/Twist.h"
-#include "ar_track_alvar_msgs/AlvarMarkers.h"
 #include "std_msgs/Int8.h"
 #include "sensor_msgs/Joy.h"
 
@@ -39,21 +38,13 @@ class controller {
     // Levels of control priority, lower is stronger
     enum CommandPriorityLevels {JOYSTICKCONTROL, OBSTACLEAVOIDANCE, EXTERNAL, NOINPUT};
 
-    double arTagSafetyDistance_, maxSpeed_;
+    double maxSpeed_;
 
     //Keeps the command we will use with its priority
     struct CommandAndPriority {
       CommandPriorityLevels priority;
       geometry_msgs::Twist vels;
     } command_;
-
-    /** arTagCallback
-    * Safety controller that activates if the quad gets too close to an ar tag.
-    * Moves away from the tag if in certain modes
-    *
-    * @param msg List of ar tags detected in frame
-    */
-    void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg);
 
     /**
     * Changes the current mode
