@@ -10,8 +10,10 @@
 #include "ros/ros.h"
 
 #include "jetyak_uav_utils/Mode.h"
+#include "pid.h"
 
-
+#include "dynamic_reconfigure/server.h"
+#include "dynamic_reconfigure/follow_constants.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Quaternion.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
@@ -20,8 +22,10 @@
 
 class take_off_follow {
   private:
+    geometry_msgs::Quaternion kp,kd,ki;
+    PID xpid_,ypid_,zpid_,wpid_;
     ros::Subscriber arTagSub_, modeSub_;
-    ros::Publisher cmdPub_, modePub_;
+    ros::Publisher cmdPub_, modePub_, takeoffPub_;
 
     // x: x dist, y: y dist, z: z dist, w: yaw
     geometry_msgs::Quaternion followPose_;

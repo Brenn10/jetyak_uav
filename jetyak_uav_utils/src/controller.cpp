@@ -8,6 +8,8 @@ controller::controller(ros::NodeHandle& nh) {
   arTagSub_ = nh.subscribe("ar_track_alvar",1,&controller::arTagCallback, this);
   modeSub_ = nh.subscribe("uav_mode",1,&controller::modeCallback,this);
   cmdSub_ = nh.subscribe("raw_cmd",1,&controller::cmdCallback,this);
+  landSub_ = nh.subscribe("land",1,&controller::landCallback,this);
+  takeoffSub_ = nh.subscribe("takeoff",1,&controller::takeoffCallback,this);
 
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
@@ -21,6 +23,18 @@ void controller::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr
 
 void controller::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   this->currentMode_ = msg->mode;
+}
+
+void controller::takeoffCallback(const std_msgs::Empty::ConstPtr& msg){
+  dji_sdk::DroneTaskControl srv;
+  srv.request.task=6;
+  taskSrv_.call(srv);
+}
+
+void controller::landCallback(const std_msgs::Empty::ContPtr& msg) {
+  dji_sdk::DroneTaskControl srv;
+  srv.request.task=6;
+  taskSrv_.call(srv);
 }
 void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
 

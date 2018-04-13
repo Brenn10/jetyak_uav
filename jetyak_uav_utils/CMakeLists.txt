@@ -7,6 +7,7 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   ar_track_alvar
+  dynamic_reconfigure
   geometry_msgs
   nav_msgs
   roscpp
@@ -36,6 +37,9 @@ generate_messages(
   visualization_msgs
 )
 
+generate_dynamic_reconfigure_options(
+  cfg/follow_constants.cfg
+)
 ## includes, libraries, depends
 catkin_package(
   INCLUDE_DIRS include
@@ -60,8 +64,8 @@ add_executable(controller_node src/controller.cpp)
 add_executable(take_off_follow_node src/take_off_follow.cpp)
 
 #add dependencies
-add_dependencies(controller_node ${catkin_EXPORTED_TARGETS})
-add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(controller_node ${catkin_EXPORTED_TARGETS} )
+add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Link executables
 target_link_libraries(controller_node

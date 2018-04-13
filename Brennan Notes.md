@@ -429,16 +429,6 @@ This is a project from a long time ago. The goal is to create a roadmap of a giv
 		* 6 at the top
 		* 7 will be next CCW from 6 and 8 will be next CCW from 7
 
-|8| |7|
-|-|-|-|
-| |6| |
-| |5| |
-| |4| |
-| |3| |
-| |2| |
-| |1| |
-|_|I|_|
-
 ## Thu Feb 1 2018
 * Goal
 	* Take off

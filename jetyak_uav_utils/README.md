@@ -4,13 +4,12 @@
 
 ## Nodes
 * controller
-	* used to send commands to the quad
-	* Implements a safety controller if mast becomes too close - TODO
+	* used to send commands to the drone
+	* Implements a safety controller if mast becomes too close
 	* Implements joystick override of other Nodes
 	* listens to commands to switch modes
 	* TODO
 		* Implement ar tag safety controller
-		* make a button to release and regain control on the joystick
 * search
 	* broadcasts which jetyak is in view
 	* listens for which jetyak to search for

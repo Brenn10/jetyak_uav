@@ -3,7 +3,7 @@
 
 #include "ros/ros.h"
 
-class pid {
+class PID {
   private:
     double kp_,ki_,kd_,last_error_,integral_,last_time_,signal_;
   public:

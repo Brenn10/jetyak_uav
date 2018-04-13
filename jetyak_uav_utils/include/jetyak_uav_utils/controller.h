@@ -27,7 +27,7 @@
 class controller {
   private:
 
-    ros::Subscriber joySub_, arTagSub_, modeSub_, cmdSub_;
+    ros::Subscriber joySub_, arTagSub_, modeSub_, cmdSub_,takeoffSub_,landSub_;
     ros::Publisher cmdPub_, modePub_;
     ros::ServiceClient controlRequestSrv_,taskSrv_;
     char currentMode_;
