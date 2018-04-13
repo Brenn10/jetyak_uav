@@ -33,6 +33,7 @@ class controller {
     char currentMode_;
 
     sensor_msgs::Joy cmdVel_; //ONLY USE WITH publishCommand METHOD
+    double last_cmd_update_;
 
     // Levels of control priority, lower is stronger
     enum CommandPriorityLevels {JOYSTICKCONTROL, OBSTACLEAVOIDANCE, EXTERNAL, NOINPUT};

@@ -15,7 +15,15 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
   if(!msg->markers.empty()){
     if(wasLastLanded_)
     {
+<<<<<<< HEAD
       takeoffPub_.publish(std_msgs::Empty);
+=======
+      geometry_msgs::Twist cmd;
+      cmd.linear.z=1;
+      cmd.linear.x=cmd.linear.y=cmd.angular.x=cmd.angular.y=cmd.angular.z=0;
+      wasLastLanded_=false;
+      cmdPub_.publish(cmd);
+>>>>>>> 06e4087652ece293b2c06eaf5f2746b9b33007f7
     }
     else {
 

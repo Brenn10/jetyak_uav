@@ -4,7 +4,11 @@
 
 ## Nodes
 * controller
+<<<<<<< HEAD
 	* used to send commands to the drone
+=======
+	* used to send commands to the quad (y forward, x left, z-up)
+>>>>>>> 06e4087652ece293b2c06eaf5f2746b9b33007f7
 	* Implements a safety controller if mast becomes too close
 	* Implements joystick override of other Nodes
 	* listens to commands to switch modes
@@ -39,7 +43,35 @@
 ## External Libraries
 * ar_track_alvar
 	* find tags on boat
+	* Uses tag bundle
+			5
+		 4 6
+			3
+			|
+			1
+			|
+			0
+	* tag 0 is master and reduces the effects of boat roll on measurements
 * robot_localization
 	* Keep track of the pose of the quadcopter in relation to the kayak
 	* integrate the 6 ar tag poses
 	* Somehow gotta disable when dispatched and restart when landing
+
+## Needs
+* Tags need to be mounted to the masts
+* Strong router needed to connect the jetyaks GPS and UAV
+	* test out configurations
+* implementation needed for search and land Nodes
+* Testing is needed for all current implementation
+* for takeoff and follow, i am trying to figure out the transforms from ar_track_alvar to GROUND_ELU or BODY_FLU
+
+## Joy reference
+* LT or RT deadswitch
+* B - Give Control
+* A-land
+* Y- Takeoff
+* X - take control
+* Right stick X - linear y
+* Right stick Y - linear x
+* left stick Y - linear z
+* left stick X - Angular z
