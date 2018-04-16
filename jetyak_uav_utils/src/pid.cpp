@@ -40,6 +40,12 @@ void pid::update(double error)
   last_time_=ros::Time::now().toSec();
 }
 
+void updateParams(double kp, double kd, double ki) {
+  kp_=kp;
+  kd_=kd;
+  ki_=ki;
+}
+
 void pid::reset()
 {
   last_error_=0;

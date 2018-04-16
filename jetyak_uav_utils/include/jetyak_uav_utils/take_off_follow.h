@@ -13,7 +13,7 @@
 #include "pid.h"
 
 #include "dynamic_reconfigure/server.h"
-#include "dynamic_reconfigure/follow_constants.h"
+#include "dynamic_reconfigure/FollowConstantsConfig.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Quaternion.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
@@ -22,18 +22,26 @@
 
 class take_off_follow {
   private:
+    //Dynamic reconfigure
+    dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> server;
+    dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
+
+    //declare PID controller constants and controllers
     geometry_msgs::Quaternion kp,kd,ki;
-    PID xpid_,ypid_,zpid_,wpid_;
+    PID* xpid_,ypid_,zpid_,wpid_;
+
+    //Subscribers and publishers
     ros::Subscriber arTagSub_, modeSub_;
     ros::Publisher cmdPub_, modePub_, takeoffPub_;
 
     // x: x dist, y: y dist, z: z dist, w: yaw
     geometry_msgs::Quaternion followPose_;
 
+    //Keep track of currentmode
     char currentMode_=0;
-    double tag_confidence_threshhold_ = .8;
 
     bool wasLastLanded_=true;
+    double droneLastSeen_=0;
 
     /** arTagCallback
     * Use tf from jetyak to tags and info on tags to determine position relative to kayak
