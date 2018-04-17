@@ -22,6 +22,7 @@
 
 #include "geometry_msgs/Twist.h"
 #include "std_msgs/Int8.h"
+#include "std_msgs/Empty.h"
 #include "sensor_msgs/Joy.h"
 
 class controller {
@@ -74,6 +75,10 @@ class controller {
     * @param msg Twist message of the requested velocities
     */
     void cmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
+
+    //Make a guess
+    void takeoffCallback(const std_msgs::Empty::ConstPtr& msg);
+    void landCallback(const std_msgs::Empty::ConstPtr& msg);
 
   public:
     /** Constructor

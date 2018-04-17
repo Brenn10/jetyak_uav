@@ -37,7 +37,7 @@ void controller::takeoffCallback(const std_msgs::Empty::ConstPtr& msg){
   taskSrv_.call(srv);
 }
 
-void controller::landCallback(const std_msgs::Empty::ContPtr& msg) {
+void controller::landCallback(const std_msgs::Empty::ConstPtr& msg) {
   dji_sdk::DroneTaskControl srv;
   srv.request.task=6;
   taskSrv_.call(srv);

@@ -1,6 +1,8 @@
-#include "jetyak_uav_utils/pid.h"
+#include "include/pid.h"
+namespace bsc_common {
+PID::PID() : PID(0.0,0.0,0.0){};
 
-pid::pid(double kp, double kd, double ki)
+PID::PID(double kp, double kd, double ki)
 {
   kp_=kp;
   kd_=kd;
@@ -10,12 +12,12 @@ pid::pid(double kp, double kd, double ki)
   integral_=0;
 }
 
-double pid::get_signal()
+double PID::get_signal()
 {
   return signal_;
 }
 
-void pid::update(double error)
+void PID::update(double error)
 {
   // Proportional
   signal_=error*kp_;
@@ -40,15 +42,16 @@ void pid::update(double error)
   last_time_=ros::Time::now().toSec();
 }
 
-void updateParams(double kp, double kd, double ki) {
+void PID::updateParams(double kp, double kd, double ki) {
   kp_=kp;
   kd_=kd;
   ki_=ki;
 }
 
-void pid::reset()
+void PID::reset()
 {
   last_error_=0;
   last_time_=0;
   integral_=0;
 }
+} // namespace bsc_common
