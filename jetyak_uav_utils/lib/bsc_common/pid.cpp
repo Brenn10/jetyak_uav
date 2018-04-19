@@ -2,7 +2,7 @@
 namespace bsc_common {
 PID::PID() : PID(0.0,0.0,0.0){};
 
-PID::PID(double kp, double kd, double ki)
+PID::PID(double kp, double ki, double kd)
 {
   kp_=kp;
   kd_=kd;
@@ -42,7 +42,7 @@ void PID::update(double error)
   last_time_=ros::Time::now().toSec();
 }
 
-void PID::updateParams(double kp, double kd, double ki) {
+void PID::updateParams(double kp, double ki, double kd) {
   kp_=kp;
   kd_=kd;
   ki_=ki;

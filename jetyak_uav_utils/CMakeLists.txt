@@ -63,16 +63,22 @@ add_executable(take_off_follow_node
                 src/take_off_follow.cpp
                 lib/bsc_common/pid.cpp
                 lib/bsc_common/util.cpp)
-
+add_executable(land_node
+                src/land.cpp
+                lib/bsc_common/pid.cpp
+                lib/bsc_common/util.cpp)
 #add dependencies
 add_dependencies(controller_node ${catkin_EXPORTED_TARGETS} )
-add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS})
-add_dependencies(take_off_follow_node ${PROJECT_NAME}_gencfg)
+add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+add_dependencies(land_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Link executables
 target_link_libraries(controller_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(take_off_follow_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(land_node
   ${catkin_LIBRARIES}
 )

@@ -9,7 +9,7 @@ public:
   PID();
   PID(double kp, double ki, double kd);
   void update(double error);
-  void updateParams(double kp, double kd, double ki);
+  void updateParams(double kp, double ki, double kd);
   void reset();
   double get_signal();
 };

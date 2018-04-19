@@ -13,8 +13,11 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh)
 }
 
 void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {
+
+
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING) {
     if(!msg->markers.empty()){
+      droneLastSeen_=ros::Time::now().toSec();
       geometry_msgs::Quaternion* state;
       const geometry_msgs::Pose* pose = const_cast<const geometry_msgs::Pose*>(&msg->markers[0].pose.pose);
       bsc_common::util::xyzw_from_pose(pose,state);
@@ -47,12 +50,35 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         cmdPub_.publish(cmdT);
       }
     }
+    else { //if not seen in more than a sec, stop and spin. after 5, search
+      if(ros::Time::now().toSec()-droneLastSeen_>5) { // if not seen in 5 sec
+        jetyak_uav_utils::Mode m;
+        m.mode=jetyak_uav_utils::Mode::SEARCHING;
+        modePub_.publish(m);
+      }
+      else if(ros::Time::now().toSec()-droneLastSeen_>1) { //if not seen in 1 sec
+        geometry_msgs::Twist cmdT;
+        cmdT.linear.x=0;
+        cmdT.linear.x=0;
+        cmdT.linear.x=0;
+        cmdT.angular.z=1.5;
+        cmdT.angular.y=cmdT.angular.x=0;
+        cmdPub_.publish(cmdT);
+      }
+    }
   }
 }
 void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   currentMode_=msg->mode;
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
+  {
     firstFollowLoop_=true;
+    droneLastSeen_=0;
+  }
+  else
+  {
+    droneLastSeen_=0;
+  }
 }
 
 void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level) {
@@ -71,7 +97,15 @@ void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfi
   ki_.z=config.ki_z;
   ki_.w=config.ki_w;
 
+  followPose_.x=config.follow_x;
+  followPose_.y=config.follow_y;
+  followPose_.z=config.follow_z;
+  followPose_.w=config.follow_w;
 
+  xpid_->updateParams(kp_.x,ki_.x,kd_.x);
+  ypid_->updateParams(kp_.y,ki_.y,kd_.y);
+  zpid_->updateParams(kp_.z,ki_.z,kd_.z);
+  wpid_->updateParams(kp_.w,ki_.w,kd_.w);
 }
 
 int main(int argc, char *argv[]) {
