@@ -31,13 +31,13 @@ Current design is for DJI N3 controller with a raspberry pi interface. Must set 
   * linear.y : Left
   * linear.z : Up
   * angular.z : Counter-Clockwise
-####Publications
+#### Publications
 * /dji_sdk/flight_control_setpoint_generic (sensor_msgs::Joy)
- * (linear.x, linear.y, linear.z, angular.z, 0x4B)
- * 0x4B = Command Horizontal Velocities + Command Vertical Speed + Command Yaw speed + Active break
+  * (linear.x, linear.y, linear.z, angular.z, 0x4B)
+  * 0x4B = Command Horizontal Velocities + Command Vertical Speed + Command Yaw speed + Active break
 * uav_mode (jetyak_uav_utils::Mode)
- * Publishes when gamepad takes off or lands (AWAY and LANDED respectively)
+  * Publishes when gamepad takes off or lands (AWAY and LANDED respectively)
 
-### take_off_follow_node ==
+### take_off_follow_node
 #### Subscriptions
 #### Publications
