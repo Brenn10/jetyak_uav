@@ -42,7 +42,7 @@ generate_dynamic_reconfigure_options(
 )
 ## includes, libraries, depends
 catkin_package(
-  INCLUDE_DIRS include
+  INCLUDE_DIRS include lib/bsc_common/include
   LIBRARIES jetyak_uav_utils
   CATKIN_DEPENDS dynamic_reconfigure ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf dji_sdk visualization_msgs message_runtime
   DEPENDS system_lib
@@ -51,18 +51,18 @@ catkin_package(
 ## Includes
 include_directories(
   include
+  lib/bsc_common/include
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-add_library(${PROJECT_NAME}
-  lib/bsc_common/pid.cpp
-  lib/bsc_common/util.cpp
-)
 
 ## Add executables
-add_executable(controller_node src/controller.cpp)
-add_executable(take_off_follow_node src/take_off_follow.cpp)
+add_executable(controller_node
+                src/controller.cpp)
+add_executable(take_off_follow_node
+                src/take_off_follow.cpp
+                lib/bsc_common/pid.cpp
+                lib/bsc_common/util.cpp)
 
 #add dependencies
 add_dependencies(controller_node ${catkin_EXPORTED_TARGETS} )

@@ -24,9 +24,6 @@
 
 class take_off_follow {
   private:
-    //Dynamic reconfigure
-    dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> server;
-    dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
 
     //declare PID controller constants and controllers
     geometry_msgs::Quaternion kp_,kd_,ki_,follow_pos_;
@@ -42,7 +39,7 @@ class take_off_follow {
     //Keep track of currentmode
     char currentMode_=0;
 
-    bool wasLastLanded_=true;
+    bool firstFollowLoop_=true;
     double droneLastSeen_=0;
 
     /** arTagCallback
@@ -66,9 +63,11 @@ class take_off_follow {
     * @param msg Mode that has been activated
     */
     void modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg);
-    void reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level);
 
   public:
+
+    void reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level);
+
     /** Constructor
     * Creates the publishers, subscribers, and service clients
     *

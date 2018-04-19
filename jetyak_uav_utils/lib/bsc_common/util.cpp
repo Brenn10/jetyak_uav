@@ -1,6 +1,6 @@
 #include "include/util.h"
 namespace bsc_common {
-void util::xyzw_from_pose(geometry_msgs::Pose* pose, geometry_msgs::Quaternion* state) {
+void util::xyzw_from_pose(const geometry_msgs::Pose* pose, geometry_msgs::Quaternion* state) {
   state->x = pose->position.x;
   state->y = pose->position.y;
   state->z = pose->position.z;

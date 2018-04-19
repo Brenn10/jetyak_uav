@@ -2,9 +2,7 @@
 
 take_off_follow::take_off_follow(ros::NodeHandle& nh)
 {
-  // Setup dynamic reconfigure
-  f = boost::bind(&take_off_follow::reconfigureCallback,_1,_2);
-  server.setCallback(f);
+
 
   takeoffPub_ = nh.advertise<std_msgs::Empty>("takeoff",1);
   cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd",1);
@@ -18,19 +16,20 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING) {
     if(!msg->markers.empty()){
       geometry_msgs::Quaternion* state;
-      bsc_common::util::xyzw_from_pose(msg->markers[0].pose.pose,state);
+      const geometry_msgs::Pose* pose = const_cast<const geometry_msgs::Pose*>(&msg->markers[0].pose.pose);
+      bsc_common::util::xyzw_from_pose(pose,state);
 
       // Get drone last_cmd_update_
 
-      if(wasLastLanded_)
+      if(firstFollowLoop_)
       {
-        wasLastLanded_=false;
+        firstFollowLoop_=false;
         xpid_=new bsc_common::PID(kp_.x,ki_.x,kd_.x);
         ypid_=new bsc_common::PID(kp_.y,ki_.y,kd_.y);
         zpid_=new bsc_common::PID(kp_.z,ki_.z,kd_.z);
         wpid_=new bsc_common::PID(kp_.w,ki_.w,kd_.w);
 
-        takeoffPub_.publish(bsc_common::util::empty);
+        takeoffPub_.publish(std_msgs::Empty());
       }
       else {
         xpid_->update(follow_pos_.x-state->x);
@@ -45,13 +44,15 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         cmdT.linear.x=zpid_->get_signal();
         cmdT.angular.z=wpid_->get_signal();
         cmdT.angular.y=cmdT.angular.x=0;
-        cmdVel.publish(cmdT);
+        cmdPub_.publish(cmdT);
       }
     }
   }
 }
 void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
-
+  currentMode_=msg->mode;
+  if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
+    firstFollowLoop_=true;
 }
 
 void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level) {
@@ -77,6 +78,15 @@ int main(int argc, char *argv[]) {
   ros::init(argc,argv,"take_off_follow");
   ros::NodeHandle nh;
   take_off_follow takeOffFollow(nh);
+  //Dynamic reconfigure
+  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> server;
+  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
+
+  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) > f2( boost::bind( &take_off_follow::reconfigureCallback,&takeOffFollow, _1, _2 ) );
+
+  // (iv) Set the callback to the service server.
+  f=f2; // Copy the functor data f2 to our dynamic_reconfigure::Server callback type
+  server.setCallback(f);
   ros::spin();
   return 0;
 }

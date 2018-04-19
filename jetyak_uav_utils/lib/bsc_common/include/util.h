@@ -13,8 +13,7 @@ const long double C_PI = 3.14159265358979323846; // My long PI value
 
 class util {
 public:
-  static std_msgs::Empty empty;
-  static void xyzw_from_pose(geometry_msgs::Pose* pose, geometry_msgs::Quaternion* state);
+  static void xyzw_from_pose(const geometry_msgs::Pose* pose, geometry_msgs::Quaternion* state);
 };
 
 } // namespace bsc_common
