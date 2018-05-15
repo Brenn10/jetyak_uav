@@ -5,7 +5,7 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh)
 
 
   takeoffPub_ = nh.advertise<std_msgs::Empty>("takeoff",1);
-  cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd",1);
+  cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd_vel_FLU",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
   arTagSub_ = nh.subscribe("ar_track_alvar",1,&take_off_follow::arTagCallback, this);

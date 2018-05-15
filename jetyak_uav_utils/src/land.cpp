@@ -29,8 +29,8 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 
       if(firstLandLoop_)
       {
-        flyPose_.x=initialFlyPose_.x;
-        flyPose_.y=initialFlyPose_.y;
+        flyPose_.x=0;
+        flyPose_.y=0;
         flyPose_.z=initialFlyPose_.z;
         flyPose_.w=initialFlyPose_.w;
 
@@ -43,6 +43,9 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
         landPub_.publish(std_msgs::Empty());
       }
       else {
+        flyPose_.z = flyPose_.z *collapseRatio_;
+        flyPose_.w = flyPose_.w *collapseRatio_;
+
         xpid_->update(flyPose_.x-state->x);
         ypid_->update(flyPose_.y-state->y);
         zpid_->update(flyPose_.z-state->z);

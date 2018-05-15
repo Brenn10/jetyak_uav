@@ -38,7 +38,8 @@ class land {
 
     //Keep track of currentmode
     char currentMode_=0;
-
+    // Each iteration of tag track multiplies this by each position offset
+    float collapseRatio_=.98;
     bool firstLandLoop_=true;
     double droneLastSeen_=0;
 

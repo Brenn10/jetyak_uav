@@ -12,6 +12,7 @@
 #include "ros/ros.h"
 
 #include "jetyak_uav_utils/Mode.h"
+#include "../lib/bsc_common/include/util.h"
 
 #include <cstdlib>
 #include <vector>
@@ -28,7 +29,7 @@
 class controller {
   private:
 
-    ros::Subscriber joySub_, arTagSub_, modeSub_, cmdSub_,takeoffSub_,landSub_;
+    ros::Subscriber joySub_, arTagSub_, modeSub_, posCmdSub_, velCmdSub_,takeoffSub_,landSub_;
     ros::Publisher cmdPub_, modePub_;
     ros::ServiceClient controlRequestSrv_,taskSrv_,activateSrv_;
     char currentMode_;
@@ -44,6 +45,7 @@ class controller {
     //Keeps the command we will use with its priority
     struct CommandAndPriority {
       CommandPriorityLevels priority;
+      float flag;
       geometry_msgs::Twist vels;
     } command_;
 
@@ -69,12 +71,19 @@ class controller {
     */
     void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
 
-    /** cmdCallback
+    /** velCmdCallback
     * Passes along a command if deemed safe by safety controller
     *
-    * @param msg Twist message of the requested velocities
+    * @param msg Twist message of the requested velocity in FLU-xyz
     */
-    void cmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
+    void velCmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
+
+    /** posCmdCallback
+    * Passes along a command if deemed safe by safety controller
+    *
+    * @param msg Twist message of the requested offset in ENU-xyz
+    */
+    void posCmdCallback(const geometry_msgs::Twist::ConstPtr& msg);
 
     //Make a guess
     void takeoffCallback(const std_msgs::Empty::ConstPtr& msg);

@@ -5,7 +5,8 @@ controller::controller(ros::NodeHandle& nh) {
 
   joySub_ = nh.subscribe("joy",1,&controller::joyCallback,this);
   modeSub_ = nh.subscribe("uav_mode",1,&controller::modeCallback,this);
-  cmdSub_ = nh.subscribe("raw_cmd",1,&controller::cmdCallback,this);
+  posCmdSub_ = nh.subscribe("raw_cmd_pos_ENU",1,&controller::posCmdCallback,this);
+  velCmdSub_ = nh.subscribe("raw_cmd_vel_FLU",1,&controller::velCmdCallback,this);
   landSub_ = nh.subscribe("land",1,&controller::landCallback,this);
   takeoffSub_ = nh.subscribe("takeoff",1,&controller::takeoffCallback,this);
 
@@ -78,35 +79,49 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
   }
 }
 
+
 void controller::publishCommand() {
 
-  //{Left,Forward,Up,CCW}
+  //{x,y,z,w}
 
   cmdVel_.axes = {
-    (float)command_.vels.linear.x,
-    (float)command_.vels.linear.y,
-    (float)command_.vels.linear.z,
-    (float)command_.vels.angular.z,
-    0x4B
+    bsc_common::util::clip((float)command_.vels.linear.x,-maxSpeed_,maxSpeed_),
+    bsc_common::util::clip((float)command_.vels.linear.y,-maxSpeed_,maxSpeed_),
+    bsc_common::util::clip((float)command_.vels.linear.z,-maxSpeed_,maxSpeed_),
+    bsc_common::util::clip((float)command_.vels.angular.z,-maxSpeed_,maxSpeed_),
+    (float)command_.flag
   };
 
   command_.vels = geometry_msgs::Twist(); //reset command
+  command_.flag = 0x4B;
   command_.priority = NOINPUT;
   cmdPub_.publish(cmdVel_);
 }
 
-void controller::cmdCallback(const geometry_msgs::Twist::ConstPtr& msg)
+void controller::velCmdCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
   if(command_.priority>=EXTERNAL) // If this has a stronger or equal priority, overwrite
   {
     command_.priority=EXTERNAL;
+    command_.flag = 0x4B;
     command_.vels.linear.x=msg->linear.x;
     command_.vels.linear.y=msg->linear.y;
     command_.vels.linear.z=msg->linear.z;
     command_.vels.angular.z=msg->angular.z;
   }
 }
-
+void controller::posCmdCallback(const geometry_msgs::Twist::ConstPtr& msg)
+{
+  if(command_.priority>=EXTERNAL) // If this has a stronger or equal priority, overwrite
+  {
+    command_.priority=EXTERNAL;
+    command_.flag = 0x91;
+    command_.vels.linear.x=msg->linear.x;
+    command_.vels.linear.y=msg->linear.y;
+    command_.vels.linear.z=msg->linear.z;
+    command_.vels.angular.z=msg->angular.z;
+  }
+}
 int main(int argc, char **argv) {
   ros::init(argc,argv,"uav_controller");
   ros::NodeHandle nh;
