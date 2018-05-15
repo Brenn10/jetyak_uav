@@ -9,8 +9,8 @@
 * angle camera up and publish landed mode
 */
 
-#ifndef JETYAK_UAV_UTILS_SEARCH_AND_LAND
-#define JETYAK_UAV_UTILS_SEARCH_AND_LAND
+#ifndef JETYAK_UAV_UTILS_SEARCH_
+#define JETYAK_UAV_UTILS_SEARCH_
 
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Quaternion.h"
@@ -27,6 +27,7 @@ class search {
     geometry_msgs::Quaternion lastUavGpsCoord_; // x:longitude, y: latitude, z: altitude, w: heading
 
     double searchVelocity_;
+    char currentMode_=0;
     /** arTagCallback
     * If in SEARCHING mode
     *   If the tag is within some threshold of where the jetyak should be, set to APPROACH
@@ -44,26 +45,7 @@ class search {
     *
     * @param msg Mode message
     */
-    void modeCallback(const std_msgs::Int8::ConstPtr& msg);
-
-    /** uavGpsSub
-    * if SEARCHING
-    *   record the gps position of this uav
-    *   send command to controller
-    *
-    * @param msg Gps coordinates of uav
-    */
-    void uavGpsCallback(const nav_msgs::NavSatFix::ConstPtr& msg);
-
-
-    /** uavAttitudeCallback
-    * If in SEARCH
-    *   Update the uav heading from the yaw
-    *   send command to controller
-    *
-    * @param msg Quaternion encoding compass heading as yaw
-    */
-    void uavAttitudeCallback(const geometry_msgs::Quaternion::ConstPtr& msg);
+    void modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg);
 
     /** jetyakGpsSub
     * if in SEARCH
@@ -81,12 +63,6 @@ class search {
     */
     void jetyakToPursueCallback(const std_msgs::String::ConstPtr& msg);
 
-    /** computeSearchingVelocities
-    * Compute the x,y,z,w velocities to reach the jetyak based off of
-    *
-    * @return Quaternion of x,y,z,w velocities
-    */
-    geometry_msgs::Quaternion computeSearchingVelocities() const;
   public:
     /** Constructor
     * Creates the publishers, subscribers, and service clients
