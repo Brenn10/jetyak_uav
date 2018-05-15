@@ -18,9 +18,18 @@ void search::arTagCallback(const ar_track_alvar::AlvarMarkers::ConstPtr& msg)
 {
   Mode newmode;
   newmode.mode=jetyak_uav_utils::Mode::FOLLOWING;
-  modePub_.publish(newmode)
+  modePub_.publish(newmode);
 }
 
+void modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
+  this.currentMode_=msg.mode;
+}
+
+void search::jetyakGpsCallback(const nav_msgs::NavSatFix::ConstPtr& msg) {
+
+}
+
+void search::jetyakToPursueCallback(const std_msgs::String::ConstPtr& msg) {}
 
 int main(int argc, char *argv[]) {
   ros::init(argc,argv,"search");
