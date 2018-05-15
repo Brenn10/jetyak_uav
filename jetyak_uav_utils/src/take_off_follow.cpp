@@ -43,10 +43,11 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
 
         geometry_msgs::Twist cmdT;
         cmdT.linear.x=xpid_->get_signal();
-        cmdT.linear.x=ypid_->get_signal();
-        cmdT.linear.x=zpid_->get_signal();
+        cmdT.linear.y=ypid_->get_signal();
+        cmdT.linear.z=zpid_->get_signal();
+        cmdT.angular.x = 0;
+        cmdT.angular.y = 0;
         cmdT.angular.z=wpid_->get_signal();
-        cmdT.angular.y=cmdT.angular.x=0;
         cmdPub_.publish(cmdT);
       }
     }
@@ -58,11 +59,13 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
       else if(ros::Time::now().toSec()-droneLastSeen_>1) { //if not seen in 1 sec
         geometry_msgs::Twist cmdT;
-        cmdT.linear.x=0;
-        cmdT.linear.x=0;
-        cmdT.linear.x=0;
-        cmdT.angular.z=1.5;
-        cmdT.angular.y=cmdT.angular.x=0;
+        cmdT.linear.x = 0;
+        cmdT.linear.y = 0;
+        cmdT.linear.z = 0;
+        cmdT.angular.x = 0;
+        cmdT.angular.y = 0;
+        // TO DO: if the gimbal is used rotate camera not drone
+        cmdT.angular.z = 1.5;
         cmdPub_.publish(cmdT);
       }
     }
