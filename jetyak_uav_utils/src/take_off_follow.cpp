@@ -1,7 +1,8 @@
 #include "jetyak_uav_utils/take_off_follow.h"
-
+#include <iostream>
 take_off_follow::take_off_follow(ros::NodeHandle& nh)
 {
+
 
 
   takeoffPub_ = nh.advertise<std_msgs::Empty>("takeoff",1);
@@ -115,15 +116,17 @@ int main(int argc, char *argv[]) {
   ros::init(argc,argv,"take_off_follow");
   ros::NodeHandle nh;
   take_off_follow takeOffFollow(nh);
-  //Dynamic reconfigure
+
   dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> server;
   dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
+  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) >
+      f2( boost::bind( &take_off_follow::reconfigureCallback,&takeOffFollow, _1, _2 ) );
+  std::cout << "After bind"<<std::endl;
 
-  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) > f2( boost::bind( &take_off_follow::reconfigureCallback,&takeOffFollow, _1, _2 ) );
-
-  // (iv) Set the callback to the service server.
-  f=f2; // Copy the functor data f2 to our dynamic_reconfigure::Server callback type
+  f=f2;
+  std::cout << "After f=f2"<<std::endl;
   server.setCallback(f);
+  std::cout << "After setCallback" << std::endl;
   ros::spin();
   return 0;
 }

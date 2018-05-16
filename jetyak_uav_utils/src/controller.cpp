@@ -52,22 +52,22 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
     if(msg->buttons[2]) { //give control
       dji_sdk::SDKControlAuthority srv;
       srv.request.control_enable=0;
-      ROS_WARN("Release Response: %s",controlRequestSrv_.call(srv)? "Success": "Fail");
+      ROS_WARN("give control Response: %s",controlRequestSrv_.call(srv)? "Success": "Fail");
     }
     else if(msg->buttons[0]){ //take control
       dji_sdk::SDKControlAuthority srv;
       srv.request.control_enable=1;
-      ROS_WARN("Release Response: %s",controlRequestSrv_.call(srv)? "Success": "Fail");
+      ROS_WARN("Take control Response: %s",controlRequestSrv_.call(srv)? "Success": "Fail");
     }
     else if(msg->buttons[1]) { //land
       dji_sdk::DroneTaskControl srv;
       srv.request.task=6;
-      ROS_WARN("Release Response: %s",taskSrv_.call(srv)? "Success": "Fail");
+      ROS_WARN("land Response: %s",taskSrv_.call(srv)? "Success": "Fail");
     }
     else if(msg->buttons[3]) { //take off
       dji_sdk::DroneTaskControl srv;
       srv.request.task=4;
-      ROS_WARN("Release Response: %s",taskSrv_.call(srv)? "Success": "Fail");
+      ROS_WARN("take off Response: %s",taskSrv_.call(srv)? "Success": "Fail");
     }
     else { //set vels
 

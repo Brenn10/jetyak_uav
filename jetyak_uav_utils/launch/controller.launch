@@ -1,0 +1,4 @@
+<launch>
+  <node name="uav_controller" pkg="jetyak_uav_utils" type="controller_node" output="screen"/>
+  <node name="uav_follow" pkg="jetyak_uav_utils" type="take_off_follow_node" output="screen" />
+</launch>
