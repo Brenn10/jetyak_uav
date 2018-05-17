@@ -1,10 +1,11 @@
 #include "jetyak_uav_utils/take_off_follow.h"
 #include <iostream>
-take_off_follow::take_off_follow(ros::NodeHandle& nh)
+take_off_follow::take_off_follow(ros::NodeHandle& nh) :
+  xpid_(NULL),
+  ypid_(NULL),
+  zpid_(NULL),
+  wpid_(NULL)
 {
-
-
-
   takeoffPub_ = nh.advertise<std_msgs::Empty>("takeoff",1);
   cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd_vel_FLU",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
@@ -13,11 +14,13 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh)
   modeSub_ = nh.subscribe("uav_mode",1,&take_off_follow::modeCallback,this);
 }
 
-void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {
+void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
+{
 
-
-  if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING) {
-    if(!msg->markers.empty()){
+  if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING) 
+  {
+    if(!msg->markers.empty())
+    {
       droneLastSeen_=ros::Time::now().toSec();
       geometry_msgs::Quaternion* state;
       const geometry_msgs::Pose* pose = const_cast<const geometry_msgs::Pose*>(&msg->markers[0].pose.pose);
@@ -35,7 +38,8 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
 
         takeoffPub_.publish(std_msgs::Empty());
       }
-      else {
+      else
+      {
         xpid_->update(follow_pos_.x-state->x);
         ypid_->update(follow_pos_.y-state->y);
         zpid_->update(follow_pos_.z-state->z);
@@ -52,13 +56,16 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         cmdPub_.publish(cmdT);
       }
     }
-    else { //if not seen in more than a sec, stop and spin. after 5, search
-      if(ros::Time::now().toSec()-droneLastSeen_>5) { // if not seen in 5 sec
+    else 
+    { //if not seen in more than a sec, stop and spin. after 5, search
+      if(ros::Time::now().toSec()-droneLastSeen_>5) 
+      { // if not seen in 5 sec
         jetyak_uav_utils::Mode m;
         m.mode=jetyak_uav_utils::Mode::SEARCHING;
         modePub_.publish(m);
       }
-      else if(ros::Time::now().toSec()-droneLastSeen_>1) { //if not seen in 1 sec
+      else if(ros::Time::now().toSec()-droneLastSeen_>1) 
+      { //if not seen in 1 sec
         geometry_msgs::Twist cmdT;
         cmdT.linear.x = 0;
         cmdT.linear.y = 0;
@@ -72,7 +79,8 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
     }
   }
 }
-void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
+void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg)
+{
   currentMode_=msg->mode;
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
   {
@@ -85,7 +93,8 @@ void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) 
   }
 }
 
-void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level) {
+void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level)
+{
   kp_.x=config.kp_x;
   kp_.y=config.kp_y;
   kp_.z=config.kp_z;
@@ -106,13 +115,18 @@ void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfi
   followPose_.z=config.follow_z;
   followPose_.w=config.follow_w;
 
-  xpid_->updateParams(kp_.x,ki_.x,kd_.x);
-  ypid_->updateParams(kp_.y,ki_.y,kd_.y);
-  zpid_->updateParams(kp_.z,ki_.z,kd_.z);
-  wpid_->updateParams(kp_.w,ki_.w,kd_.w);
+  if (xpid_ != NULL) 
+  {
+    xpid_->updateParams(kp_.x,ki_.x,kd_.x);
+    ypid_->updateParams(kp_.y,ki_.y,kd_.y);
+    zpid_->updateParams(kp_.z,ki_.z,kd_.z);
+    wpid_->updateParams(kp_.w,ki_.w,kd_.w);
+  }
+  
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   ros::init(argc,argv,"take_off_follow");
   ros::NodeHandle nh;
   take_off_follow takeOffFollow(nh);
@@ -121,12 +135,9 @@ int main(int argc, char *argv[]) {
   dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
   boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) >
       f2( boost::bind( &take_off_follow::reconfigureCallback,&takeOffFollow, _1, _2 ) );
-  std::cout << "After bind"<<std::endl;
 
   f=f2;
-  std::cout << "After f=f2"<<std::endl;
   server.setCallback(f);
-  std::cout << "After setCallback" << std::endl;
   ros::spin();
   return 0;
 }
