@@ -1,6 +1,10 @@
 #include "jetyak_uav_utils/land.h"
 
-land::land(ros::NodeHandle& nh)
+land::land(ros::NodeHandle& nh):
+  xpid_(NULL),
+  ypid_(NULL),
+  zpid_(NULL),
+  wpid_(NULL)
 {
   flyPose_.x=initialFlyPose_.x=5;
   flyPose_.y=initialFlyPose_.y=0;
@@ -35,10 +39,11 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
         flyPose_.w=initialFlyPose_.w;
 
         firstLandLoop_=false;
-        xpid_=new bsc_common::PID(kp_.x,ki_.x,kd_.x);
-        ypid_=new bsc_common::PID(kp_.y,ki_.y,kd_.y);
-        zpid_=new bsc_common::PID(kp_.z,ki_.z,kd_.z);
-        wpid_=new bsc_common::PID(kp_.w,ki_.w,kd_.w);
+
+        xpid_->reset();
+        ypid_->reset();
+        zpid_->reset();
+        wpid_->reset();
 
         landPub_.publish(std_msgs::Empty());
       }
@@ -113,21 +118,30 @@ void land::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, 
   initialFlyPose_.z=config.follow_z;
   initialFlyPose_.w=config.follow_w;
 
-  xpid_->updateParams(kp_.x,ki_.x,kd_.x);
-  ypid_->updateParams(kp_.y,ki_.y,kd_.y);
-  zpid_->updateParams(kp_.z,ki_.z,kd_.z);
-  wpid_->updateParams(kp_.w,ki_.w,kd_.w);
+  if (xpid_ != NULL)
+  {
+    xpid_->updateParams(kp_.x,ki_.x,kd_.x);
+    ypid_->updateParams(kp_.y,ki_.y,kd_.y);
+    zpid_->updateParams(kp_.z,ki_.z,kd_.z);
+    wpid_->updateParams(kp_.w,ki_.w,kd_.w);
+  } else {
+    xpid_ = new bsc_common::PID(kp_.x,ki_.x,kd_.x);
+    ypid_ = new bsc_common::PID(kp_.y,ki_.y,kd_.y);
+    zpid_ = new bsc_common::PID(kp_.z,ki_.z,kd_.z);
+    wpid_ = new bsc_common::PID(kp_.w,ki_.w,kd_.w);
+  }
 }
 
 int main(int argc, char *argv[]) {
   ros::init(argc,argv,"land");
   ros::NodeHandle nh;
-  land land(nh);
+  land land_o(nh);
   //Dynamic reconfigure
   dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> server;
   dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
 
-  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) > f2( boost::bind( &land::reconfigureCallback,&land, _1, _2 ) );
+  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) >
+      f2(boost::bind( &land::reconfigureCallback,&land_o, _1, _2 ) );
 
   // (iv) Set the callback to the service server.
   f=f2; // Copy the functor data f2 to our dynamic_reconfigure::Server callback type

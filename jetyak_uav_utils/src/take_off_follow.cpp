@@ -17,7 +17,7 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh) :
 void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 {
 
-  if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING) 
+  if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
   {
     if(!msg->markers.empty())
     {
@@ -31,10 +31,10 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       if(firstFollowLoop_)
       {
         firstFollowLoop_=false;
-        xpid_=new bsc_common::PID(kp_.x,ki_.x,kd_.x);
-        ypid_=new bsc_common::PID(kp_.y,ki_.y,kd_.y);
-        zpid_=new bsc_common::PID(kp_.z,ki_.z,kd_.z);
-        wpid_=new bsc_common::PID(kp_.w,ki_.w,kd_.w);
+        xpid_->reset();
+        ypid_->reset();
+        zpid_->reset();
+        wpid_->reset();
 
         takeoffPub_.publish(std_msgs::Empty());
       }
@@ -56,15 +56,15 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         cmdPub_.publish(cmdT);
       }
     }
-    else 
+    else
     { //if not seen in more than a sec, stop and spin. after 5, search
-      if(ros::Time::now().toSec()-droneLastSeen_>5) 
+      if(ros::Time::now().toSec()-droneLastSeen_>5)
       { // if not seen in 5 sec
         jetyak_uav_utils::Mode m;
         m.mode=jetyak_uav_utils::Mode::SEARCHING;
         modePub_.publish(m);
       }
-      else if(ros::Time::now().toSec()-droneLastSeen_>1) 
+      else if(ros::Time::now().toSec()-droneLastSeen_>1)
       { //if not seen in 1 sec
         geometry_msgs::Twist cmdT;
         cmdT.linear.x = 0;
@@ -115,14 +115,19 @@ void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfi
   followPose_.z=config.follow_z;
   followPose_.w=config.follow_w;
 
-  if (xpid_ != NULL) 
+  if (xpid_ != NULL)
   {
     xpid_->updateParams(kp_.x,ki_.x,kd_.x);
     ypid_->updateParams(kp_.y,ki_.y,kd_.y);
     zpid_->updateParams(kp_.z,ki_.z,kd_.z);
     wpid_->updateParams(kp_.w,ki_.w,kd_.w);
+  } else {
+    xpid_ = new bsc_common::PID(kp_.x,ki_.x,kd_.x);
+    ypid_ = new bsc_common::PID(kp_.y,ki_.y,kd_.y);
+    zpid_ = new bsc_common::PID(kp_.z,ki_.z,kd_.z);
+    wpid_ = new bsc_common::PID(kp_.w,ki_.w,kd_.w);
   }
-  
+
 }
 
 int main(int argc, char *argv[])
