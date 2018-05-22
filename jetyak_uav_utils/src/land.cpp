@@ -60,8 +60,8 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 
         geometry_msgs::Twist cmdT;
         cmdT.linear.x=xpid_->get_signal();
-        cmdT.linear.x=ypid_->get_signal();
-        cmdT.linear.x=zpid_->get_signal();
+        cmdT.linear.y=ypid_->get_signal();
+        cmdT.linear.z=zpid_->get_signal();
         cmdT.angular.z=wpid_->get_signal();
         cmdT.angular.y=cmdT.angular.x=0;
         cmdPub_.publish(cmdT);

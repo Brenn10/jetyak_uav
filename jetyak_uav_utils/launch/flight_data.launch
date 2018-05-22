@@ -1,0 +1,13 @@
+<launch>
+	<node pkg="rosbag" type="record" name="rosbag_telemetry"
+		args="record -o /dji_sdk/flight_status /dji_sdk/imu  /dji_sdk/attitude /dji_sdk/gps_position /dji_sdk/gps_health /dji_sdk/local_position /dji_sdk/velocity /dji_sdk/rc /dji_sdk/battery_state"
+	</node>
+
+	<node pkg="rosbag" type="record" name="rosbag_controls"
+		args="record -o /uav_controller/joy /uav_controller/uav_mode /uav_controller/raw_cmd_pos_ENU /uav_controller/raw_cmd_vel_FLU"
+	</node>
+
+	<node pkg="rosbag" type="record" name="rosbag_camera"
+		args="record -o /raspicam_node/image_raw /raspicam_node/camera_info"
+	</node>
+</launch>
