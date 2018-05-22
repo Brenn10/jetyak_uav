@@ -4,7 +4,7 @@
 	</node>
 
 	<node pkg="rosbag" type="record" name="rosbag_controls"
-		args="record -o /uav_controller/joy /uav_controller/uav_mode /uav_controller/raw_cmd_pos_ENU /uav_controller/raw_cmd_vel_FLU"
+		args="record -o /joy /jetyak_uav_utils/uav_mode /jetyak_uav_utils/raw_cmd_pos_ENU /jetyak_uav_utils/raw_cmd_vel_FLU /dji_sdk/flight_control_setpoint_generic"
 	</node>
 
 	<node pkg="rosbag" type="record" name="rosbag_camera"

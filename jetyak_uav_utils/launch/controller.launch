@@ -1,5 +1,7 @@
 <launch>
-  <node name="uav_controller" pkg="jetyak_uav_utils" type="controller_node" output="screen"/>
-  <node name="uav_follow" pkg="jetyak_uav_utils" type="take_off_follow_node" output="screen" />
-  <node name="uav_land" pkg="jetyak_uav_utils" type="land_node" output="screen" />
+  <group ns="jetyak_uav_utils">
+    <node name="uav_controller" pkg="jetyak_uav_utils" type="controller_node" output="screen"/>
+    <node name="uav_follow" pkg="jetyak_uav_utils" type="take_off_follow_node" output="screen" />
+    <node name="uav_land" pkg="jetyak_uav_utils" type="land_node" output="screen" />
+  </group>
 </launch>
