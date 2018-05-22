@@ -44,12 +44,18 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         xpid_->update(follow_pos_.x-(-msg->markers[0].pose.pose.position.x));
         ypid_->update(follow_pos_.y-(-msg->markers[0].pose.pose.position.z));
         zpid_->update(follow_pos_.z-msg->markers[0].pose.pose.position.y);
-        wpid_->update(follow_pos_.w-state->y); //pitch of the tag
+        wpid_->update(follow_pos_.w+state->y); //pitch of the tag TODO: check sign
 
+
+        //rotate velocities in reference to the tag
+        double *rotated_x;
+        double *rotated_y;
+        bsc_common::util::rotate_vector(
+          xpid_->get_signal(),ypid_->get_signal(),state->y,rotated_x,rotated_y);
 
         geometry_msgs::Twist cmdT;
-        cmdT.linear.x=xpid_->get_signal();
-        cmdT.linear.y=ypid_->get_signal();
+        cmdT.linear.x=*rotated_x;
+        cmdT.linear.y=*rotated_y;
         cmdT.linear.z=zpid_->get_signal();
         cmdT.angular.x = 0;
         cmdT.angular.y = 0;

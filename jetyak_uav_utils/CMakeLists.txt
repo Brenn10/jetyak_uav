@@ -59,7 +59,8 @@ include_directories(
 
 ## Add executables
 add_executable(controller_node
-                src/controller.cpp)
+                src/controller.cpp
+                lib/bsc_common/util.cpp)
 add_executable(take_off_follow_node
                 src/take_off_follow.cpp
                 lib/bsc_common/pid.cpp

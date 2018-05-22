@@ -2,10 +2,14 @@
 #define BSC_COMMON_UTIL_
 
 
+#include <math.h>
+
 #include <tf/transform_datatypes.h>
+
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Quaternion.h"
 #include "std_msgs/Empty.h"
+
 namespace bsc_common {
 
 const long double C_PI = 3.14159265358979323846; // My long PI value
@@ -31,9 +35,17 @@ public:
    *
    * @return clipped value of x
   */
-  static float clip(float x, float low, float high) {
-    return std::max(std::min(high,x),low);
-  };
+  static float clip(float x, float low, float high);
+
+  /* rotate_vector
+   *
+   * @param x x coordinate
+   * @param y y coordinate
+   * @param theta angle to rotate
+   * @param xp x after rotation
+   * @param yp y after rotation
+  */
+  static void rotate_vector(double x, double y, double theta,double *xp,double *yp);
 };
 
 } // namespace bsc_common
