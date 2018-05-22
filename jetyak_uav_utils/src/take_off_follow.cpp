@@ -22,9 +22,10 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
     if(!msg->markers.empty())
     {
       droneLastSeen_=ros::Time::now().toSec();
-      geometry_msgs::Quaternion* state;
-      const geometry_msgs::Pose* pose = const_cast<const geometry_msgs::Pose*>(&msg->markers[0].pose.pose);
-      bsc_common::util::xyzw_from_pose(pose,state);
+      geometry_msgs::Vector3* state;
+
+      const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&msg->markers[0].pose.pose.orientation);
+      bsc_common::util::rpy_from_quat(orientation,state);
 
       // Get drone last_cmd_update_
 
@@ -40,10 +41,10 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
       else
       {
-        xpid_->update(follow_pos_.x-state->x);
-        ypid_->update(follow_pos_.y-state->y);
-        zpid_->update(follow_pos_.z-state->z);
-        wpid_->update(follow_pos_.w-state->w);
+        xpid_->update(follow_pos_.x-(-msg->markers[0].pose.pose.position.x));
+        ypid_->update(follow_pos_.y-(-msg->markers[0].pose.pose.position.z));
+        zpid_->update(follow_pos_.z-msg->markers[0].pose.pose.position.y);
+        wpid_->update(follow_pos_.w-state->y); //pitch of the tag
 
 
         geometry_msgs::Twist cmdT;
@@ -72,11 +73,13 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         cmdT.linear.z = 0;
         cmdT.angular.x = 0;
         cmdT.angular.y = 0;
-        // TO DO: if the gimbal is used rotate camera not drone
+        // TODO: if the gimbal is used rotate camera not drone
         cmdT.angular.z = 1.5;
         cmdPub_.publish(cmdT);
       }
     }
+  } else {
+    firstFollowLoop_ = true;
   }
 }
 void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg)
@@ -95,6 +98,7 @@ void take_off_follow::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg)
 
 void take_off_follow::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level)
 {
+  ROS_WARN("%s","Reconfigure received by take_off_follow");
   kp_.x=config.kp_x;
   kp_.y=config.kp_y;
   kp_.z=config.kp_z;

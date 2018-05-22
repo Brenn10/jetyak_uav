@@ -6,10 +6,6 @@ land::land(ros::NodeHandle& nh):
   zpid_(NULL),
   wpid_(NULL)
 {
-  flyPose_.x=initialFlyPose_.x=5;
-  flyPose_.y=initialFlyPose_.y=0;
-  flyPose_.z=initialFlyPose_.z=4;
-  flyPose_.w=initialFlyPose_.w=0;
 
   landPub_ = nh.advertise<std_msgs::Empty>("land",1);
   cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd",1);
@@ -22,21 +18,22 @@ land::land(ros::NodeHandle& nh):
 void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg) {
 
 
-  if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING) {
+  if(currentMode_==jetyak_uav_utils::Mode::LANDING) {
     if(!msg->markers.empty()){
       droneLastSeen_=ros::Time::now().toSec();
-      geometry_msgs::Quaternion* state;
-      const geometry_msgs::Pose* pose = const_cast<const geometry_msgs::Pose*>(&msg->markers[0].pose.pose);
-      bsc_common::util::xyzw_from_pose(pose,state);
+      geometry_msgs::Vector3* state;
+
+      const geometry_msgs::Quaternion* orientation =
+          const_cast<const geometry_msgs::Quaternion*>
+          (&msg->markers[0].pose.pose.orientation);
+
+      bsc_common::util::rpy_from_quat(orientation,state);
 
       // Get drone last_cmd_update_
 
       if(firstLandLoop_)
       {
-        flyPose_.x=0;
-        flyPose_.y=0;
-        flyPose_.z=initialFlyPose_.z;
-        flyPose_.w=initialFlyPose_.w;
+        currGoalHeight_=startHeight_;
 
         firstLandLoop_=false;
 
@@ -48,13 +45,17 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
         landPub_.publish(std_msgs::Empty());
       }
       else {
-        flyPose_.z = flyPose_.z *collapseRatio_;
-        flyPose_.w = flyPose_.w *collapseRatio_;
+        currGoalHeight_*=collapseRatio_;
 
-        xpid_->update(flyPose_.x-state->x);
-        ypid_->update(flyPose_.y-state->y);
-        zpid_->update(flyPose_.z-state->z);
-        wpid_->update(flyPose_.w-state->w);
+        // line up with center of pad
+        xpid_->update(padCenter_.x-(-msg->markers[0].pose.pose.position.x));
+        ypid_->update(padCenter_.y-(-msg->markers[0].pose.pose.position.z));
+
+        //descend
+        zpid_->update(currGoalHeight_-msg->markers[0].pose.pose.position.y);
+
+        //point at tag
+        wpid_->update(-state->y);// pitch of tag
 
 
         geometry_msgs::Twist cmdT;
@@ -68,6 +69,7 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
     }
     else { //if not seen in more than a sec, stop and spin. after 5, search
       if(ros::Time::now().toSec()-droneLastSeen_>5) { // if not seen in 5 sec
+        // TODO: Make safer by increasing altitude first
         jetyak_uav_utils::Mode m;
         m.mode=jetyak_uav_utils::Mode::SEARCHING;
         modePub_.publish(m);
@@ -75,13 +77,16 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
       else if(ros::Time::now().toSec()-droneLastSeen_>1) { //if not seen in 1 sec
         geometry_msgs::Twist cmdT;
         cmdT.linear.x=0;
-        cmdT.linear.x=0;
-        cmdT.linear.x=0;
+        cmdT.linear.y=0;
+        cmdT.linear.z=0;
         cmdT.angular.z=1.5;
         cmdT.angular.y=cmdT.angular.x=0;
         cmdPub_.publish(cmdT);
       }
     }
+  } else {
+    firstLandLoop_=true;
+
   }
 }
 void land::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
@@ -97,7 +102,9 @@ void land::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
   }
 }
 
-void land::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level) {
+void land::reconfigureCallback(jetyak_uav_utils::LandConstantsConfig &config, uint32_t level) {
+  ROS_WARN("%s","Reconfigure received by land");
+
   kp_.x=config.kp_x;
   kp_.y=config.kp_y;
   kp_.z=config.kp_z;
@@ -113,10 +120,9 @@ void land::reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, 
   ki_.z=config.ki_z;
   ki_.w=config.ki_w;
 
-  initialFlyPose_.x=config.follow_x;
-  initialFlyPose_.y=config.follow_y;
-  initialFlyPose_.z=config.follow_z;
-  initialFlyPose_.w=config.follow_w;
+  padCenter_.x=config.pad_center_x;
+  padCenter_.y=config.pad_center_y;
+  padCenter_.z=config.pad_center_z;
 
   if (xpid_ != NULL)
   {
@@ -137,10 +143,10 @@ int main(int argc, char *argv[]) {
   ros::NodeHandle nh;
   land land_o(nh);
   //Dynamic reconfigure
-  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> server;
-  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType f;
+  dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig> server;
+  dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig>::CallbackType f;
 
-  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) >
+  boost::function<void (jetyak_uav_utils::LandConstantsConfig &,int) >
       f2(boost::bind( &land::reconfigureCallback,&land_o, _1, _2 ) );
 
   // (iv) Set the callback to the service server.

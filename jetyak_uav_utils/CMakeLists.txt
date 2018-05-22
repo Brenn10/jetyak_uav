@@ -39,6 +39,7 @@ generate_messages(
 
 generate_dynamic_reconfigure_options(
   cfg/FollowConstants.cfg
+  cfg/LandConstants.cfg
 )
 ## includes, libraries, depends
 catkin_package(

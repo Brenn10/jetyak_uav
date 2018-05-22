@@ -2,6 +2,8 @@
 * Angles camera down on liftoff and uses that camera to move up and back
 * Angles camera up to find tag2 and follow at some xyz,yaw
 * Keeps tag in that position
+*
+* Author: Brennan Cain
 */
 
 #ifndef JETYAK_UAV_UTILS_LAND_H_
@@ -14,7 +16,7 @@
 #include "../lib/bsc_common/include/util.h"
 
 #include "dynamic_reconfigure/server.h"
-#include "jetyak_uav_utils/FollowConstantsConfig.h"
+#include "jetyak_uav_utils/LandConstantsConfig.h"
 #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/Quaternion.h"
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
@@ -26,20 +28,23 @@ class land {
   private:
 
     //declare PID controller constants and controllers
-    geometry_msgs::Quaternion kp_,kd_,ki_,follow_pos_;
+    geometry_msgs::Quaternion kp_,kd_,ki_;
     bsc_common::PID *xpid_,*ypid_,*zpid_,*wpid_;
 
     //Subscribers and publishers
     ros::Subscriber arTagSub_, modeSub_;
     ros::Publisher cmdPub_, modePub_, landPub_;
 
-    // x: x dist, y: y dist, z: z dist, w: yaw
-    geometry_msgs::Quaternion initialFlyPose_,flyPose_;
+    // Each iteration of tag track multiplies this by each position offset
+    const float collapseRatio_=.98; // TODO: Make modifyable parameter/tune
+    //use currGoalHeight_for collapse and pid
+    const double startHeight_=3; // TODO: make modifyable parameter
+    double currGoalHeight_=startHeight_;
+
+    geometry_msgs::Vector3 padCenter_;
 
     //Keep track of currentmode
     char currentMode_=0;
-    // Each iteration of tag track multiplies this by each position offset
-    float collapseRatio_=.98;
     bool firstLandLoop_=true;
     double droneLastSeen_=0;
 
@@ -71,7 +76,7 @@ class land {
 
   public:
 
-    void reconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level);
+    void reconfigureCallback(jetyak_uav_utils::LandConstantsConfig &config, uint32_t level);
 
     /** Constructor
     * Creates the publishers, subscribers, and service clients

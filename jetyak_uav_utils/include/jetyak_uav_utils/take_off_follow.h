@@ -50,7 +50,6 @@ class take_off_follow {
     *   set wasLastLanded_ to false
     * else
     *   PID to follow position
-    * if position is within a meter and state is TAKINGOFF, set mode to FOLLOWING
     *
     * @param msg vector of marker info
     */
