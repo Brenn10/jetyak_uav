@@ -16,11 +16,14 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh) :
 
 void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 {
+  if(!msg->markers.empty()) {
 
+  }
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
   {
     if(!msg->markers.empty())
     {
+
       droneLastSeen_=ros::Time::now().toSec();
       geometry_msgs::Vector3* state;
 
@@ -41,11 +44,11 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
       else
       {
-        xpid_->update(follow_pos_.x-(-msg->markers[0].pose.pose.position.x));
-        ypid_->update(follow_pos_.y-(-msg->markers[0].pose.pose.position.z));
-        zpid_->update(follow_pos_.z-msg->markers[0].pose.pose.position.y);
-        wpid_->update(follow_pos_.w+state->y); //pitch of the tag TODO: check sign
-
+        xpid_->update(follow_pos_.x-msg->markers[0].pose.pose.position.x);
+        ypid_->update(follow_pos_.y-msg->markers[0].pose.pose.position.y);
+        zpid_->update(follow_pos_.z-msg->markers[0].pose.pose.position.z);
+        wpid_->update(follow_pos_.w+state->z); //yaw of the tag TODO: check sign and axis
+        ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",msg->markers[0].pose.pose.position.y,msg->markers[0].pose.pose.position.z,state->z);
 
         //rotate velocities in reference to the tag
         double *rotated_x;
