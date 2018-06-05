@@ -3,8 +3,13 @@ This package is being developed by the Autonomous Field Robotics Lab as an inter
 
 Current design is for DJI N3 controller with a raspberry pi interface. Must set Lightbridge Controller to P_MODE before control will be able to be requested by the package. The package will ***NOT*** immediately request control, the X button on the controller must be used to request control.
 
+## Usage
+call ```roslaunch jetyak_uav_utils full.launch```
+Launches dji_sdk, ar_track_alvar, raspicam_node, and all jetyak_uav_utils nodes
+
+
 ## jetyak_uav_utils Nodes
-### controller_node 
+### controller_node
 #### Subsciptions
 * joy (sensor_msgs::Joy) for use with logitech gamepad
   * RT, LT - Deadswitch
@@ -26,7 +31,7 @@ Current design is for DJI N3 controller with a raspberry pi interface. Must set 
   * SEARCHING=4
   * APPROACHING=5
   * LANDING=6
-* raw_cmd (geometry_msgs::Twist) 
+* raw_cmd (geometry_msgs::Twist)
   * linear.x : Forward
   * linear.y : Left
   * linear.z : Up
