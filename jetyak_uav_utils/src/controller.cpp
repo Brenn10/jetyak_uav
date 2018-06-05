@@ -13,9 +13,9 @@ controller::controller(ros::NodeHandle& nh) {
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
-  controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("dji_sdk/sdk_control_authority");
-  taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("dji_sdk/drone_task_control");
-  activateSrv_ = nh.serviceClient<dji_sdk::Activation>("dji_sdk/activation");
+  controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("/dji_sdk/sdk_control_authority");
+  taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
+  activateSrv_ = nh.serviceClient<dji_sdk::Activation>("/dji_sdk/activation");
 
   currentMode_ = 0;
   dji_sdk::Activation actSrvMsg;
