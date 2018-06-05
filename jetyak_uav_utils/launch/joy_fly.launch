@@ -1,8 +1,0 @@
-<launch>
-  <include file="$(find dji_sdk)/launch/sdk.launch"/>
-  <include file="$(find jetyak_uav_utils)/launch/tag_tracker.launch"/>
-  <node name="uav_controller" pkg="jetyak_uav_utils" type="controller_node">
-    <param name="arTagSafetyDistance" value=".5"/>
-    <param name="maxSpeed" value=".3"/>
-  </node>
-</launch>
