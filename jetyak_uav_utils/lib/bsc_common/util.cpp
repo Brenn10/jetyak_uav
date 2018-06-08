@@ -18,6 +18,7 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
   state->x = t_r;
   state->y = t_p;
   state->z = t_y;
+  std::cout <<"wrote" <<std::endl;
 
   if(state->x>C_PI) {
     state->x = state->x-2*C_PI;
