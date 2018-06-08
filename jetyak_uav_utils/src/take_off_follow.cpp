@@ -10,7 +10,7 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh) :
   cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd_vel_FLU",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
-  arTagSub_ = nh.subscribe("/ar_track_alvar",1,&take_off_follow::arTagCallback, this);
+  arTagSub_ = nh.subscribe("/ar_pose_marker",1,&take_off_follow::arTagCallback, this);
   modeSub_ = nh.subscribe("uav_mode",1,&take_off_follow::modeCallback,this);
 }
 
