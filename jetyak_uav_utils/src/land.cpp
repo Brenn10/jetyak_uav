@@ -60,14 +60,14 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
         wpid_->update(-yaw);// pitch of tag TODO: Check sign
 
         //rotate velocities in reference to the tag
-        double *rotated_x;
-        double *rotated_y;
+        double rotated_x;
+        double rotated_y;
         bsc_common::util::rotate_vector(
           xpid_->get_signal(),ypid_->get_signal(),-yaw,rotated_x,rotated_y);
 
         geometry_msgs::Twist cmdT;
-        cmdT.linear.x=*rotated_x;
-        cmdT.linear.y=*rotated_y;
+        cmdT.linear.x=rotated_x;
+        cmdT.linear.y=rotated_y;
         cmdT.linear.z=zpid_->get_signal();
         cmdT.angular.z=wpid_->get_signal();
         cmdT.angular.y=cmdT.angular.x=0;

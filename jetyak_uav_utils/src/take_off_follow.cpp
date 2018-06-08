@@ -58,21 +58,19 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z,yaw);
 
         //rotate velocities in reference to the tag
-        double *rotated_x;
-        double *rotated_y;
+        double rotated_x;
+        double rotated_y;
         bsc_common::util::rotate_vector(
           xpid_->get_signal(),ypid_->get_signal(),-yaw,rotated_x,rotated_y);
         std::cout << "Rotate called" <<std::endl;
         geometry_msgs::Twist cmdT;
-        cmdT.linear.x=*rotated_x;
-        cmdT.linear.y=*rotated_y;
+        cmdT.linear.x=rotated_x;
+        cmdT.linear.y=rotated_y;
         cmdT.linear.z=zpid_->get_signal();
         cmdT.angular.x = 0;
         cmdT.angular.y = 0;
         cmdT.angular.z=wpid_->get_signal();
         cmdPub_.publish(cmdT);
-        delete rotated_y;
-        delete rotated_x;
       }
       delete state;
     }
