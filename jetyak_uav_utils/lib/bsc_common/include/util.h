@@ -47,7 +47,7 @@ public:
    * @param xp x after rotation
    * @param yp y after rotation
   */
-  static void rotate_vector(double x, double y, double theta,double *xp,double *yp);
+  static void rotate_vector(double x, double y, double theta,double &xp,double &yp);
 
   /* inverse_pose
    * invert the pose. Make it from child to parent frame
