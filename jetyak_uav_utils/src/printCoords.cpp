@@ -31,7 +31,6 @@ void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 
     geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
     bsc_common::util::rpy_from_quat(orientation,state);
-    delete orientation;
     std::cout << "rpy_from_quat called" << std::endl;
 
     ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z,state->z);
