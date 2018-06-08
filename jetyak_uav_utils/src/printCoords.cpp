@@ -5,16 +5,26 @@
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
+#include <iostream>
+
 void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 {
+  std::cout << "callback called" << std::endl;
   if(!msg->markers.empty())
   {
+    std::cout << "callback called" << std::endl;
+
     tf2::Transform transform_from_camera;
     tf2::fromMsg(msg->markers[0].pose.pose,transform_from_camera);
+    std::cout << "fromMsg called" << std::endl;
+
     geometry_msgs::Vector3* state;
     geometry_msgs::Pose pose_from_tag;
     const tf2::Transform transform_from_tag = transform_from_camera.inverse();
+    std::cout << "inverse called" << std::endl;
+
     tf2::toMsg(transform_from_tag,pose_from_tag);
+    std::cout << "toMsg called" << std::endl;
 
     const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
     bsc_common::util::rpy_from_quat(orientation,state);
