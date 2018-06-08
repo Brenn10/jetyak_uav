@@ -21,11 +21,8 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
   if(currentMode_==jetyak_uav_utils::Mode::LANDING) {
     if(!msg->markers.empty()){
       droneLastSeen_=ros::Time::now().toSec();
-      tf2::Transform transform_from_camera;
-      tf2::fromMsg(msg->markers[0].pose.pose,transform_from_camera);
       geometry_msgs::Pose pose_from_tag;
-      const tf2::Transform transform_from_tag = transform_from_camera.inverse();
-      tf2::toMsg(transform_from_tag,pose_from_tag);
+      bsc_common::util::inverse_pose(msg->markers[0].pose.pose,pose_from_tag);
       const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
       geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
       bsc_common::util::rpy_from_quat(orientation,state);
