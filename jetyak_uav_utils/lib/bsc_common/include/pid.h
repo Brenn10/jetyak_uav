@@ -4,7 +4,7 @@
 namespace bsc_common {
 class PID {
 private:
-  double kp_,ki_,kd_,last_error_,integral_,last_time_,signal_=0;
+  double kp_,ki_,kd_,last_error_,integral_,last_time_,signal_;
 public:
   PID();
   PID(double kp, double ki, double kd);
