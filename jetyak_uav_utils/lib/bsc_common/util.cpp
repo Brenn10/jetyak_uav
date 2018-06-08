@@ -32,8 +32,8 @@ float util::clip(float x, float low, float high) {
 }
 
 void util::rotate_vector(double x, double y, double theta,double *xp,double *yp) {
-  *xp = (x*std::cos(theta)-y*std::sin(theta));
-  *yp = (x*std::sin(theta)+y*std::cos(theta));
+  xp = (x*std::cos(theta)-y*std::sin(theta));
+  yp = (x*std::sin(theta)+y*std::cos(theta));
 }
 void util::inverse_pose(const geometry_msgs::Pose& in, geometry_msgs::Pose &out) {
   tf2::Transform trans;
