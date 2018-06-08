@@ -1,4 +1,5 @@
 #include "include/util.h"
+#include <iostream>
 namespace bsc_common {
 void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_msgs::Vector3* state) {
 
@@ -13,7 +14,7 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
   tf::Matrix3x3 m(q);
   double t_r, t_p, t_y;
   m.getRPY(t_r, t_p, t_y);
-
+  std::cout<<"r: " <<t_r<<", p: "<<t_p<<", y: "<<t_y<<std::endl;
   state->x = t_r;
   state->y = t_p;
   state->z = t_y;
