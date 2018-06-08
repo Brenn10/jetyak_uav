@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   ros::init(argc,argv,"print_coords");
   ros::NodeHandle nh;
 
-  ros::Subscriber ar_tag_sub = nh.subscribe("/ar_track_alvar",1,&arTagCallback);
+  ros::Subscriber ar_tag_sub = nh.subscribe("/ar_pose_marker",1,&arTagCallback);
   ros::spin();
   return 0;
 }

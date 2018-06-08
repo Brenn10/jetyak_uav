@@ -10,13 +10,13 @@ search::search(ros::NodeHandle& nh)
   cmdPub_ = nh.advertise<geometry_msgs::Twist>("raw_cmd_pos_ENU",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
-  arTagSub_ = nh.subscribe("/ar_track_alvar",1,&search::arTagCallback, this);
+  arTagSub_ = nh.subscribe("/ar_pose_marker",1,&search::arTagCallback, this);
   modeSub_ = nh.subscribe("uav_mode",1,&search::modeCallback,this);
 }
 
 void search::arTagCallback(const ar_track_alvar::AlvarMarkers::ConstPtr& msg)
 {
-  
+
 }
 
 void modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {
