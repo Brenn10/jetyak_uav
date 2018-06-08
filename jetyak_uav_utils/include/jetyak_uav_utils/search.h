@@ -17,6 +17,7 @@
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
 #include "std_msgs/Int8.h"
 #include "std_msgs/String.h"
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 class search {
   private:

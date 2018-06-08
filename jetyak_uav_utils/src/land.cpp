@@ -21,15 +21,18 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
   if(currentMode_==jetyak_uav_utils::Mode::LANDING) {
     if(!msg->markers.empty()){
       droneLastSeen_=ros::Time::now().toSec();
-      geometry_msgs::Vector3* state;
-
-      const geometry_msgs::Quaternion* orientation =
-          const_cast<const geometry_msgs::Quaternion*>
-          (&msg->markers[0].pose.pose.orientation);
-
+      tf2::Transform transform_from_camera;
+      tf2::fromMsg(msg->markers[0].pose.pose,transform_from_camera);
+      geometry_msgs::Pose pose_from_tag;
+      const tf2::Transform transform_from_tag = transform_from_camera.inverse();
+      tf2::toMsg(transform_from_tag,pose_from_tag);
+      const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
+      geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
       bsc_common::util::rpy_from_quat(orientation,state);
-
-      // Get drone last_cmd_update_
+      double yaw = state->z+bsc_common::util::C_PI/2;
+      if(yaw>bsc_common::util::C_PI) {
+        yaw=yaw-2*bsc_common::util::C_PI;
+      }
 
       if(firstLandLoop_)
       {
@@ -48,20 +51,20 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
         currGoalHeight_*=collapseRatio_;
 
         // line up with center of pad
-        xpid_->update(padCenter_.x-(-msg->markers[0].pose.pose.position.x));
-        ypid_->update(padCenter_.y-(-msg->markers[0].pose.pose.position.z));
+        xpid_->update(padCenter_.x-pose_from_tag.position.x);
+        ypid_->update(padCenter_.y-pose_from_tag.position.y);
 
         //descend
-        zpid_->update(currGoalHeight_-msg->markers[0].pose.pose.position.y);
+        zpid_->update(currGoalHeight_-pose_from_tag.position.z);
 
         //point at tag
-        wpid_->update(-state->y);// pitch of tag TODO: Check sign
+        wpid_->update(-yaw);// pitch of tag TODO: Check sign
 
         //rotate velocities in reference to the tag
         double *rotated_x;
         double *rotated_y;
         bsc_common::util::rotate_vector(
-          xpid_->get_signal(),ypid_->get_signal(),state->y,rotated_x,rotated_y);
+          xpid_->get_signal(),ypid_->get_signal(),-yaw,rotated_x,rotated_y);
 
         geometry_msgs::Twist cmdT;
         cmdT.linear.x=*rotated_x;
@@ -71,6 +74,7 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
         cmdT.angular.y=cmdT.angular.x=0;
         cmdPub_.publish(cmdT);
       }
+      delete state;
     }
     else { //if not seen in more than a sec, stop and spin. after 5, search
       if(ros::Time::now().toSec()-droneLastSeen_>5) { // if not seen in 5 sec
