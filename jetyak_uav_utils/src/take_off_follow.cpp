@@ -34,7 +34,7 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
 
       // Get drone last_cmd_update_
-      std::cout<<"inversion done " std::endl;
+      std::cout<<"inversion done "<< std::endl;
       if(firstFollowLoop_) {
         if(xpid_!=NULL) {
           std::cout << "first loop action" <<std::endl;
