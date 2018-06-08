@@ -13,11 +13,9 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
   tf::Matrix3x3 m(q);
   double t_r, t_p, t_y;
   m.getRPY(t_r, t_p, t_y);
-
   state->x = t_r;
   state->y = t_p;
   state->z = t_y;
-
   if(state->x>C_PI) {
     state->x = state->x-2*C_PI;
   }
@@ -33,9 +31,17 @@ float util::clip(float x, float low, float high) {
   return std::max(std::min(high,x),low);
 }
 
-void util::rotate_vector(double x, double y, double theta,double *xp,double *yp) {
-  *xp = (x*std::cos(theta)-y*std::sin(theta));
-  *yp = (x*std::sin(theta)+y*std::cos(theta));
+void util::rotate_vector(double x, double y, double theta,double& xp,double& yp) {
+  xp = (x*std::cos(theta)-y*std::sin(theta));
+  yp = (x*std::sin(theta)+y*std::cos(theta));
+}
+void util::inverse_pose(const geometry_msgs::Pose& in, geometry_msgs::Pose &out) {
+  tf2::Transform trans;
+  tf2::fromMsg(in,trans);
+  geometry_msgs::Pose inverse_pose;
+  const tf2::Transform inverse_trans = trans.inverse();
+  tf2::toMsg(inverse_trans,out);
+
 }
 
 } // namespace bsc_common

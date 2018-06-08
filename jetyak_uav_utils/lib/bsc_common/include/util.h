@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include <tf/transform_datatypes.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Quaternion.h"
@@ -12,10 +13,11 @@
 
 namespace bsc_common {
 
-const long double C_PI = 3.14159265358979323846; // My long PI value
 
 class util {
 public:
+  static constexpr long double C_PI = 3.14159265358979323846; // My long PI value
+
   /* xyzw_from_pose
    * Gives the x,y,z,yaw offset given a pose.
    * xyz are extracted and yaw is calculated from Quaternion
@@ -45,7 +47,16 @@ public:
    * @param xp x after rotation
    * @param yp y after rotation
   */
-  static void rotate_vector(double x, double y, double theta,double *xp,double *yp);
+  static void rotate_vector(double x, double y, double theta,double &xp,double &yp);
+
+  /* inverse_pose
+   * invert the pose. Make it from child to parent frame
+   *
+   * @param in pose from parent to child
+   * @param out pose from child to parent
+  */
+  static void inverse_pose(const geometry_msgs::Pose& in, geometry_msgs::Pose &out);
+
 };
 
 } // namespace bsc_common

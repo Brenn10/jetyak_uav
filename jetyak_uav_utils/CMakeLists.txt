@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   tf
+  tf2
   dji_sdk
   visualization_msgs
   message_generation
@@ -69,10 +70,15 @@ add_executable(land_node
                 src/land.cpp
                 lib/bsc_common/pid.cpp
                 lib/bsc_common/util.cpp)
+
+add_executable(print_coord_node
+                src/printCoords.cpp
+                lib/bsc_common/util.cpp)
 #add dependencies
 add_dependencies(controller_node ${catkin_EXPORTED_TARGETS} )
 add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 add_dependencies(land_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+add_dependencies(print_coord_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Link executables
 target_link_libraries(controller_node
@@ -82,5 +88,8 @@ target_link_libraries(take_off_follow_node
   ${catkin_LIBRARIES}
 )
 target_link_libraries(land_node
+  ${catkin_LIBRARIES}
+)
+target_link_libraries(print_coord_node
   ${catkin_LIBRARIES}
 )

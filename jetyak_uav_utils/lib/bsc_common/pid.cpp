@@ -10,6 +10,7 @@ PID::PID(double kp, double ki, double kd)
   last_error_=0;
   last_time_=0;
   integral_=0;
+  signal_=0;
 }
 
 double PID::get_signal()
