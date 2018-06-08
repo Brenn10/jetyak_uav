@@ -28,6 +28,7 @@ void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 
     const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
     std::cout << "cast called" << std::endl;
+    ROS_WARN("x: %.2f, y: %.2f, z: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z);
 
     bsc_common::util::rpy_from_quat(orientation,state);
     std::cout << "rpy_from_quat called" << std::endl;
