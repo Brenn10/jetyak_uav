@@ -26,11 +26,7 @@ catkin_make
 
 ## Nodes
 * controller
-<<<<<<< HEAD
-	* used to send commands to the drone
-=======
 	* used to send commands to the quad (y forward, x left, z-up)
->>>>>>> 06e4087652ece293b2c06eaf5f2746b9b33007f7
 	* Implements a safety controller if mast becomes too close
 	* Implements joystick override of other Nodes
 	* listens to commands to switch modes
@@ -47,7 +43,8 @@ catkin_make
 * land
 	* descends using ar tag bundle
 	* TODO
-		* Full implementation
+		* Controller test
+		Threshold test
 * take_off_and_follow
 	* lifts off
 		* give a z velocity

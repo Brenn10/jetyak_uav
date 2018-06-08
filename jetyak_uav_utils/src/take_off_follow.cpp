@@ -25,9 +25,14 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
     {
 
       droneLastSeen_=ros::Time::now().toSec();
+      tf2::Transform transform_from_camera;
+      tf2::fromMsg(msg->markers[0].pose.pose,transform_from_camera);
       geometry_msgs::Vector3* state;
+      geometry_msgs::Pose pose_from_tag;
+      const tf2::Transform transform_from_tag = transform_from_camera.inverse();
+      tf2::toMsg(transform_from_tag,pose_from_tag);
 
-      const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&msg->markers[0].pose.pose.orientation);
+      const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
       bsc_common::util::rpy_from_quat(orientation,state);
 
       // Get drone last_cmd_update_
@@ -44,11 +49,11 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
       else
       {
-        xpid_->update(follow_pos_.x-msg->markers[0].pose.pose.position.x);
-        ypid_->update(follow_pos_.y-msg->markers[0].pose.pose.position.y);
-        zpid_->update(follow_pos_.z-msg->markers[0].pose.pose.position.z);
+        xpid_->update(follow_pos_.x-pose_from_tag.position.x);
+        ypid_->update(follow_pos_.y-pose_from_tag.position.y);
+        zpid_->update(follow_pos_.z-pose_from_tag.position.z);
         wpid_->update(follow_pos_.w+state->z); //yaw of the tag TODO: check sign and axis
-        ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",msg->markers[0].pose.pose.position.y,msg->markers[0].pose.pose.position.z,state->z);
+        ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z,state->z);
 
         //rotate velocities in reference to the tag
         double *rotated_x;
