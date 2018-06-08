@@ -16,9 +16,7 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh) :
 
 void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 {
-  if(!msg->markers.empty()) {
-
-  }
+  std::cout << "ar called" <<std::endl;
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
   {
     if(!msg->markers.empty())
