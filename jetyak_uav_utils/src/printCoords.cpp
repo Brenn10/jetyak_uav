@@ -18,7 +18,6 @@ void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
     tf2::fromMsg(msg->markers[0].pose.pose,transform_from_camera);
     std::cout << "fromMsg called" << std::endl;
 
-    geometry_msgs::Vector3* state;
     geometry_msgs::Pose pose_from_tag;
     const tf2::Transform transform_from_tag = transform_from_camera.inverse();
     std::cout << "inverse called" << std::endl;
@@ -30,10 +29,13 @@ void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
     std::cout << "cast called" << std::endl;
     ROS_WARN("x: %.2f, y: %.2f, z: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z);
 
+    geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
     bsc_common::util::rpy_from_quat(orientation,state);
+    delete orientation;
     std::cout << "rpy_from_quat called" << std::endl;
 
     ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z,state->z);
+    delete state;
   }
 }
 
