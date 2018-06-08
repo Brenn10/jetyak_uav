@@ -28,7 +28,7 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
   if(state->z>C_PI) {
     state->z = state->z-2*C_PI;
   }
-  std::cout <<"close" <<std::endll;
+  std::cout <<"close" <<std::endl;
 }
 
 float util::clip(float x, float low, float high) {
