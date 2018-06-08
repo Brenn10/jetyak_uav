@@ -33,16 +33,18 @@ void land::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 
       if(firstLandLoop_)
       {
-        currGoalHeight_=startHeight_;
+        if(xpid_!=NULL) {
+          currGoalHeight_=startHeight_;
 
-        firstLandLoop_=false;
+          firstLandLoop_=false;
 
-        xpid_->reset();
-        ypid_->reset();
-        zpid_->reset();
-        wpid_->reset();
+          xpid_->reset();
+          ypid_->reset();
+          zpid_->reset();
+          wpid_->reset();
 
-        landPub_.publish(std_msgs::Empty());
+          landPub_.publish(std_msgs::Empty());
+        }
       }
       else {
         currGoalHeight_*=collapseRatio_;
