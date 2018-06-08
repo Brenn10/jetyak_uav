@@ -37,15 +37,17 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
 
       // Get drone last_cmd_update_
 
-      if(firstFollowLoop_)
-      {
-        firstFollowLoop_=false;
-        xpid_->reset();
-        ypid_->reset();
-        zpid_->reset();
-        wpid_->reset();
+      if(firstFollowLoop_) {
+        if(xpid_!=NULL) {
+          firstFollowLoop_=false;
 
-        takeoffPub_.publish(std_msgs::Empty());
+          xpid_->reset();
+          ypid_->reset();
+          zpid_->reset();
+          wpid_->reset();
+
+          takeoffPub_.publish(std_msgs::Empty());
+        }
       }
       else
       {
@@ -69,6 +71,8 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         cmdT.angular.y = 0;
         cmdT.angular.z=wpid_->get_signal();
         cmdPub_.publish(cmdT);
+        delete rotated_y;
+        delete rotated_x;
       }
       delete state;
     }
