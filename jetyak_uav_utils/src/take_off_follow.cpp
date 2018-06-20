@@ -16,12 +16,10 @@ take_off_follow::take_off_follow(ros::NodeHandle& nh) :
 
 void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 {
-  std::cout << "ar called" <<std::endl;
   if(currentMode_==jetyak_uav_utils::Mode::FOLLOWING)
   {
     if(!msg->markers.empty())
     {
-      std::cout << " markers available" <<std::endl;
       droneLastSeen_=ros::Time::now().toSec();
       geometry_msgs::Pose pose_from_tag;
       bsc_common::util::inverse_pose(msg->markers[0].pose.pose,pose_from_tag);
@@ -34,10 +32,8 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
 
       // Get drone last_cmd_update_
-      std::cout<<"inversion done "<< std::endl;
       if(firstFollowLoop_) {
         if(xpid_!=NULL) {
-          std::cout << "first loop action" <<std::endl;
           firstFollowLoop_=false;
 
           xpid_->reset();
@@ -50,7 +46,6 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
       }
       else
       {
-        std::cout << "main loop called" <<std::endl;
         xpid_->update(follow_pos_.x-pose_from_tag.position.x);
         ypid_->update(follow_pos_.y-pose_from_tag.position.y);
         zpid_->update(follow_pos_.z-pose_from_tag.position.z);
@@ -62,7 +57,6 @@ void take_off_follow::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::Con
         double rotated_y;
         bsc_common::util::rotate_vector(
           xpid_->get_signal(),ypid_->get_signal(),-yaw,rotated_x,rotated_y);
-        std::cout << "Rotate called" <<std::endl;
         geometry_msgs::Twist cmdT;
         cmdT.linear.x=rotated_x;
         cmdT.linear.y=rotated_y;

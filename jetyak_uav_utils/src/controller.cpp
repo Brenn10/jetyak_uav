@@ -81,21 +81,22 @@ void controller::joyCallback(const sensor_msgs::Joy::ConstPtr& msg) {
 
 
 void controller::publishCommand() {
+  if(command_.flag!=0) //if there is a recent command, publish it
+    //{x,y,z,w}
 
-  //{x,y,z,w}
+    cmdVel_.axes = {
+      bsc_common::util::clip((float)command_.vels.linear.x,-maxSpeed_,maxSpeed_),
+      bsc_common::util::clip((float)command_.vels.linear.y,-maxSpeed_,maxSpeed_),
+      bsc_common::util::clip((float)command_.vels.linear.z,-maxSpeed_,maxSpeed_),
+      bsc_common::util::clip((float)command_.vels.angular.z,-maxSpeed_,maxSpeed_),
+      (float)command_.flag
+    };
 
-  cmdVel_.axes = {
-    bsc_common::util::clip((float)command_.vels.linear.x,-maxSpeed_,maxSpeed_),
-    bsc_common::util::clip((float)command_.vels.linear.y,-maxSpeed_,maxSpeed_),
-    bsc_common::util::clip((float)command_.vels.linear.z,-maxSpeed_,maxSpeed_),
-    bsc_common::util::clip((float)command_.vels.angular.z,-maxSpeed_,maxSpeed_),
-    (float)command_.flag
-  };
-
-  command_.vels = geometry_msgs::Twist(); //reset command
-  command_.flag = 0x4B;
-  command_.priority = NOINPUT;
-  cmdPub_.publish(cmdVel_);
+    command_.vels = geometry_msgs::Twist(); //reset command
+    command_.flag = 0x0;
+    command_.priority = NOINPUT;
+    cmdPub_.publish(cmdVel_);
+  }
 }
 
 void controller::velCmdCallback(const geometry_msgs::Twist::ConstPtr& msg)

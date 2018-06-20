@@ -9,7 +9,6 @@
 
 void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
 {
-  std::cout << "callback called" << std::endl;
   if(!msg->markers.empty())
   {
     geometry_msgs::Pose pose_from_tag;
@@ -24,9 +23,6 @@ void arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr& msg)
     ROS_WARN("x: %.2f, y: %.2f, z: %.2f, yaw: %.2f",pose_from_tag.position.x,pose_from_tag.position.y,pose_from_tag.position.z,yaw);
     double rotated_x;
     double rotated_y;
-
-    bsc_common::util::rotate_vector(1,0,bsc_common::util::C_PI,rotated_x,rotated_y);
-    ROS_WARN("rotx: %.2f, roty: %.2f",rotated_x,rotated_y);
 
     delete state;
   }
