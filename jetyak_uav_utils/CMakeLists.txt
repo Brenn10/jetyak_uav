@@ -74,6 +74,7 @@ add_executable(matrice_pilot_node
                 lib/bsc_common/util.cpp)
 add_executable(behaviors_node
                 src/behaviors.cpp
+                lib/bsc_common/pid.cpp
                 lib/bsc_common/util.cpp)
 
 #add dependencies
