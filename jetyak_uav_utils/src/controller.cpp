@@ -13,19 +13,13 @@ controller::controller(ros::NodeHandle& nh) {
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic",1);
   modePub_ = nh.advertise<jetyak_uav_utils::Mode>("uav_mode",1);
 
-  controlRequestSrv_ = nh.serviceClient<dji_sdk::SDKControlAuthority>("/dji_sdk/sdk_control_authority");
   taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
-  activateSrv_ = nh.serviceClient<dji_sdk::Activation>("/dji_sdk/activation");
 
   currentMode_ = 0;
-  dji_sdk::Activation actSrvMsg;
-  ROS_WARN("Activation Response: %s",activateSrv_.call(actSrvMsg)? "Success": "Fail");
 }
 
 controller::~controller() {
-  dji_sdk::SDKControlAuthority srv;
-  srv.request.control_enable=0;
-  ROS_WARN("Release Response: %s",controlRequestSrv_.call(srv)? "Success": "Fail");
+  ROS_WARN("%s","Behavior was killed");
 }
 
 void controller::modeCallback(const jetyak_uav_utils::Mode::ConstPtr& msg) {

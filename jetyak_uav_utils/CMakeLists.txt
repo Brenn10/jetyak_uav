@@ -22,22 +22,32 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
 )
 
+find_package(DJIOSDK REQUIRED)
+
 ## Custom message files to be created
-add_message_files(DIRECTORY msg
+#add_message_files(DIRECTORY msg
+#  FILES
+#  ModeMsg.msg
+#)
+add_service_files(DIRECTORY srv
   FILES
-  Mode.msg
+  Mode.srv
 )
 
 ## Generate added messages and services with any dependencies listed here
+#generate_messages(
+#  DEPENDENCIES
+#  geometry_msgs
+#  nav_msgs
+#  sensor_msgs
+#  std_msgs
+#  visualization_msgs
+#)
+
 generate_messages(
   DEPENDENCIES
-  geometry_msgs
-  nav_msgs
-  sensor_msgs
-  std_msgs
-  visualization_msgs
+  jetyak_uav_utils
 )
-
 generate_dynamic_reconfigure_options(
   cfg/FollowConstants.cfg
   cfg/LandConstants.cfg
@@ -59,37 +69,23 @@ include_directories(
 
 
 ## Add executables
-add_executable(controller_node
-                src/controller.cpp
+add_executable(matrice_pilot_node
+                src/matrice_pilot.cpp
                 lib/bsc_common/util.cpp)
-add_executable(take_off_follow_node
-                src/take_off_follow.cpp
-                lib/bsc_common/pid.cpp
-                lib/bsc_common/util.cpp)
-add_executable(land_node
-                src/land.cpp
-                lib/bsc_common/pid.cpp
+add_executable(behaviors_node
+                src/behaviors.cpp
                 lib/bsc_common/util.cpp)
 
-add_executable(print_coord_node
-                src/printCoords.cpp
-                lib/bsc_common/util.cpp)
 #add dependencies
-add_dependencies(controller_node ${catkin_EXPORTED_TARGETS} )
-add_dependencies(take_off_follow_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-add_dependencies(land_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-add_dependencies(print_coord_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+add_dependencies(matrice_pilot_node ${catkin_EXPORTED_TARGETS} )
+add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Link executables
-target_link_libraries(controller_node
+target_link_libraries(matrice_pilot_node
   ${catkin_LIBRARIES}
+  ${DJIOSDK_LIBRARIES}
 )
-target_link_libraries(take_off_follow_node
+target_link_libraries(behaviors_node
   ${catkin_LIBRARIES}
-)
-target_link_libraries(land_node
-  ${catkin_LIBRARIES}
-)
-target_link_libraries(print_coord_node
-  ${catkin_LIBRARIES}
+  ${DJIOSDK_LIBRARIES}
 )
