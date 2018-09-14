@@ -49,6 +49,12 @@ class behaviors {
 
     } land_;
 
+    // Land specific constants
+    struct {
+      geometry_msgs::Quaternion kp,kd,ki;
+      geometry_msgs::Quaternion follow_pose;
+    } follow_;
+
     /**
     * Changes the current mode
     * changes control_priority

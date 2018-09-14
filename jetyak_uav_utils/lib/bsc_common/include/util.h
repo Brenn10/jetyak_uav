@@ -18,12 +18,11 @@ class util {
 public:
   static constexpr long double C_PI = 3.14159265358979323846; // My long PI value
 
-  /* xyzw_from_pose
-   * Gives the x,y,z,yaw offset given a pose.
-   * xyz are extracted and yaw is calculated from Quaternion
+  /* rpy_from_quat
+   * Gives the roll pitch and yaw in radians given a quaternion
    *
    * @param orientation quaternion
-   * @param state saves the rollmpitch,yaw encoded as a Vector3
+   * @param state saves the roll,pitch,yaw encoded as a Vector3
    */
   static void rpy_from_quat(const geometry_msgs::Quaternion* pose, geometry_msgs::Vector3* state);
 
@@ -37,7 +36,8 @@ public:
    *
    * @return clipped value of x
   */
-  static float clip(float x, float low, float high);
+  template <typename T>
+  static T clip(T x, T low, T high);
 
   /* rotate_vector
    *
@@ -57,6 +57,15 @@ public:
   */
   static void inverse_pose(const geometry_msgs::Pose& in, geometry_msgs::Pose &out);
 
+  /* ang_dist
+   * finds the shortest angular distance between two angles. The sign follows
+   * CCW as positive. ex. start=170, stop=-170 => +20, start=+170, stop=170 => -20
+   *
+   * @param start beginning angle
+   * @param end final angle
+   * @param rad=true using radians if true (default)
+  */
+   static double ang_dist(double start,double stop, bool rad=true);
 };
 
 } // namespace bsc_common

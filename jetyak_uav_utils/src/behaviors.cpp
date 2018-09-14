@@ -121,9 +121,44 @@ void behaviors::arTagCallback(const ar_track_alvar_msgs::AlvarMarkers::ConstPtr&
       }
       // FOLLOW BEHAVIOR HERE
       case jetyak_uav_utils::Mode::Request::FOLLOW: {
-        /* If tag found, update pid and send commands
-         * if not, do action
-         */
+        if(behaviorChanged)
+        {
+          behaviorChanged=false;
+
+          // update PID Constants
+          xpid_->updateParams(follow_.kp.x,follow_.ki.x,follow_.kd.x);
+          ypid_->updateParams(follow_.kp.y,follow_.ki.y,follow_.kd.y);
+          zpid_->updateParams(follow_.kp.z,follow_.ki.z,follow_.kd.z);
+          wpid_->updateParams(follow_.kp.w,follow_.ki.w,follow_.kd.w);
+
+          // reset PIDs
+          xpid_->reset();
+          ypid_->reset();
+          zpid_->reset();
+          wpid_->reset();
+        }
+        else
+        {
+          //update controllers
+          xpid_->update(follow_.follow_pose.x-uavPose_.x);
+          ypid_->update(follow_.follow_pose.y-uavPose_.y);
+          zpid_->update(follow_.follow_pose.z-uavPose_.z);
+          wpid_->update(bsc_common::util::ang_dist(follow_.follow_pose.w,uavPose_.w));//TODO: Check sign
+
+          //rotate velocities in reference to the uav
+          double rotated_x;
+          double rotated_y;
+          bsc_common::util::rotate_vector(
+            xpid_->get_signal(),ypid_->get_signal(),-uavPose_.w,rotated_x,rotated_y);
+
+          // set cmd things and publish
+          sensor_msgs::Joy cmd;
+          cmd.axes.push_back(rotated_x);
+          cmd.axes.push_back(rotated_y);
+          cmd.axes.push_back(wpid_->get_signal());
+          cmd.axes.push_back(zpid_->get_signal());
+          cmdPub_.publish(cmd);
+        }
         break;
       }
       // RETURN BEHVAIOR HERE
@@ -181,16 +216,16 @@ int main(int argc, char **argv) {
   ros::init(argc,argv,"uav_behaviors");
   ros::NodeHandle nh;
   behaviors uav_behaviors(nh);
-
-  ros::Rate rate(10);
-
-  while(ros::ok())
-  {
-    ros::spinOnce();
-
-    uav_behaviors.publishCommand();
-
-    rate.sleep();
-  }
+  ros::spin();
+  // ros::Rate rate(10);
+  //
+  // while(ros::ok())
+  // {
+  //   ros::spinOnce();
+  //
+  //   uav_behaviors.publishCommand();
+  //
+  //   rate.sleep();
+  // }
   return 0;
 }

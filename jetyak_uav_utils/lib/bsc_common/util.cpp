@@ -26,8 +26,8 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
     state->z = state->z-2*C_PI;
   }
 }
-
-float util::clip(float x, float low, float high) {
+template <typename T>
+T util::clip(T x, T low, T high) {
   return std::max(std::min(high,x),low);
 }
 
@@ -42,6 +42,21 @@ void util::inverse_pose(const geometry_msgs::Pose& in, geometry_msgs::Pose &out)
   const tf2::Transform inverse_trans = trans.inverse();
   tf2::toMsg(inverse_trans,out);
 
+}
+double util::ang_dist(double start,double stop, bool rad) {
+  double pi = rad ? C_PI : 180;
+
+	while(start<-pi) start+=2*pi;
+	while(stop<-pi) stop+=2*pi;
+	while(start>=pi) start-=2*pi;
+	while(stop>=pi) stop-=2*pi;
+
+	int d1=stop-start;
+	if(d1>=pi)
+		d1=d1-2*pi;
+	if(d1<-pi)
+		d1=d1+2*pi;
+  return d1;
 }
 
 } // namespace bsc_common
