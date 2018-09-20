@@ -42,17 +42,15 @@ private:
   * INSTANCE VARIABLES
   **********************/
   bsc_common::PID *xpid_,*ypid_,*zpid_,*wpid_; // pid controllers
-  bool behaviorChanged=false;
-  bool tagDetected=false;
+  bool behaviorChanged_=false;
   char currentMode_=0;
-  double tagLastSeen_=0;
 
   /************************************
   * STATE VARIABLES
   ************************************/
   sensor_msgs::NavSatFix uavGPS_,boatGPS_;
   sensor_msgs::QuaternionStamped uavAttitude_;
-  std_msgs::Float64 boatHeading_;
+  sensor_msgs::Imu uavImu_, boatImu_;
   sensor_msgs::PoseStamped tagPose_;
 
 
@@ -120,10 +118,18 @@ private:
   */
   void uavAttitudeCallback(const sensor_msgs::QuaternionStamped::ConstPtr& msg);
 
-  /** boatIMUCallback
-  * Listens for updates in the boat's orientation
+  /** uavImuCallback
+  * Listens for updates in the UAVs IMU
   *
-  * @param msg gets the heading of the boat
+  * @param msg gets the Imu reading of the UAV
+  */
+  void uavImuCallback(const sensor_msgs::Imu::ConstPtr& msg);
+
+
+  /** boatIMUCallback
+  * Listens for updates in the boat's IMU
+  *
+  * @param msg gets the IMU reading of the boat
   */
   void boatIMUCallback(const sensor_msgs::Imu::ConstPtr& msg);
 
@@ -132,7 +138,12 @@ private:
   * BEHAVIOR METHODS
   ******************************/
   /** takeoffBehavior
-   * implements the takeoff behavior
+   * Take off and change to follow mode if successful
+  */
+  void takeoffBehavior();
+
+  /** followBehavior
+   * Follow the boat using tags (later fused sensors)
   */
   void takeoffBehavior();
 public:
