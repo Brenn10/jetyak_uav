@@ -59,7 +59,7 @@ include_directories(
 )
 
 ## Add executables
-add_executable(virtual_rc_N3
+add_executable(n3_pilot_node
                 src/virtual_rc_N3.cpp
                 lib/dji_virtual_rc/virtual_rc.cpp)
 
@@ -69,11 +69,11 @@ add_executable(behaviors_node
                 lib/bsc_common/util.cpp)
 
 #add dependencies
-add_dependencies(virtual_rc_N3 ${catkin_EXPORTED_TARGETS} )
+add_dependencies(n3_pilot_node ${catkin_EXPORTED_TARGETS} )
 add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Link executables
-target_link_libraries(virtual_rc_N3
+target_link_libraries(n3_pilot_node
   ${catkin_LIBRARIES}
   ${DJIOSDK_LIBRARIES}
 )

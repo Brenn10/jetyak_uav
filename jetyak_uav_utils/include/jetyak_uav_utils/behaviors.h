@@ -47,7 +47,7 @@ private:
   *********************************************/
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
-  ros::ServiceClient taskSrv_;
+  ros::ServiceClient armSrv_;
   ros::ServiceServer modeService_;
 
   /**********************
@@ -56,6 +56,7 @@ private:
   bsc_common::PID *xpid_,*ypid_,*zpid_,*wpid_; // pid controllers
   bool behaviorChanged_=false;
   char currentMode_=0;
+  bool propellorsRunning=false;
   char commandFlag_ = (
     DJISDK::VERTICAL_VELOCITY   |
     DJISDK::HORIZONTAL_VELOCITY |

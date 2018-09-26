@@ -1,5 +1,4 @@
 # Used to broadcast the current mode to tell which nodes to activate
-# Used to broadcast the current mode to tell which nodes to activate
 
 #Gives the modes and mode contains the integer value
 int8 TAKEOFF=0

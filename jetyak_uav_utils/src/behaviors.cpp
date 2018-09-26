@@ -17,7 +17,7 @@ behaviors::behaviors(ros::NodeHandle& nh):
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd",1);
 
   //service clients
-  taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
+  armSrv_ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
 
   // Service servers
   modeService_ = nh.advertiseService("mode",&behaviors::modeCallback,this);
@@ -28,35 +28,10 @@ behaviors::~behaviors() {}
 
 bool behaviors::modeCallback(jetyak_uav_utils::Mode::Request  &req, jetyak_uav_utils::Mode::Response &res) {
 
-  this->currentMode_ = req.mode;
-  this->behaviorChanged_=true;
-  switch(this->currentMode_)
-  {
-    case req.TAKEOFF: {
-      dji_sdk::DroneTaskControl srv;
-      srv.request.task=4;
-      taskSrv_.call(srv);
-      res.success=srv.response.result;
-      if(res.success)
-      {
-        this->currentMode_=req.FOLLOW;
-      }
-      else
-      {
-        this->currentMode_=req.HOVER;
-      }
-    }
-    case req.LAND: {}
-    case req.FOLLOW: {}
-    case req.LEAVE: {}
-    case req.RETURN: {
-      res.success=true;
-      break;
-    }
-
-  }
+  currentMode_=req.mode;
   behaviorChanged_=true;
-  return res.success;
+  res.success=true
+  return true;
 }
 
 void behaviors::tagPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
@@ -106,6 +81,7 @@ void behaviors::uavImuCallback(const sensor_msgs::Imu::ConstPtr& msg) {
   uavImu_.linear_acceleration=msg->linear_acceleration;
   uavImu_.linear_acceleration_covariance=msg->linear_acceleration_covariance;
 }
+
 void behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr& msg) {
   boatImu_.header=msg->header;
   boatImu_.orientation=msg->orientation;
@@ -117,11 +93,14 @@ void behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr& msg) {
 }
 
 void behaviors::takeoffBehavior() {
-  dji_sdk::DroneTaskControl srv;
-  srv.request.task=4;
-  taskSrv_.call(srv);
-  if(srv.response.result) {
-    currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
+  if(!propellorsRunning) {
+    dji_sdk::DroneArmControl srv;
+    srv.request.arm=1;
+    armSrv_.call(srv);
+    if(srv.response.result) {
+      currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
+      propellorsRunning=true;
+    }
   }
 }
 
@@ -174,6 +153,18 @@ void behaviors::followBehavior() {
   }
 }
 
+void behaviors::returnBehavior() {};
+
+void behaviors::landBehavior() {};
+
+void behaviors::rideBehavior() {
+  if(propellorsRunning) {
+    dji_sdk::DroneArmControl srv;
+    srv.request.arm=0;
+    armSrv_.call(srv);
+    propellorsRunning=srv.response.result;
+  }
+}
 void behaviors::doBehaviorAction() {
   switch(currentMode_) {
     case jetyak_uav_utils::Mode::Request::TAKEOFF: {
@@ -182,6 +173,36 @@ void behaviors::doBehaviorAction() {
     }
     case jetyak_uav_utils::Mode::Request::FOLLOW: {
       followBehavior();
+      break;
+    }
+    case jetyak_uav_utils::Mode::Request::LEAVE: {
+      //Do nothing, an external node is currently communicating with the pilot
+      break;
+    }
+    case jetyak_uav_utils::Mode::Request::RETURN: {
+      returnBehavior();
+      break;
+    }
+    case jetyak_uav_utils::Mode::Request::LAND: {
+      landBehavior();
+      break;
+    }
+    case jetyak_uav_utils::Mode::Request::RIDE: {
+      rideBehavior();
+      break;
+    }
+    case jetyak_uav_utils::Mode::Request::HOVER: {
+      hoverBehavior();
+      break;
+    }
+    default: {
+      if(propellorsRunning) {
+        ROS_ERROR("Mode out of bounds: %i. Now hovering.",currentMode_);
+        this->currentMode_=jetyak_uav_utils::Request::HOVER;
+      else {
+        ROS_ERROR("Mode out of bounds: %i. Now riding.",currentMode_);
+        this->currentMode_=jetyak_uav_utils::Request::RIDE;
+      }
       break;
     }
   }
