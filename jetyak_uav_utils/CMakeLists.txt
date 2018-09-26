@@ -4,7 +4,6 @@ project(jetyak_uav_utils)
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
-
 find_package(catkin REQUIRED COMPONENTS
   ar_track_alvar
   dynamic_reconfigure
@@ -54,7 +53,7 @@ generate_dynamic_reconfigure_options(
 )
 ## includes, libraries, depends
 catkin_package(
-  INCLUDE_DIRS include lib/bsc_common/include
+  INCLUDE_DIRS include lib/bsc_common/include lib/dji_virtual_rc/include
   LIBRARIES jetyak_uav_utils
   CATKIN_DEPENDS dynamic_reconfigure ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf dji_sdk visualization_msgs message_runtime
   DEPENDS system_lib
@@ -64,25 +63,26 @@ catkin_package(
 include_directories(
   include
   lib/bsc_common/include
+  lib/dji_virtual_rc/include
   ${catkin_INCLUDE_DIRS}
 )
 
-
 ## Add executables
-add_executable(matrice_pilot_node
-                src/matrice_pilot.cpp
-                lib/bsc_common/util.cpp)
+add_executable(virtual_rc_N3
+                src/virtual_rc_N3.cpp
+                lib/dji_virtual_rc/virtual_rc.cpp)
+
 add_executable(behaviors_node
                 src/behaviors.cpp
                 lib/bsc_common/pid.cpp
                 lib/bsc_common/util.cpp)
 
 #add dependencies
-add_dependencies(matrice_pilot_node ${catkin_EXPORTED_TARGETS} )
+add_dependencies(virtual_rc_N3 ${catkin_EXPORTED_TARGETS} )
 add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Link executables
-target_link_libraries(matrice_pilot_node
+target_link_libraries(virtual_rc_N3
   ${catkin_LIBRARIES}
   ${DJIOSDK_LIBRARIES}
 )
