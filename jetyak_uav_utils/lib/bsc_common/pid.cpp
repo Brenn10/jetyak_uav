@@ -18,10 +18,8 @@ double PID::get_signal()
   return signal_;
 }
 
-void PID::update(double error)
+void PID::update(double error,double utime)
 {
-  // Get time now
-  double time_now_ = ros::Time::now().toSec();
 
   // Proportional
   signal_=error*kp_;
@@ -31,7 +29,7 @@ void PID::update(double error)
     double i,d;
 
     // get change in time
-    double dt = last_time_-time_now_;
+    double dt = last_time_-utime;
 
     // integral
     integral_+=error*dt;
@@ -43,7 +41,7 @@ void PID::update(double error)
     signal_ += i+d;
   }
   last_error_=error;
-  last_time_=time_now_;
+  last_time_=utime;
 }
 
 void PID::updateParams(double kp, double ki, double kd) {

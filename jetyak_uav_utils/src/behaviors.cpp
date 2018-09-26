@@ -7,20 +7,20 @@ behaviors::behaviors(ros::NodeHandle& nh):
   wpid_(NULL)
  {
   //subscribers
-  tagPoseSub_ = nh.subscribe("/jetyak_uav_utils/tag_pose",1,&behaviors::tagPoseCallback, this);
+  tagPoseSub_ = nh.subscribe("tag_pose",1,&behaviors::tagPoseCallback, this);
   uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position",1,&behaviors::uavGPSCallback, this);
   boatGPSSub_ = nh.subscribe("boat_gps",1,&behaviors::uavGPSCallback, this);
   uavAttSub_ =  nh.subscribe("/dji_sdk/attitude",1, &behaviors::uavAttitudeCallback, this);
   boatIMUSub_ =  nh.subscribe("boat_imu",1, &behaviors::boatIMUCallback, this);
 
   //Publishers
-  cmdPub_ = nh.advertise<sensor_msgs::Joy>("jetyak_uav_utils/behavior_cmd",1);
+  cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd",1);
 
   //service clients
   taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
 
   // Service servers
-  modeService_ = nh.advertiseService("jetyak_uav_utils/mode",&behaviors::modeCallback,this);
+  modeService_ = nh.advertiseService("mode",&behaviors::modeCallback,this);
 }
 
 behaviors::~behaviors() {}
@@ -136,6 +136,41 @@ void behaviors::followBehavior() {
     ypid_->updateParams(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
     zpid_->updateParams(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
     wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
+  } else {
+    geometry_msgs::Pose pose_from_tag;
+    bsc_common::util::inverse_pose(tagPose_.pose,pose_from_tag);
+
+    const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
+    geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
+
+    bsc_common::util::rpy_from_quat(orientation,state);
+
+    double yaw = state->z+bsc_common::util::C_PI/2;
+    if(yaw>bsc_common::util::C_PI) {
+      yaw=yaw-2*bsc_common::util::C_PI;
+    }
+
+    // line up with center of pad
+    xpid_->update(follow_.follow_pose.x-pose_from_tag.position.x,tagPose_.header.stamp.toSec());
+    ypid_->update(follow_.follow_pose.y-pose_from_tag.position.y,tagPose_.header.stamp.toSec());
+    zpid_->update(follow_.follow_pose.z-pose_from_tag.position.z,tagPose_.header.stamp.toSec());
+
+    //point at tag
+    wpid_->update(-yaw,tagPose_.header.stamp.toSec());// pitch of tag TODO: Check sign
+
+    //rotate velocities in reference to the tag
+    double rotated_x;
+    double rotated_y;
+    bsc_common::util::rotate_vector(
+      xpid_->get_signal(),ypid_->get_signal(),-yaw,rotated_x,rotated_y);
+
+    sensor_msgs::Joy cmd;
+    cmd.axes.push_back(xpid_->get_signal());
+    cmd.axes.push_back(ypid_->get_signal());
+    cmd.axes.push_back(zpid_->get_signal());
+    cmd.axes.push_back(wpid_->get_signal());
+    cmd.axes.push_back(commandFlag_);
+    cmdPub_.publish(cmd);
   }
 }
 

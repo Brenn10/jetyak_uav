@@ -10,6 +10,8 @@
 #define JETYAK_UAV_UTILS_BEHAVIORS_H_
 
 #include "ros/ros.h"
+#include "dji_sdk/dji_sdk.h"
+
 
 //C includes
 #include <cstdlib>
@@ -54,6 +56,12 @@ private:
   bsc_common::PID *xpid_,*ypid_,*zpid_,*wpid_; // pid controllers
   bool behaviorChanged_=false;
   char currentMode_=0;
+  char commandFlag_ = (
+    DJISDK::VERTICAL_VELOCITY   |
+    DJISDK::HORIZONTAL_VELOCITY |
+    DJISDK::YAW_RATE            |
+    DJISDK::HORIZONTAL_BODY     |
+    DJISDK::STABLE_ENABLE);
 
   /************************************
   * STATE VARIABLES

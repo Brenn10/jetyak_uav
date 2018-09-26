@@ -8,7 +8,7 @@ private:
 public:
   PID();
   PID(double kp, double ki, double kd);
-  void update(double error);
+  void update(double error,double utime);
   void updateParams(double kp, double ki, double kd);
   void reset();
   double get_signal();

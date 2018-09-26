@@ -3,7 +3,7 @@
 virtual_rc::virtual_rc(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
-	setJoyTopic(nh, "jetyak_uav_utils/bahavior_cmd");
+	setJoyTopic(nh, "jetyak_uav_utils/behavior_cmd");
 	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &virtual_rc::rcCallback, this);
 
 	// Set up command publisher
