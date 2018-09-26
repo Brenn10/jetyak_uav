@@ -11,18 +11,21 @@
 
 #include "ros/ros.h"
 
+#include <cstdlib>
+#include <vector>
+
 #include "jetyak_uav_utils/Mode.h"
-#include "../lib/bsc_common/include/util.h"
 
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <dji_sdk/DroneTaskControl.h>
 
-#include <cstdlib>
-#include <vector>
+#include <sensor_msgs/Joy.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <geometry_msgs/QuaternionStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 
+#include <sensor_msgs/Imu.h>
 
-
-#include "sensor_msgs/Joy.h"
 #include "../lib/bsc_common/include/pid.h"
 #include "../lib/bsc_common/include/util.h"
 
@@ -33,7 +36,7 @@ private:
   /*********************************************
   * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
   *********************************************/
-  ros::Subscriber tagPoseSub_, boatGPSSub_, boatAttSub_, uavGPSSub_, uavAttSub_;
+  ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
   ros::ServiceClient taskSrv_;
   ros::ServiceServer modeService_;
@@ -49,9 +52,9 @@ private:
   * STATE VARIABLES
   ************************************/
   sensor_msgs::NavSatFix uavGPS_,boatGPS_;
-  sensor_msgs::QuaternionStamped uavAttitude_;
+  geometry_msgs::QuaternionStamped uavAttitude_;
   sensor_msgs::Imu uavImu_, boatImu_;
-  sensor_msgs::PoseStamped tagPose_;
+  geometry_msgs::PoseStamped tagPose_;
 
 
   /*********************************************
@@ -116,7 +119,7 @@ private:
   *
   * @param msg gets the global attitude of the UAV
   */
-  void uavAttitudeCallback(const sensor_msgs::QuaternionStamped::ConstPtr& msg);
+  void uavAttitudeCallback(const geometry_msgs::QuaternionStamped::ConstPtr& msg);
 
   /** uavImuCallback
   * Listens for updates in the UAVs IMU
@@ -145,7 +148,7 @@ private:
   /** followBehavior
    * Follow the boat using tags (later fused sensors)
   */
-  void takeoffBehavior();
+  void followBehavior();
 public:
   /** Constructor
   * Start up the Controller Node

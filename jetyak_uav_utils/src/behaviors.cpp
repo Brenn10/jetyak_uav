@@ -15,7 +15,7 @@ behaviors::behaviors(ros::NodeHandle& nh):
   uavAttSub_ =  nh.subscribe("/dji_sdk/attitude",1,
     &behaviors::uavAttitudeCallback, this);
   boatIMUSub_ =  nh.subscribe("boat_imu",1,
-    &behaviors::boatHeadingCallback, this);
+    &behaviors::boatIMUCallback, this);
 
   //Publishers
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("jetyak_uav_utils/behavior_cmd",1);
@@ -62,7 +62,7 @@ bool behaviors::modeCallback(jetyak_uav_utils::Mode::Request  &req,
     }
 
   }
-  behaviorChanged=true;
+  behaviorChanged_=true;
   return res.success;
 }
 
@@ -82,7 +82,7 @@ void behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
     uavGPS_.position_covariance=msg->position_covariance;
     uavGPS_.position_covariance_type=msg->position_covariance_type;
   } else {
-    ROS_WARN("UAV GNSS fix failed. Status: %s",msg->status.status)
+    ROS_WARN("UAV GNSS fix failed. Status: %i",msg->status.status);
   }
 }
 
@@ -96,12 +96,12 @@ void behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
     boatGPS_.position_covariance=msg->position_covariance;
     boatGPS_.position_covariance_type=msg->position_covariance_type;
   } else {
-    ROS_WARN("Boat GNSS fix failed. Status: %s",msg->status.status)
+    ROS_WARN("Boat GNSS fix failed. Status: %i",msg->status.status);
   }
 }
 
 void behaviors::uavAttitudeCallback(
-    const sensor_msgs::QuaternionStamped::ConstPtr& msg) {
+    const geometry_msgs::QuaternionStamped::ConstPtr& msg) {
   uavAttitude_.header=msg->header;
   uavAttitude_.quaternion = msg->quaternion;
 }
@@ -129,8 +129,8 @@ void behaviors::takeoffBehavior() {
   dji_sdk::DroneTaskControl srv;
   srv.request.task=4;
   taskSrv_.call(srv);
-  if(srv.response) {
-    currentMode_=jetyak_uav_utils::Mode.request.FOLLOW;
+  if(srv.response.result) {
+    currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
   }
 }
 
@@ -150,11 +150,11 @@ void behaviors::followBehavior() {
 
 void behaviors::doBehaviorAction() {
   switch(currentMode_) {
-    case jetyak_uav_utils::Mode.request.TAKEOFF: {
+    case jetyak_uav_utils::Mode::Request::TAKEOFF: {
       takeoffBehavior();
       break;
     }
-    case jetyak_uav_utils::Mode.request.FOLLOW: {
+    case jetyak_uav_utils::Mode::Request::FOLLOW: {
       followBehavior();
       break;
     }
