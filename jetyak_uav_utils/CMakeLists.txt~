@@ -46,7 +46,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   INCLUDE_DIRS include lib/bsc_common/include lib/dji_virtual_rc/include
   LIBRARIES jetyak_uav_utils
-  CATKIN_DEPENDS dynamic_reconfigure ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf tf2 tf2_geometry_msgs dji_sdk visualization_msgs message_runtime
+  CATKIN_DEPENDS dynamic_reconfigure ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf tf2 dji_sdk visualization_msgs message_runtime
   DEPENDS system_lib
 )
 
