@@ -33,20 +33,9 @@ add_service_files(DIRECTORY srv
   Mode.srv
 )
 
-## Generate added messages and services with any dependencies listed here
-#generate_messages(
-#  DEPENDENCIES
-#  geometry_msgs
-#  nav_msgs
-#  sensor_msgs
-#  std_msgs
-#  visualization_msgs
-#)
-
 generate_messages(
-  DEPENDENCIES
-  jetyak_uav_utils
 )
+
 generate_dynamic_reconfigure_options(
   cfg/FollowConstants.cfg
   cfg/LandConstants.cfg
