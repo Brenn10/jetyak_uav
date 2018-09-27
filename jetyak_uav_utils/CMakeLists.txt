@@ -61,15 +61,22 @@ include_directories(
 ## Add executables
 add_executable(virtual_rc_N3
                 src/virtual_rc_N3.cpp
-                lib/dji_virtual_rc/virtual_rc.cpp)
+                lib/dji_virtual_rc/virtual_rc.cpp
+                )
+
+add_executable(gimbal_tag
+                src/gimbal_tag.cpp
+                )
 
 add_executable(behaviors_node
                 src/behaviors.cpp
                 lib/bsc_common/pid.cpp
-                lib/bsc_common/util.cpp)
+                lib/bsc_common/util.cpp
+                )
 
 #add dependencies
 add_dependencies(virtual_rc_N3 ${catkin_EXPORTED_TARGETS} )
+add_dependencies(gimbal_tag ${catkin_EXPORTED_TARGETS} )
 add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Link executables
@@ -77,6 +84,11 @@ target_link_libraries(virtual_rc_N3
   ${catkin_LIBRARIES}
   ${DJIOSDK_LIBRARIES}
 )
+
+target_link_libraries(gimbal_tag
+  ${catkin_LIBRARIES}
+)
+
 target_link_libraries(behaviors_node
   ${catkin_LIBRARIES}
   ${DJIOSDK_LIBRARIES}

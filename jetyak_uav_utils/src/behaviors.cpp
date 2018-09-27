@@ -9,7 +9,7 @@ behaviors::behaviors(ros::NodeHandle& nh):
   //subscribers
   tagPoseSub_ = nh.subscribe("tag_pose",1,&behaviors::tagPoseCallback, this);
   uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position",1,&behaviors::uavGPSCallback, this);
-  boatGPSSub_ = nh.subscribe("boat_gps",1,&behaviors::uavGPSCallback, this);
+  boatGPSSub_ = nh.subscribe("boat_gps",1,&behaviors::boatGPSCallback, this);
   uavAttSub_ =  nh.subscribe("/dji_sdk/attitude",1, &behaviors::uavAttitudeCallback, this);
   boatIMUSub_ =  nh.subscribe("boat_imu",1, &behaviors::boatIMUCallback, this);
 
