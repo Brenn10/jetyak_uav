@@ -30,7 +30,7 @@ bool behaviors::modeCallback(jetyak_uav_utils::Mode::Request  &req, jetyak_uav_u
 
   currentMode_=req.mode;
   behaviorChanged_=true;
-  res.success=true
+  res.success=true;
   return true;
 }
 
@@ -102,6 +102,9 @@ void behaviors::takeoffBehavior() {
       propellorsRunning=true;
     }
   }
+  else {
+    currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
+  }
 }
 
 void behaviors::followBehavior() {
@@ -165,6 +168,15 @@ void behaviors::rideBehavior() {
     propellorsRunning=srv.response.result;
   }
 }
+
+void behaviors::hoverBehavior() {
+  sensor_msgs::Joy cmd;
+  for(int i =0; i < 4; i++) //push all zeroes for FLUY
+    cmd.axes.push_back(0);
+  cmd.axes.push_back(commandFlag_);
+  cmdPub_.publish(cmd);
+};
+
 void behaviors::doBehaviorAction() {
   switch(currentMode_) {
     case jetyak_uav_utils::Mode::Request::TAKEOFF: {
@@ -198,10 +210,11 @@ void behaviors::doBehaviorAction() {
     default: {
       if(propellorsRunning) {
         ROS_ERROR("Mode out of bounds: %i. Now hovering.",currentMode_);
-        this->currentMode_=jetyak_uav_utils::Request::HOVER;
+        this->currentMode_=jetyak_uav_utils::Mode::Request::HOVER;
+      }
       else {
         ROS_ERROR("Mode out of bounds: %i. Now riding.",currentMode_);
-        this->currentMode_=jetyak_uav_utils::Request::RIDE;
+        this->currentMode_=jetyak_uav_utils::Mode::Request::RIDE;
       }
       break;
     }

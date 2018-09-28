@@ -31,7 +31,7 @@
 
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
-#include <dji_sdk/DroneTaskControl.h>
+#include <dji_sdk/DroneArmControl.h>
 #include <dynamic_reconfigure/server.h>
 
 //Custom Lib includes
@@ -164,6 +164,26 @@ private:
    * Follow the boat using tags (later fused sensors)
   */
   void followBehavior();
+
+  /** returnBehavior
+   * Safely return to the boat
+  */
+  void returnBehavior();
+
+  /** landBehavior
+   * Safely land on the boat
+  */
+  void landBehavior();
+
+  /** rideBehavior
+   * Safely ride on the boat
+  */
+  void rideBehavior();
+
+  /** hoverBehavior
+   * Safely hover
+  */
+  void hoverBehavior();
 public:
   /** Constructor
   * Start up the Controller Node

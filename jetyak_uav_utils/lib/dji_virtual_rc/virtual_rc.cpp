@@ -3,14 +3,14 @@
 virtual_rc::virtual_rc(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
-	setJoyTopic(nh, "jetyak_uav_utils/behavior_cmd");
+	setJoyTopic(nh, "behavior_cmd");
 	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &virtual_rc::rcCallback, this);
 
 	// Set up command publisher
 	controlPub = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic", 10);
 
 	// Set up basic services
-	sdk_ctrl_authority_service = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_control_authority");
+	sdk_ctrl_authority_service = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_permission_control");
 
 	// Set default values
 	autopilotOn = false;

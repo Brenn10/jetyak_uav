@@ -76,7 +76,7 @@ add_executable(behaviors_node
 
 #add dependencies
 add_dependencies(n3_pilot_node ${catkin_EXPORTED_TARGETS} )
-add_dependencies(gimbal_tag ${catkin_EXPORTED_TARGETS} )
+add_dependencies(gimbal_tag_node ${catkin_EXPORTED_TARGETS} )
 add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
 
 ## Link executables
