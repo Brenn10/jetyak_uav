@@ -7,7 +7,7 @@
 class virtual_rc_N3 : public virtual_rc
 {
 public:
-	using virtual_rc::virtual_rc;
+	virtual_rc_N3(ros::NodeHandle &nh);
 	virtual ~virtual_rc_N3(){};
 
 protected:

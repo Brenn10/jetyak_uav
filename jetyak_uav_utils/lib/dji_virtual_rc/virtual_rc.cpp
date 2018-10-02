@@ -1,29 +1,5 @@
 #include "include/virtual_rc.h"
 
-virtual_rc::virtual_rc(ros::NodeHandle& nh)
-{
-	// Subscribe to joy topic
-	setJoyTopic(nh, "behavior_cmd");
-	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &virtual_rc::rcCallback, this);
-
-	// Set up command publisher
-	controlPub = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic", 10);
-
-	// Set up basic services
-	sdk_ctrl_authority_service = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_permission_control");
-
-	// Set default values
-	autopilotOn = false;
-	bypassPilot = false;
-
-	commandFlag = (
-		DJISDK::VERTICAL_VELOCITY   |
-		DJISDK::HORIZONTAL_VELOCITY |
-		DJISDK::YAW_RATE            |
-		DJISDK::HORIZONTAL_BODY     |
-		DJISDK::STABLE_ENABLE);
-}
-
 virtual_rc::~virtual_rc()
 {
 	if (autopilotOn)
@@ -33,6 +9,8 @@ virtual_rc::~virtual_rc()
 			ROS_INFO("Control released back to RC");
 	}
 }
+
+// Callbacks
 
 void virtual_rc::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
@@ -59,6 +37,31 @@ void virtual_rc::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
 		bypassPilot = true;
 	}
+}
+
+// Protected
+
+virtual_rc::initializeRC(ros::NodeHandle& nh)
+{
+	// Subscribe to joy topic
+	setJoyTopic(nh, "behavior_cmd");
+	
+	// Set up command publisher
+	controlPub = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic", 10);
+
+	// Set up basic services
+	sdk_ctrl_authority_service = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_permission_control");
+
+	// Set default values
+	autopilotOn = false;
+	bypassPilot = false;
+
+	commandFlag = (
+		DJISDK::VERTICAL_VELOCITY   |
+		DJISDK::HORIZONTAL_VELOCITY |
+		DJISDK::YAW_RATE            |
+		DJISDK::HORIZONTAL_BODY     |
+		DJISDK::STABLE_ENABLE);
 }
 
 bool virtual_rc::requestControl()
@@ -98,6 +101,8 @@ bool virtual_rc::releaseControl()
 
 	return true;
 }
+
+// Public
 
 void virtual_rc::setJoyTopic(ros::NodeHandle& nh, std::string topicJoy)
 {

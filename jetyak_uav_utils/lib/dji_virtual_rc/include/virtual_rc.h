@@ -21,7 +21,7 @@
 class virtual_rc
 {
 public:
-	virtual_rc(ros::NodeHandle& nh);
+	virtual_rc(){};
 	~virtual_rc();
 
 	//! Specify here the topic that the input commands will be published
@@ -48,6 +48,7 @@ protected:
 	void rcCallback(const sensor_msgs::Joy::ConstPtr& msg);
 
 	// Functions
+	void initializeRC(ros::NodeHandle &nh);
 	bool requestControl();
 	bool releaseControl();
 
