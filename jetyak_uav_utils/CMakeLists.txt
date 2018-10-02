@@ -44,7 +44,7 @@ generate_dynamic_reconfigure_options(
 )
 ## includes, libraries, depends
 catkin_package(
-  INCLUDE_DIRS include lib/bsc_common/include lib/dji_virtual_rc/include
+  INCLUDE_DIRS include lib/bsc_common/include
   LIBRARIES jetyak_uav_utils
   CATKIN_DEPENDS dynamic_reconfigure ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf tf2 tf2_geometry_msgs dji_sdk visualization_msgs message_runtime
   DEPENDS system_lib
@@ -54,14 +54,12 @@ catkin_package(
 include_directories(
   include
   lib/bsc_common/include
-  lib/dji_virtual_rc/include
   ${catkin_INCLUDE_DIRS}
 )
 
 ## Add executables
 add_executable(n3_pilot_node
-                src/virtual_rc_N3.cpp
-                lib/dji_virtual_rc/virtual_rc.cpp
+                src/n3_pilot.cpp
                 )
 
 add_executable(gimbal_tag_node
