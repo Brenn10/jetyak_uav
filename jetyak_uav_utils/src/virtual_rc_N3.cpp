@@ -3,7 +3,7 @@
 virtual_rc_N3::virtual_rc_N3(ros::NodeHandle& nh)
 {
 	virtual_rc::initializeRC(nh);
-	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &virtual_rc::rcCallback, this);
+	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &virtual_rc_N3::rcCallback, this);
 }
 
 void virtual_rc_N3::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
