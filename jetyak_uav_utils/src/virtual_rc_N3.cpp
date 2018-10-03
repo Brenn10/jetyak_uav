@@ -1,6 +1,7 @@
 #include "jetyak_uav_utils/virtual_rc_N3.h"
 
 void virtual_rc_N3::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
+
 {
 	// Switch autopilot on/off
 	// F mode && Autopilot switch on && Autopilot flag not set

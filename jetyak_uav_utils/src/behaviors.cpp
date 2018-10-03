@@ -30,7 +30,7 @@ bool behaviors::modeCallback(jetyak_uav_utils::Mode::Request  &req, jetyak_uav_u
 
   currentMode_=req.mode;
   behaviorChanged_=true;
-  res.success=true
+  res.success=true;
   return true;
 }
 
@@ -198,15 +198,18 @@ void behaviors::doBehaviorAction() {
     default: {
       if(propellorsRunning) {
         ROS_ERROR("Mode out of bounds: %i. Now hovering.",currentMode_);
-        this->currentMode_=jetyak_uav_utils::Request::HOVER;
+        this->currentMode_=jetyak_uav_utils::Mode::Request::HOVER;
+      }
       else {
         ROS_ERROR("Mode out of bounds: %i. Now riding.",currentMode_);
-        this->currentMode_=jetyak_uav_utils::Request::RIDE;
+        this->currentMode_=jetyak_uav_utils::Mode::Request::RIDE;
       }
       break;
     }
   }
 }
+
+void behaviors::hoverBehavior() {};
 
 void behaviors::landReconfigureCallback(jetyak_uav_utils::LandConstantsConfig &config, uint32_t level) {
   ROS_WARN("%s","Reconfigure received for Landing");
