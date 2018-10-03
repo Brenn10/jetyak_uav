@@ -1,4 +1,6 @@
 <launch>
+  <include file="$(find dji_camera)/launch/tagSearch.launch"/>
+  <!--
   <node type="raspicam_node" pkg="raspicam_node" name="raspicam_node" output="screen">
 
     <param name="camera_info_url" value="package://jetyak_uav_utils/res/hex_raspi_config.yaml"/>
@@ -28,4 +30,5 @@
 	<arg name="bundle_files" default="$(find jetyak_uav_utils)/res/home_made_bundle.xml" />
 
 	<node name="ar_track_alvar" pkg="ar_track_alvar" type="findMarkerBundlesNoKinect" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame) $(arg bundle_files)" />
+  -->
 </launch>

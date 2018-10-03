@@ -4,23 +4,29 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
 	joySub = nh.subscribe("joy", 10, &n3_pilot::joyCallback, this);
-	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
-	
+	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
+
 	// Set up command publisher
-	controlPub = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic", 10);
+	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
 	// Set up basic services
-	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_control_authority");
+	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
 
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
 
+	// Initialize joy command
+	joyCommand.axes.clear();
+	for (int i = 0; i < 5; ++i)
+		joyCommand.axes.push_back(0);
+
+	// Initialize default command flag
 	commandFlag = (
 		DJISDK::VERTICAL_VELOCITY   |
 		DJISDK::HORIZONTAL_VELOCITY |
 		DJISDK::YAW_RATE            |
-		DJISDK::HORIZONTAL_GROUND   |
+		DJISDK::HORIZONTAL_BODY     |
 		DJISDK::STABLE_ENABLE);
 }
 
@@ -74,7 +80,7 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 			rcCommand.axes.push_back(msg->axes[1]); // Roll
 			rcCommand.axes.push_back(msg->axes[0]); // Pitch
 			rcCommand.axes.push_back(msg->axes[3]); // Altitude
-			rcCommand.axes.push_back(msg->axes[2]); // Yaw
+			rcCommand.axes.push_back(-msg->axes[2]); // Yaw
 			rcCommand.axes.push_back(commandFlag);  // Command Flag
 
 			bypassPilot = true;
@@ -133,7 +139,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   n3_pilot joyPilot(nh);
-  
+
   ros::Rate rate(10);
 
   while(ros::ok())
