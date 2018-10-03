@@ -10,7 +10,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
 	// Set up basic services
-	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_control_authority");
+	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
 
 	// Set default values
 	autopilotOn = false;
