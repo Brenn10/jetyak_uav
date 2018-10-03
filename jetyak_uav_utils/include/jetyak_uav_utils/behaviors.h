@@ -55,7 +55,7 @@ private:
   **********************/
   bsc_common::PID *xpid_,*ypid_,*zpid_,*wpid_; // pid controllers
   bool behaviorChanged_=false;
-  char currentMode_=0;
+  char currentMode_=jetyak_uav_utils::Mode::Request::RIDE;
   bool propellorsRunning=false;
   char commandFlag_ = (
     DJISDK::VERTICAL_VELOCITY   |
