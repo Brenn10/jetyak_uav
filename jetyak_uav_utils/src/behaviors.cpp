@@ -165,6 +165,19 @@ void behaviors::rideBehavior() {
     propellorsRunning=srv.response.result;
   }
 }
+
+
+void behaviors::hoverBehavior() {
+  sensor_msgs::Joy cmd;
+  cmd.axes.push_back(0);
+  cmd.axes.push_back(0);
+  cmd.axes.push_back(0);
+  cmd.axes.push_back(0);
+  cmd.axes.push_back(commandFlag_);
+  cmdPub_.publish(cmd);
+};
+
+
 void behaviors::doBehaviorAction() {
   switch(currentMode_) {
     case jetyak_uav_utils::Mode::Request::TAKEOFF: {
@@ -208,8 +221,6 @@ void behaviors::doBehaviorAction() {
     }
   }
 }
-
-void behaviors::hoverBehavior() {};
 
 void behaviors::landReconfigureCallback(jetyak_uav_utils::LandConstantsConfig &config, uint32_t level) {
   ROS_WARN("%s","Reconfigure received for Landing");
