@@ -102,6 +102,9 @@ void behaviors::takeoffBehavior() {
       propellorsRunning=true;
     }
   }
+  else {
+    currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
+  }
 }
 
 void behaviors::followBehavior() {
@@ -176,7 +179,6 @@ void behaviors::hoverBehavior() {
   cmd.axes.push_back(commandFlag_);
   cmdPub_.publish(cmd);
 };
-
 
 void behaviors::doBehaviorAction() {
   switch(currentMode_) {

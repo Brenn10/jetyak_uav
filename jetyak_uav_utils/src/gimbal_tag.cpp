@@ -10,7 +10,7 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	vehicleAttiSub = nh.subscribe("dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
 
 	// Set up publisher
-	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("jetyak_uav_utils/tag_pose", 10);
+	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
 
 	tagFound = false;
 
@@ -27,24 +27,24 @@ void gimbal_tag::publishTagPose()
 	{
 		// The vehicle quaternion is the rotation from body_FLU to ground_ENU
 		// The Gimbal rotation is from the ground_ENU to Gimbal body
-		
+
 		// Calculate offset quaternion
 		qOffset = qVehicle.inverse() * qGimbal.inverse();
 		qOffset.normalize();
-		
+
 		// Apply rotation to go from gimbal frame to body frame
 		tf::Quaternion qTagBody = qOffset*qTag;
 		qTagBody.normalize();
 		tf::Quaternion positonTagBody = qOffset*posTag*qOffset.inverse();
 		geometry_msgs::PoseStamped tagPoseBody;
-		
+
 		// Get time
 		ros::Time time = ros::Time::now();
-		
+
 		// Update header
 		tagPoseBody.header.stamp = time;
 		tagPoseBody.header.frame_id = "body_FLU";
-		
+
 		tagPoseBody.pose.position.x = positonTagBody[0];
 		tagPoseBody.pose.position.y = positonTagBody[1];
 		tagPoseBody.pose.position.z = positonTagBody[2];
@@ -63,7 +63,7 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 		// Update Tag quaternion
 		tf::quaternionMsgToTF(msg.markers[0].pose.pose.orientation, qTag);
 		qTag.normalize();
-		
+
 		// Update Tag position as quaternion
 		posTag[0] = msg.markers[0].pose.pose.position.x;
 		posTag[1] = msg.markers[0].pose.pose.position.y;

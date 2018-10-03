@@ -165,12 +165,24 @@ private:
   */
   void followBehavior();
 
+  /** returnBehavior
+   * Safely return to the boat
+  */
   void returnBehavior();
 
+  /** landBehavior
+   * Safely land on the boat
+  */
   void landBehavior();
 
+  /** rideBehavior
+   * Safely ride on the boat
+  */
   void rideBehavior();
 
+  /** hoverBehavior
+   * Safely hover
+  */
   void hoverBehavior();
 public:
   /** Constructor

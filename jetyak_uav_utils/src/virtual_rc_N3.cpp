@@ -47,7 +47,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   virtual_rc_N3 joyPilot(nh);
-  joyPilot.setJoyTopic(nh, "joy");
+  //joyPilot.setJoyTopic(nh, "joy");
 
   ros::Rate rate(10);
 
