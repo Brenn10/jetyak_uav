@@ -4,10 +4,10 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
 	joySub = nh.subscribe("joy", 10, &n3_pilot::joyCallback, this);
-	djiRCSub = nh.subscribe("dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
-	
+	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
+
 	// Set up command publisher
-	controlPub = nh.advertise<sensor_msgs::Joy>("dji_sdk/flight_control_setpoint_generic", 10);
+	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
 	// Set up basic services
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("dji_sdk/sdk_control_authority");
@@ -133,7 +133,7 @@ int main(int argc, char** argv)
   ros::NodeHandle nh;
 
   n3_pilot joyPilot(nh);
-  
+
   ros::Rate rate(10);
 
   while(ros::ok())
