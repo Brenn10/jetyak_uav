@@ -6,8 +6,8 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 {
 	// Subscribe to topics
 	tagPoseSub = nh.subscribe("ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
-	gimbalAngleSub = nh.subscribe("dji_sdk/gimbal_angle", 10, &gimbal_tag::gimbalCallback, this);
-	vehicleAttiSub = nh.subscribe("dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
+	gimbalAngleSub = nh.subscribe("/dji_sdk/gimbal_angle", 10, &gimbal_tag::gimbalCallback, this);
+	vehicleAttiSub = nh.subscribe("/dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
 
 	// Set up publisher
 	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
