@@ -26,6 +26,18 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
     state->z = state->z-2*C_PI;
   }
 }
+
+void util::yaw_from_quat(const geometry_msgs::Quaternion* orientation){
+  geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
+
+  bsc_common::util::rpy_from_quat(orientation,state);
+
+  double yaw = state->z;
+  if(yaw>bsc_common::util::C_PI) {
+    yaw=yaw-2*bsc_common::util::C_PI;
+  }
+}
+
 template <typename T>
 T util::clip(T x, T low, T high) {
   return std::max(std::min(high,x),low);

@@ -1,0 +1,7 @@
+# Used to broadcast the current mode to tell which nodes to activate
+
+
+
+char mode
+---
+bool success

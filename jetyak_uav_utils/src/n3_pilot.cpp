@@ -3,8 +3,8 @@
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
-	joySub = nh.subscribe("joy", 10, &n3_pilot::joyCallback, this);
-	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
+	joySub = nh.subscribe("/joy", 10, &n3_pilot::joyCallback, this);
+	djiRCSub = nh.subscribe("/dji_sdk/rc", 1, &n3_pilot::rcCallback, this);
 
 	// Set up command publisher
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);

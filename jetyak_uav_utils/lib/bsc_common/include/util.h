@@ -26,6 +26,14 @@ public:
    */
   static void rpy_from_quat(const geometry_msgs::Quaternion* pose, geometry_msgs::Vector3* state);
 
+  /* yaw_from_quat
+   * Gives the roll pitch and yaw in radians given a quaternion
+   *
+   * @param orientation quaternion
+   * @return yaw in range [-pi,pi)
+   */
+  static double yaw_from_quat(const geometry_msgs::Quaternion* pose);
+
   /* clip
    * clips a value to be between a min and maxSpeed
    * equivalent to max(min(high,x),low)

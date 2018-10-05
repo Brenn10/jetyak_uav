@@ -5,7 +5,10 @@ behaviors::behaviors(ros::NodeHandle& nh):
   ypid_(NULL),
   zpid_(NULL),
   wpid_(NULL)
- {
+{
+  //initialize mode
+  currentMode_=Mode::RIDE;
+
   //subscribers
   tagPoseSub_ = nh.subscribe("tag_pose",1,&behaviors::tagPoseCallback, this);
   uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position",1,&behaviors::uavGPSCallback, this);
@@ -20,17 +23,23 @@ behaviors::behaviors(ros::NodeHandle& nh):
   armSrv_ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
 
   // Service servers
-  modeService_ = nh.advertiseService("mode",&behaviors::modeCallback,this);
+  setModeService_ = nh.advertiseService("setMode",&behaviors::setModeCallback,this);
+  getModeService_ = nh.advertiseService("getMode",&behaviors::getModeCallback,this);
 }
 
 behaviors::~behaviors() {}
 
 
-bool behaviors::modeCallback(jetyak_uav_utils::Mode::Request  &req, jetyak_uav_utils::Mode::Response &res) {
+bool behaviors::setModeCallback(jetyak_uav_utils::SetMode::Request  &req, jetyak_uav_utils::SetMode::Response &res) {
 
-  currentMode_=req.mode;
+  currentMode_=(Mode)req.mode;
   behaviorChanged_=true;
   res.success=true;
+  return true;
+}
+
+bool behaviors::getModeCallback(jetyak_uav_utils::GetMode::Request  &req, jetyak_uav_utils::GetMode::Response &res) {
+  res.mode=(char)currentMode_;
   return true;
 }
 
@@ -44,8 +53,8 @@ void behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
     uavGPS_.header=msg->header;
     uavGPS_.status=msg->status;
     uavGPS_.latitude=msg->latitude;
-    uavGPS_.latitude=msg->latitude;
-    uavGPS_.latitude=msg->latitude;
+    uavGPS_.longitude=msg->longitude;
+    uavGPS_.altitude=msg->altitude;
     uavGPS_.position_covariance=msg->position_covariance;
     uavGPS_.position_covariance_type=msg->position_covariance_type;
   } else {
@@ -58,8 +67,8 @@ void behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr& msg) {
     boatGPS_.header=msg->header;
     boatGPS_.status=msg->status;
     boatGPS_.latitude=msg->latitude;
-    boatGPS_.latitude=msg->latitude;
-    boatGPS_.latitude=msg->latitude;
+    boatGPS_.longitude=msg->longitude;
+    boatGPS_.altitude=msg->altitude;
     boatGPS_.position_covariance=msg->position_covariance;
     boatGPS_.position_covariance_type=msg->position_covariance_type;
   } else {
@@ -98,17 +107,23 @@ void behaviors::takeoffBehavior() {
     srv.request.arm=1;
     armSrv_.call(srv);
     if(srv.response.result) {
-      currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
+      ROS_WARN("ARMS ENABLED");
+      behaviorChanged_=true;
+      currentMode_=Mode::FOLLOW;
       propellorsRunning=true;
+    } else {
+      ROS_WARN("FAILED TO ENABLE ARMS");
     }
   }
   else {
-    currentMode_=jetyak_uav_utils::Mode::Request::FOLLOW;
+    ROS_WARN("ARMS ALREADY GOING");
+    currentMode_=Mode::FOLLOW;
   }
 }
 
 void behaviors::followBehavior() {
   if(behaviorChanged_) {
+    behaviorChanged_=false;
     xpid_->reset();
     ypid_->reset();
     zpid_->reset();
@@ -120,7 +135,7 @@ void behaviors::followBehavior() {
     wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
   } else {
     geometry_msgs::Pose pose_from_tag;
-    bsc_common::util::inverse_pose(tagPose_.pose,pose_from_tag);
+    bsc_common::util::inverse_pose(actualPose_.pose,pose_from_tag);
 
     const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
     geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
@@ -133,12 +148,12 @@ void behaviors::followBehavior() {
     }
 
     // line up with center of pad
-    xpid_->update(follow_.follow_pose.x-pose_from_tag.position.x,tagPose_.header.stamp.toSec());
-    ypid_->update(follow_.follow_pose.y-pose_from_tag.position.y,tagPose_.header.stamp.toSec());
-    zpid_->update(follow_.follow_pose.z-pose_from_tag.position.z,tagPose_.header.stamp.toSec());
+    xpid_->update(follow_.follow_pose.x-pose_from_tag.position.x,actualPose_.header.stamp.toSec());
+    ypid_->update(follow_.follow_pose.y-pose_from_tag.position.y,actualPose_.header.stamp.toSec());
+    zpid_->update(follow_.follow_pose.z-pose_from_tag.position.z,actualPose_.header.stamp.toSec());
 
     //point at tag
-    wpid_->update(-yaw,tagPose_.header.stamp.toSec());// pitch of tag TODO: Check sign
+    wpid_->update(-yaw,actualPose_.header.stamp.toSec());// pitch of tag TODO: Check sign
 
     //rotate velocities in reference to the tag
     double rotated_x;
@@ -166,6 +181,11 @@ void behaviors::rideBehavior() {
     srv.request.arm=0;
     armSrv_.call(srv);
     propellorsRunning=srv.response.result;
+    if(srv.response.result) {
+      ROS_WARN("Arms deactivated");
+    } else {
+      ROS_WARN("Failed to deactivate arms");
+    }
   }
 }
 
@@ -181,43 +201,53 @@ void behaviors::hoverBehavior() {
 };
 
 void behaviors::doBehaviorAction() {
+  //compute relative uav heading
+  double boatHeading=util::yaw_from_quat(boatImu_.orientation);
+  double uavHeading=util::yaw_from_quat(uavImu_.orientation);
+  //compute relative uav position
+  actualPose_.x=boatGPS_.latitude-uavGPS_.latitude;
+  actualPose_.y=boatGPS_.longitude-uavGPS_.longitude;
+
+
+  actualPose_.w=util::ang_dist(boatHeading,uavHeading);
+
   switch(currentMode_) {
-    case jetyak_uav_utils::Mode::Request::TAKEOFF: {
+    case Mode::TAKEOFF: {
       takeoffBehavior();
       break;
     }
-    case jetyak_uav_utils::Mode::Request::FOLLOW: {
+    case Mode::FOLLOW: {
       followBehavior();
       break;
     }
-    case jetyak_uav_utils::Mode::Request::LEAVE: {
+    case Mode::LEAVE: {
       //Do nothing, an external node is currently communicating with the pilot
       break;
     }
-    case jetyak_uav_utils::Mode::Request::RETURN: {
+    case Mode::RETURN: {
       returnBehavior();
       break;
     }
-    case jetyak_uav_utils::Mode::Request::LAND: {
+    case Mode::LAND: {
       landBehavior();
       break;
     }
-    case jetyak_uav_utils::Mode::Request::RIDE: {
+    case Mode::RIDE: {
       rideBehavior();
       break;
     }
-    case jetyak_uav_utils::Mode::Request::HOVER: {
+    case Mode::HOVER: {
       hoverBehavior();
       break;
     }
     default: {
       if(propellorsRunning) {
-        ROS_ERROR("Mode out of bounds: %i. Now hovering.",currentMode_);
-        this->currentMode_=jetyak_uav_utils::Mode::Request::HOVER;
+        ROS_ERROR("Mode out of bounds: %i. Now hovering.",(char)currentMode_);
+        this->currentMode_=Mode::HOVER;
       }
       else {
-        ROS_ERROR("Mode out of bounds: %i. Now riding.",currentMode_);
-        this->currentMode_=jetyak_uav_utils::Mode::Request::RIDE;
+        ROS_ERROR("Mode out of bounds: %i. Now riding.",(char)currentMode_);
+        this->currentMode_=Mode::RIDE;
       }
       break;
     }
@@ -301,20 +331,30 @@ int main(int argc, char **argv) {
   behaviors uav_behaviors(nh);
   ros::Rate rate(10);
 
-  //Dynamic reconfigure for land configuration
-  dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig> landCfgServer;
+
+  //Create Dynamic reconfiguration node handles
+  ros::NodeHandle nhl("~/land");
+  ros::NodeHandle nhf("~/follow");
+
+  //Create synamic Reconfigure
+  dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig> landCfgServer(nhl);
+  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> followCfgServer(nhf);
+
+  // define callback types
   dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig>::CallbackType landCfgCallback;
+  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType followCfgCallback;
+
+  // bind callbacks
   boost::function<void (jetyak_uav_utils::LandConstantsConfig &,int) >
       landCfgCallback2(boost::bind( &behaviors::landReconfigureCallback,&uav_behaviors, _1, _2 ) );
-  landCfgCallback=landCfgCallback2;
-  landCfgServer.setCallback(landCfgCallback);
-
-  //Dynamic reconfigure for follow configuration
-  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> followCfgServer;
-  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType followCfgCallback;
   boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) >
       followCfgCallback2(boost::bind( &behaviors::followReconfigureCallback,&uav_behaviors, _1, _2 ) );
+
+  landCfgCallback=landCfgCallback2;
   followCfgCallback=followCfgCallback2;
+
+  //set callbacks in server
+  landCfgServer.setCallback(landCfgCallback);
   followCfgServer.setCallback(followCfgCallback);
 
   while(ros::ok())
