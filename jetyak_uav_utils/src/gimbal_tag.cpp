@@ -5,9 +5,9 @@
 gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 {
 	// Subscribe to topics
-	tagPoseSub = nh.subscribe("ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
-	gimbalAngleSub = nh.subscribe("dji_sdk/gimbal_angle", 10, &gimbal_tag::gimbalCallback, this);
-	vehicleAttiSub = nh.subscribe("dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
+	tagPoseSub = nh.subscribe("/ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
+	gimbalAngleSub = nh.subscribe("/dji_sdk/gimbal_angle", 10, &gimbal_tag::gimbalCallback, this);
+	vehicleAttiSub = nh.subscribe("/dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
 
 	// Set up publisher
 	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
@@ -15,7 +15,6 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	tagFound = false;
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
-	// !!! The constant offset is measured on Matrice 100 and Z3 !!!
 	qConstant = tf::Quaternion(0.0, 0.0, -0.707, 0.707);
 	qConstant.normalize();
 	qCamera2Gimbal = tf::Quaternion(-0.5, 0.5, -0.5, 0.5);
@@ -84,7 +83,7 @@ void gimbal_tag::gimbalCallback(const geometry_msgs::Vector3Stamped& msg)
 {
 	// Update gimbal quaternion
 	qGimbal = tf::createQuaternionFromRPY(
-		DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
+		DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
 	// Remove the constant offset
 	qGimbal = qConstant*qGimbal;
 	qGimbal.normalize();

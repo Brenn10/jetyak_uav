@@ -3,7 +3,7 @@
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
-	joySub = nh.subscribe("joy", 10, &n3_pilot::joyCallback, this);
+	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
 
 	// Set up command publisher
@@ -77,11 +77,11 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 		{
 			// Clear any previous RC commands
 			rcCommand.axes.clear();
-			rcCommand.axes.push_back(msg->axes[1]); // Roll
-			rcCommand.axes.push_back(msg->axes[0]); // Pitch
-			rcCommand.axes.push_back(msg->axes[3]); // Altitude
+			rcCommand.axes.push_back(msg->axes[1]);  // Roll
+			rcCommand.axes.push_back(-msg->axes[0]); // Pitch
+			rcCommand.axes.push_back(msg->axes[3]);  // Altitude
 			rcCommand.axes.push_back(-msg->axes[2]); // Yaw
-			rcCommand.axes.push_back(commandFlag);  // Command Flag
+			rcCommand.axes.push_back(commandFlag);   // Command Flag
 
 			bypassPilot = true;
 		}
