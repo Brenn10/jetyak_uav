@@ -15,7 +15,6 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	tagFound = false;
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
-	// !!! The constant offset is measured on Matrice 100 and Z3 !!!
 	qConstant = tf::Quaternion(0.0, 0.0, -0.707, 0.707);
 	qConstant.normalize();
 	qCamera2Gimbal = tf::Quaternion(-0.5, 0.5, -0.5, 0.5);
@@ -84,7 +83,7 @@ void gimbal_tag::gimbalCallback(const geometry_msgs::Vector3Stamped& msg)
 {
 	// Update gimbal quaternion
 	qGimbal = tf::createQuaternionFromRPY(
-		DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
+		DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
 	// Remove the constant offset
 	qGimbal = qConstant*qGimbal;
 	qGimbal.normalize();

@@ -71,11 +71,11 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 		{
 			// Clear any previous RC commands
 			rcCommand.axes.clear();
-			rcCommand.axes.push_back(msg->axes[1]); // Roll
-			rcCommand.axes.push_back(msg->axes[0]); // Pitch
-			rcCommand.axes.push_back(msg->axes[3]); // Altitude
-			rcCommand.axes.push_back(msg->axes[2]); // Yaw
-			rcCommand.axes.push_back(commandFlag);  // Command Flag
+			rcCommand.axes.push_back(msg->axes[1]);  // Roll
+			rcCommand.axes.push_back(-msg->axes[0]); // Pitch
+			rcCommand.axes.push_back(msg->axes[3]);  // Altitude
+			rcCommand.axes.push_back(-msg->axes[2]); // Yaw
+			rcCommand.axes.push_back(commandFlag);   // Command Flag
 
 			bypassPilot = true;
 		}
