@@ -59,11 +59,18 @@ private:
   bool behaviorChanged_=false;
   Mode currentMode_;
   bool propellorsRunning=false;
-  char commandFlag_ = (
+  char bodyVelCmdFlag_ = (
     DJISDK::VERTICAL_VELOCITY   |
     DJISDK::HORIZONTAL_VELOCITY |
     DJISDK::YAW_RATE            |
     DJISDK::HORIZONTAL_BODY     |
+    DJISDK::STABLE_ENABLE);
+
+  char worldPositionCmdFlag_ = (
+    DJISDK::VERTICAL_POSITION   |
+    DJISDK::HORIZONTAL_POSITION |
+    DJISDK::YAW_ANGLE            |
+    DJISDK::HORIZONTAL_GROUND     |
     DJISDK::STABLE_ENABLE);
 
   /************************************

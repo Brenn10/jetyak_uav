@@ -134,39 +134,27 @@ void behaviors::followBehavior() {
     zpid_->updateParams(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
     wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
   } else {
-    geometry_msgs::Pose pose_from_tag;
-    bsc_common::util::inverse_pose(actualPose_.pose,pose_from_tag);
 
-    const geometry_msgs::Quaternion* orientation = const_cast<const geometry_msgs::Quaternion*>(&pose_from_tag.orientation);
-    geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
-
-    bsc_common::util::rpy_from_quat(orientation,state);
-
-    double yaw = state->z+bsc_common::util::C_PI/2;
-    if(yaw>bsc_common::util::C_PI) {
-      yaw=yaw-2*bsc_common::util::C_PI;
-    }
-
-    // line up with center of pad
-    xpid_->update(follow_.follow_pose.x-pose_from_tag.position.x,actualPose_.header.stamp.toSec());
-    ypid_->update(follow_.follow_pose.y-pose_from_tag.position.y,actualPose_.header.stamp.toSec());
-    zpid_->update(follow_.follow_pose.z-pose_from_tag.position.z,actualPose_.header.stamp.toSec());
+    // line up with pad
+    xpid_->update(follow_.follow_pose.x-actualPose_.quaternion.x,actualPose_.header.stamp.toSec());
+    ypid_->update(follow_.follow_pose.y-actualPose_.quaternion.y,actualPose_.header.stamp.toSec());
+    zpid_->update(follow_.follow_pose.z-actualPose_.quaternion.z,actualPose_.header.stamp.toSec());
 
     //point at tag
-    wpid_->update(-yaw,actualPose_.header.stamp.toSec());// pitch of tag TODO: Check sign
+    wpid_->update(follow_.follow_pose.w-actualPose_.quaternion.w,actualPose_.header.stamp.toSec());
 
     //rotate velocities in reference to the tag
     double rotated_x;
     double rotated_y;
     bsc_common::util::rotate_vector(
-      xpid_->get_signal(),ypid_->get_signal(),-yaw,rotated_x,rotated_y);
+      xpid_->get_signal(),ypid_->get_signal(),-actualPose_.quaternion.w,rotated_x,rotated_y);
 
     sensor_msgs::Joy cmd;
     cmd.axes.push_back(xpid_->get_signal());
     cmd.axes.push_back(ypid_->get_signal());
     cmd.axes.push_back(zpid_->get_signal());
     cmd.axes.push_back(wpid_->get_signal());
-    cmd.axes.push_back(commandFlag_);
+    cmd.axes.push_back(bodyVelCmdFlag_);
     cmdPub_.publish(cmd);
   }
 }
@@ -196,20 +184,29 @@ void behaviors::hoverBehavior() {
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
-  cmd.axes.push_back(commandFlag_);
+  cmd.axes.push_back(bodyVelCmdFlag_);
   cmdPub_.publish(cmd);
 };
 
 void behaviors::doBehaviorAction() {
+
+  /*
+   * Find the UAV pose from the boat
+  */
   //compute relative uav heading
-  double boatHeading=util::yaw_from_quat(boatImu_.orientation);
-  double uavHeading=util::yaw_from_quat(uavImu_.orientation);
+  double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
+  double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);
   //compute relative uav position
-  actualPose_.x=boatGPS_.latitude-uavGPS_.latitude;
-  actualPose_.y=boatGPS_.longitude-uavGPS_.longitude;
+  actualPose_.quaternion.x=uavGPS_.latitude-boatGPS_.latitude;
+  actualPose_.quaternion.y=uavGPS_.longitude-boatGPS_.longitude;
+  actualPose_.quaternion.z=uavGPS_.altitude-boatGPS_.altitude;
+  actualPose_.quaternion.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
 
-
-  actualPose_.w=util::ang_dist(boatHeading,uavHeading);
+  //Lets grab the most recent time stamp
+  if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
+    actualPose_.header.stamp = uavGPS_.header.stamp;
+  else
+    actualPose_.header.stamp = uavGPS_.header.stamp;
 
   switch(currentMode_) {
     case Mode::TAKEOFF: {
