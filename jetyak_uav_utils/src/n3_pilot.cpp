@@ -3,7 +3,7 @@
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
-	joySub = nh.subscribe("/joy", 10, &n3_pilot::joyCallback, this);
+	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
 
 	// Set up command publisher
@@ -13,16 +13,23 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
+
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
 	isM100 = versionCheckM100()
 
+	// Initialize joy command
+	joyCommand.axes.clear();
+	for (int i = 0; i < 5; ++i)
+		joyCommand.axes.push_back(0);
+
+	// Initialize default command flag
 	commandFlag = (
 		DJISDK::VERTICAL_VELOCITY   |
 		DJISDK::HORIZONTAL_VELOCITY |
 		DJISDK::YAW_RATE            |
-		DJISDK::HORIZONTAL_GROUND   |
+		DJISDK::HORIZONTAL_BODY     |
 		DJISDK::STABLE_ENABLE);
 }
 
@@ -131,7 +138,7 @@ bool n3_pilot::versionCheckM100()
 	dji_sdk::QueryDroneVersion query;
 	droneVersionServ.call(query);
 
-	if(query.response.version == DJISDK::DroneFirmawareVersion::M100_31)
+	if(query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
 		return true;
 
 	return false;

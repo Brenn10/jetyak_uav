@@ -8,6 +8,7 @@
 #include "tf/tf.h"
 
 // DJI SDK includes
+#include "dji_sdk/dji_sdk.h"
 #include <dji_sdk/QueryDroneVersion.h>
 
 #define C_PI (double)3.141592653589793
