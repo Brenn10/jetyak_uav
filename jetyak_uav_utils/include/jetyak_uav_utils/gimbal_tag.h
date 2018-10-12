@@ -7,6 +7,9 @@
 #include "ar_track_alvar_msgs/AlvarMarkers.h"
 #include "tf/tf.h"
 
+// DJI SDK includes
+#include <dji_sdk/QueryDroneVersion.h>
+
 #define C_PI (double)3.141592653589793
 #define DEG2RAD(DEG) ((DEG) * ((C_PI) / (180.0)))
 #define RAD2DEG(RAD) ((RAD) * (180.0) / (C_PI))
@@ -29,13 +32,16 @@ private:
 	// Publishers
 	ros::Publisher tagBodyPosePub;
 
+	// Services
+	ros::ServiceClient droneVersionServ;
+
 	// Callbacks
 	void tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg);
 	void gimbalCallback(const geometry_msgs::Vector3Stamped& msg);
 	void attitudeCallback(const geometry_msgs::QuaternionStamped& msg);
 
 	// Functions
-	void updateTagPose();
+	bool versionCheckM100();
 
 	// Data
 	tf::Quaternion qCamera2Gimbal;
@@ -47,6 +53,7 @@ private:
 	tf::Quaternion posTag;
 
 	bool tagFound;
+	bool isM100;
 };
 
 #endif

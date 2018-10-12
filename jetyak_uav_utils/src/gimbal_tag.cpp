@@ -5,14 +5,18 @@
 gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 {
 	// Subscribe to topics
-	tagPoseSub = nh.subscribe("ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
+	tagPoseSub = nh.subscribe("/ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
 	gimbalAngleSub = nh.subscribe("/dji_sdk/gimbal_angle", 10, &gimbal_tag::gimbalCallback, this);
 	vehicleAttiSub = nh.subscribe("/dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
 
 	// Set up publisher
 	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
 
+	// Set up service
+	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
+
 	tagFound = false;
+	isM100 = versionCheckM100();
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
 	qConstant = tf::Quaternion(0.0, 0.0, -0.707, 0.707);
@@ -54,6 +58,17 @@ void gimbal_tag::publishTagPose()
 	}
 }
 
+bool gimbal_tag::versionCheckM100()
+{
+	dji_sdk::QueryDroneVersion query;
+	droneVersionServ.call(query);
+
+	if(query.response.version == DJISDK::DroneFirmawareVersion::M100_31)
+		return true;
+
+	return false;
+}
+
 // Callbacks
 void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 {
@@ -82,8 +97,10 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 void gimbal_tag::gimbalCallback(const geometry_msgs::Vector3Stamped& msg)
 {
 	// Update gimbal quaternion
-	qGimbal = tf::createQuaternionFromRPY(
-		DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
+	if (isM100)
+		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
+	else
+		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
 	// Remove the constant offset
 	qGimbal = qConstant*qGimbal;
 	qGimbal.normalize();
