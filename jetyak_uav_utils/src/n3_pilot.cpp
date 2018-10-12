@@ -4,6 +4,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
 	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
+
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
 
 
@@ -12,10 +13,12 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 
 	// Set up basic services
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
+	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
+	isM100 = versionCheckM100()
 
 	// Initialize joy command
 	joyCommand.axes.clear();
@@ -58,21 +61,22 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
 	// Switch autopilot on/off
 	// P mode && Autopilot switch on && Autopilot flag not set
-	if (msg->axes[4] == 1 && msg->axes[5] == 1 && !autopilotOn)
+	if (msg->axes[4] == modeFlag && msg->axes[5] == pilotFlag && !autopilotOn)
 	{
 		if(requestControl(1))
 			autopilotOn = true;
 	}
 	// P mode && Autopilot switch off && Autopilot flag set
 	// Not P mode && Autopilot flag set
-	else if ((msg->axes[4] == 1 && msg->axes[5] != 1 && autopilotOn) || (msg->axes[4] != 1 && autopilotOn))
+	else if ((msg->axes[4] == modeFlag && msg->axes[5] != pilotFlag && autopilotOn) ||
+		(msg->axes[4] != modeFlag && autopilotOn))
 	{
 		if(requestControl(0))
 			autopilotOn = false;
 	}
 
 	// If it is on P mode and the autopilot is on check if the RC is being used
-	if (msg->axes[4] == 1 && autopilotOn)
+	if (msg->axes[4] == modeFlag && autopilotOn)
 	{
 		if(msg->axes[0] != 0 || msg->axes[1] != 0 || msg->axes[2] != 0 || msg->axes[3] != 0)
 		{
@@ -90,6 +94,20 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 }
 
 // Private //
+
+void n3_pilot::setupRCCallback()
+{
+	if (isM100)
+	{
+		modeFlag = 8000;
+		pilotFlag = -10000;
+	}
+	else
+	{
+		modeFlag = 1;
+		pilotFlag = 1;
+	}
+}
 
 bool n3_pilot::requestControl(int requestFlag)
 {
@@ -115,6 +133,18 @@ bool n3_pilot::requestControl(int requestFlag)
 
 	return true;
 }
+
+bool n3_pilot::versionCheckM100()
+{
+	dji_sdk::QueryDroneVersion query;
+	droneVersionServ.call(query);
+
+	if(query.response.version == DJISDK::DroneFirmawareVersion::M100_31)
+		return true;
+
+	return false;
+}
+
 
 void n3_pilot::publishCommand()
 {

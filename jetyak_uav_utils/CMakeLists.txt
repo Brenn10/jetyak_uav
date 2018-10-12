@@ -86,6 +86,7 @@ target_link_libraries(n3_pilot_node
 
 target_link_libraries(gimbal_tag_node
   ${catkin_LIBRARIES}
+  ${DJIOSDK_LIBRARIES}
 )
 
 target_link_libraries(behaviors_node
