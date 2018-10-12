@@ -63,7 +63,7 @@ bool gimbal_tag::versionCheckM100()
 	dji_sdk::QueryDroneVersion query;
 	droneVersionServ.call(query);
 
-	if(query.response.version == DJISDK::DroneFirmawareVersion::M100_31)
+	if(query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
 		return true;
 
 	return false;
@@ -101,6 +101,7 @@ void gimbal_tag::gimbalCallback(const geometry_msgs::Vector3Stamped& msg)
 		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
 	else
 		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
+
 	// Remove the constant offset
 	qGimbal = qConstant*qGimbal;
 	qGimbal.normalize();

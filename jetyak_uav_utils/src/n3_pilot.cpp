@@ -139,7 +139,7 @@ bool n3_pilot::versionCheckM100()
 	dji_sdk::QueryDroneVersion query;
 	droneVersionServ.call(query);
 
-	if(query.response.version == DJISDK::DroneFirmawareVersion::M100_31)
+	if(query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
 		return true;
 
 	return false;
