@@ -190,23 +190,36 @@ void behaviors::hoverBehavior() {
 
 void behaviors::doBehaviorAction() {
 
-  /*
-   * Find the UAV pose from the boat
-  */
-  //compute relative uav heading
-  double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
-  double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);
-  //compute relative uav position
-  actualPose_.quaternion.x=uavGPS_.latitude-boatGPS_.latitude;
-  actualPose_.quaternion.y=uavGPS_.longitude-boatGPS_.longitude;
-  actualPose_.quaternion.z=uavGPS_.altitude-boatGPS_.altitude;
-  actualPose_.quaternion.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
 
-  //Lets grab the most recent time stamp
-  if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
-    actualPose_.header.stamp = uavGPS_.header.stamp;
-  else
-    actualPose_.header.stamp = uavGPS_.header.stamp;
+  actualPose_.quaternion.x=tagPose_.pose.position.x;
+  actualPose_.quaternion.y=tagPose_.pose.position.y;
+  actualPose_.quaternion.z=tagPose_.pose.position.z;
+
+  actualPose_.quaternion.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+
+  ROS_WARN("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.2f",
+      actualPose_.quaternion.x,
+      actualPose_.quaternion.y,
+      actualPose_.quaternion.z,
+      actualPose_.quaternion.w);
+
+  // /*
+  //  * Find the UAV pose from the boat
+  // */
+  // //compute relative uav heading
+  // double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
+  // double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);
+  // //compute relative uav position
+  // actualPose_.quaternion.x=uavGPS_.latitude-boatGPS_.latitude;
+  // actualPose_.quaternion.y=uavGPS_.longitude-boatGPS_.longitude;
+  // actualPose_.quaternion.z=uavGPS_.altitude-boatGPS_.altitude;
+  // actualPose_.quaternion.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
+  //
+  // //Lets grab the most recent time stamp
+  // if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
+  //   actualPose_.header.stamp = uavGPS_.header.stamp;
+  // else
+  //   actualPose_.header.stamp = uavGPS_.header.stamp;
 
   switch(currentMode_) {
     case Mode::TAKEOFF: {
