@@ -41,9 +41,6 @@ private:
 	void gimbalCallback(const geometry_msgs::Vector3Stamped& msg);
 	void attitudeCallback(const geometry_msgs::QuaternionStamped& msg);
 
-	// Functions
-	bool versionCheckM100();
-
 	// Data
 	tf::Quaternion qCamera2Gimbal;
 	tf::Quaternion qConstant;
@@ -54,7 +51,6 @@ private:
 	tf::Quaternion posTag;
 
 	bool tagFound;
-	bool isM100;
 };
 
 #endif

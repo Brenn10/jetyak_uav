@@ -2,6 +2,8 @@
 
 #include "tf/transform_datatypes.h"
 
+#include <iostream>
+
 gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 {
 	// Subscribe to topics
@@ -16,23 +18,19 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	tagFound = false;
-	isM100 = versionCheckM100();
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
-	qConstant = tf::Quaternion(0.0, 0.0, -0.707, 0.707);
+	qConstant = tf::Quaternion(0.7071, 0.7071, 0.0, 0.0);
 	qConstant.normalize();
-	qCamera2Gimbal = tf::Quaternion(-0.5, 0.5, -0.5, 0.5);
+	qCamera2Gimbal = tf::Quaternion(0.5, 0.5, 0.5, 0.5);
 }
 
 void gimbal_tag::publishTagPose()
 {
 	if(tagFound)
 	{
-		// The vehicle quaternion is the rotation from body_FLU to ground_ENU
-		// The Gimbal rotation is from the ground_ENU to Gimbal body
-
 		// Calculate offset quaternion
-		qOffset = qVehicle.inverse() * qGimbal.inverse();
+		qOffset = qVehicle.inverse()*qGimbal;
 		qOffset.normalize();
 
 		// Apply rotation to go from gimbal frame to body frame
@@ -56,17 +54,6 @@ void gimbal_tag::publishTagPose()
 
 		tagBodyPosePub.publish(tagPoseBody);
 	}
-}
-
-bool gimbal_tag::versionCheckM100()
-{
-	dji_sdk::QueryDroneVersion query;
-	droneVersionServ.call(query);
-
-	if(query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
-		return true;
-
-	return false;
 }
 
 // Callbacks
@@ -97,10 +84,7 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 void gimbal_tag::gimbalCallback(const geometry_msgs::Vector3Stamped& msg)
 {
 	// Update gimbal quaternion
-	if (isM100)
-		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
-	else
-		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
+	qGimbal = tf::createQuaternionFromRPY(DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
 
 	// Remove the constant offset
 	qGimbal = qConstant*qGimbal;
