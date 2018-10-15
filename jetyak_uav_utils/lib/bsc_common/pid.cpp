@@ -2,7 +2,8 @@
 namespace bsc_common {
 PID::PID() : PID(0.0,0.0,0.0){};
 
-PID::PID(double kp, double ki, double kd)
+PID::PID(double kp, double ki, double kd,int integral_frame) :
+    past_integral_contributions() //instantiate the list
 {
   kp_=kp;
   kd_=kd;
@@ -11,6 +12,7 @@ PID::PID(double kp, double ki, double kd)
   last_time_=0;
   integral_=0;
   signal_=0;
+  integral_frame_=integral_frame;
 }
 
 double PID::get_signal()
@@ -39,6 +41,17 @@ void PID::update(double error,double utime)
     d = kd_*(last_error_-error)/dt;
 
     signal_ += i+d;
+
+    // Add current integral contribution to the list
+    past_integral_contributions.push_back(i);
+    //If we have too many elements
+    if(past_integral_contributions.size()>integral_frame_)
+    {
+      //remove the oldest and subtract it's contribution to the rolling sum
+      integral_-=past_integral_contributions.front();
+      //remove it
+      past_integral_contributions.pop_front();
+    }
   }
   last_error_=error;
   last_time_=utime;
@@ -55,5 +68,6 @@ void PID::reset()
   last_error_=0;
   last_time_=0;
   integral_=0;
+  past_integral_contributions.clear();
 }
 } // namespace bsc_common

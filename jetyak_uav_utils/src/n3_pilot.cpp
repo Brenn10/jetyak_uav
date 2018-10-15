@@ -13,7 +13,6 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
-
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
@@ -143,7 +142,6 @@ bool n3_pilot::versionCheckM100()
 
 	return false;
 }
-
 
 void n3_pilot::publishCommand()
 {

@@ -30,7 +30,8 @@ find_package(DJIOSDK REQUIRED)
 #)
 add_service_files(DIRECTORY srv
   FILES
-  Mode.srv
+  GetMode.srv
+  SetMode.srv
 )
 
 generate_messages(
