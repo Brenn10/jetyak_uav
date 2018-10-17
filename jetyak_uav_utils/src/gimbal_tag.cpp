@@ -16,7 +16,7 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	tagFound = false;
-	isM100 = versionCheckM100();
+	isM100 = true; //versionCheckM100();
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
 	qConstant = tf::Quaternion(0.7071, 0.7071, 0.0, 0.0);
