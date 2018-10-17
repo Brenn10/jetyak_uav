@@ -204,7 +204,7 @@ void behaviors::doBehaviorAction() {
       actualPose_.quaternion.w);
 
   // /*
-  //  * Find the UAV pose from the boat
+  //  * Find the UAV pose from the boat through GPS
   // */
   // //compute relative uav heading
   // double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
