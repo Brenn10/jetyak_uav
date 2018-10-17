@@ -4,9 +4,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
 	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
-
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
-
 
 	// Set up command publisher
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
@@ -18,7 +16,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
-	isM100 = versionCheckM100()
+	isM100 = versionCheckM100();
 
 	// Initialize joy command
 	joyCommand.axes.clear();
@@ -139,12 +137,11 @@ bool n3_pilot::versionCheckM100()
 	dji_sdk::QueryDroneVersion query;
 	droneVersionServ.call(query);
 
-	if(query.response.version == DJISDK::DroneFirmawareVersion::M100_31)
+	if(query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
 		return true;
 
 	return false;
 }
-
 
 void n3_pilot::publishCommand()
 {

@@ -8,6 +8,7 @@
 #include "tf/tf.h"
 
 // DJI SDK includes
+#include "dji_sdk/dji_sdk.h"
 #include <dji_sdk/QueryDroneVersion.h>
 
 #define C_PI (double)3.141592653589793
@@ -35,13 +36,13 @@ private:
 	// Services
 	ros::ServiceClient droneVersionServ;
 
+	// Functions
+	bool versionCheckM100();
+
 	// Callbacks
 	void tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg);
 	void gimbalCallback(const geometry_msgs::Vector3Stamped& msg);
 	void attitudeCallback(const geometry_msgs::QuaternionStamped& msg);
-
-	// Functions
-	bool versionCheckM100();
 
 	// Data
 	tf::Quaternion qCamera2Gimbal;
