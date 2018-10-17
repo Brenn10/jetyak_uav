@@ -19,7 +19,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	isM100 = true; //versionCheckM100();
 
 	// Initialize RC
-	setupRCCallback(isM100);
+	setupRCCallback();
 
 	// Initialize joy command
 	joyCommand.axes.clear();
