@@ -7,10 +7,10 @@ behaviors::behaviors(ros::NodeHandle& nh):
   wpid_(NULL)
 {
   //initialize mode
-  currentMode_=Mode::RIDE;
+  currentMode_=Mode::HOVER;
 
   //subscribers
-  tagPoseSub_ = nh.subscribe("tag_pose",1,&behaviors::tagPoseCallback, this);
+  tagPoseSub_ = nh.subscribe("/tag_pose",1,&behaviors::tagPoseCallback, this);
   uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position",1,&behaviors::uavGPSCallback, this);
   boatGPSSub_ = nh.subscribe("boat_gps",1,&behaviors::boatGPSCallback, this);
   uavAttSub_ =  nh.subscribe("/dji_sdk/attitude",1, &behaviors::uavAttitudeCallback, this);
@@ -43,9 +43,9 @@ void behaviors::doBehaviorAction() {
       actualPose_.quaternion.z,
       actualPose_.quaternion.w);
 
-  // /*
-  //  * Find the UAV pose from the boat through GPS
-  // */
+  // //
+  // // Find the UAV pose from the boat through GPS
+  // //
   // //compute relative uav heading
   // double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
   // double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);

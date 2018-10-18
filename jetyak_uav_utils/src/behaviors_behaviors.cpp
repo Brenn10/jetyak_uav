@@ -21,7 +21,10 @@ void behaviors::takeoffBehavior() {
 }
 
 void behaviors::followBehavior() {
-  if(behaviorChanged_) {
+  /*if(!propellorsRunning) {
+    ROS_ERROR("%s","Propellors not running, unable to follow");
+  }
+  else */if(behaviorChanged_) {
     behaviorChanged_=false;
     xpid_->reset();
     ypid_->reset();
@@ -42,17 +45,18 @@ void behaviors::followBehavior() {
     //point at tag
     wpid_->update(follow_.follow_pose.w-actualPose_.quaternion.w,actualPose_.header.stamp.toSec());
 
-    //rotate velocities in reference to the tag
+/*    //rotate velocities in reference to the tag
     double rotated_x;
     double rotated_y;
     bsc_common::util::rotate_vector(
       xpid_->get_signal(),ypid_->get_signal(),-actualPose_.quaternion.w,rotated_x,rotated_y);
-
+*/
     sensor_msgs::Joy cmd;
-    cmd.axes.push_back(xpid_->get_signal());
-    cmd.axes.push_back(ypid_->get_signal());
-    cmd.axes.push_back(zpid_->get_signal());
-    cmd.axes.push_back(wpid_->get_signal());
+    cmd.axes.push_back(-xpid_->get_signal());
+    cmd.axes.push_back(-ypid_->get_signal());
+    cmd.axes.push_back(-zpid_->get_signal());
+    cmd.axes.push_back(0);
+    //cmd.axes.push_back(wpid_->get_signal());
     cmd.axes.push_back(bodyVelCmdFlag_);
     cmdPub_.publish(cmd);
   }

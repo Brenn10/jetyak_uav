@@ -4,6 +4,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
 	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
+
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
 
 	// Set up command publisher
@@ -17,7 +18,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	autopilotOn = false;
 	bypassPilot = false;
 	isM100 = true; //versionCheckM100();
-
+	
 	// Initialize RC
 	setupRCCallback();
 
