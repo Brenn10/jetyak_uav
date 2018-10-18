@@ -21,7 +21,10 @@ void behaviors::takeoffBehavior() {
 }
 
 void behaviors::followBehavior() {
-  if(behaviorChanged_) {
+  if(!propellorsRunning) {
+    ROS_ERROR("%s","Propellors not running, unable to follow");
+  }
+  else if(behaviorChanged_) {
     behaviorChanged_=false;
     xpid_->reset();
     ypid_->reset();
@@ -49,10 +52,11 @@ void behaviors::followBehavior() {
       xpid_->get_signal(),ypid_->get_signal(),-actualPose_.quaternion.w,rotated_x,rotated_y);
 
     sensor_msgs::Joy cmd;
-    cmd.axes.push_back(xpid_->get_signal());
-    cmd.axes.push_back(ypid_->get_signal());
-    cmd.axes.push_back(zpid_->get_signal());
-    cmd.axes.push_back(wpid_->get_signal());
+    cmd.axes.push_back(-xpid_->get_signal());
+    cmd.axes.push_back(-ypid_->get_signal());
+    cmd.axes.push_back(-zpid_->get_signal());
+    cmd.axes.push_back(0);
+    //cmd.axes.push_back(wpid_->get_signal());
     cmd.axes.push_back(bodyVelCmdFlag_);
     cmdPub_.publish(cmd);
   }
