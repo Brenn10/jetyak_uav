@@ -7,7 +7,6 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
 
-
 	// Set up command publisher
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
@@ -18,7 +17,10 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	// Set default values
 	autopilotOn = false;
 	bypassPilot = false;
-	isM100 = versionCheckM100()
+	isM100 = true; //versionCheckM100();
+	
+	// Initialize RC
+	setupRCCallback();
 
 	// Initialize joy command
 	joyCommand.axes.clear();
@@ -144,7 +146,6 @@ bool n3_pilot::versionCheckM100()
 
 	return false;
 }
-
 
 void n3_pilot::publishCommand()
 {
