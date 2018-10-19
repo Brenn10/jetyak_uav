@@ -71,5 +71,6 @@ void PID::reset()
   last_time_=0;
   integral_=0;
   past_integral_contributions.clear();
+  std::cout << "DONE RESETTING" <<std::endl;
 }
 } // namespace bsc_common

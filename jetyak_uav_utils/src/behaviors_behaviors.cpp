@@ -25,19 +25,30 @@ void behaviors::followBehavior() {
   /*if(!propellorsRunning) {
     ROS_ERROR("%s","Propellors not running, unable to follow");
   }
-  else */if(behaviorChanged_) {
+  else */
+  if(behaviorChanged_) {
     ROS_WARN("BEHAVIOR CHANGED");
+    if(xpid_==NULL) {
+      ROS_WARN("INSTANTIATING PID");
+      xpid_=new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
+      ypid_=new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
+      zpid_=new bsc_common::PID(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
+      wpid_=new bsc_common::PID(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
+    }
+    else {
+      xpid_->reset();
+      ypid_->reset();
+      zpid_->reset();
+      wpid_->reset();
+      ROS_WARN("PID RESET");
+      xpid_->updateParams(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
+      ypid_->updateParams(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
+      zpid_->updateParams(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
+      wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
+      ROS_WARN("PID PARAMS RESET");
+    }
     behaviorChanged_=false;
-    xpid_->reset();
-    ypid_->reset();
-    zpid_->reset();
-    wpid_->reset();
-    ROS_WARN("PID RESET");
-    xpid_->updateParams(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
-    ypid_->updateParams(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
-    zpid_->updateParams(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
-    wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
-    ROS_WARN("PID PARAMS RESET");
+
   } else {
     ROS_WARN("FOLLOWING");
     // line up with pad
