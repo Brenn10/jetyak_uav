@@ -32,16 +32,19 @@ behaviors::~behaviors() {}
 void behaviors::doBehaviorAction() {
 
 
-  actualPose_.quaternion.x=tagPose_.pose.position.x;
-  actualPose_.quaternion.y=tagPose_.pose.position.y;
-  actualPose_.quaternion.z=tagPose_.pose.position.z;
+  actualPose_.x=tagPose_.pose.position.x;
+  actualPose_.y=tagPose_.pose.position.y;
+  actualPose_.z=tagPose_.pose.position.z;
 
-  actualPose_.quaternion.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+  actualPose_.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+
+  actualPose_.t=tagPose_.header.stamp.toSec();
+
   ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
-      actualPose_.quaternion.x,
-      actualPose_.quaternion.y,
-      actualPose_.quaternion.z,
-      actualPose_.quaternion.w);
+      actualPose_.x,
+      actualPose_.y,
+      actualPose_.z,
+      actualPose_.w);
 
   // //
   // // Find the UAV pose from the boat through GPS

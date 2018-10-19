@@ -1,5 +1,6 @@
 #include "jetyak_uav_utils/n3_pilot.h"
-
+#include <algorithm>
+#define clip(x,low,high) (((x)>(low)) ? (((high)>(x))?(x):(high)) : (low))
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
@@ -17,7 +18,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	autopilotOn = false;
 	bypassPilot = false;
 	isM100 = true; //versionCheckM100();
-	
+
 	// Initialize RC
 	setupRCCallback();
 
@@ -51,10 +52,10 @@ void n3_pilot::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
 	// Pass the joystick message to the command
 	joyCommand.axes.clear();
-	joyCommand.axes.push_back(msg->axes[0]); // Roll
-	joyCommand.axes.push_back(msg->axes[1]); // Pitch
-	joyCommand.axes.push_back(msg->axes[2]); // Altitude
-	joyCommand.axes.push_back(msg->axes[3]); // Yaw
+	joyCommand.axes.push_back(clip(msg->axes[0],-1,1)); // Roll
+	joyCommand.axes.push_back(clip(msg->axes[1],-1,1)); // Pitch
+	joyCommand.axes.push_back(clip(msg->axes[2],-1,1)); // Altitude
+	joyCommand.axes.push_back(clip(msg->axes[3],-1,1)); // Yaw
 	joyCommand.axes.push_back(msg->axes[4]); // Command Flag
 }
 
@@ -79,7 +80,7 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 	// If it is on P mode and the autopilot is on check if the RC is being used
 	if (msg->axes[4] == modeFlag && autopilotOn)
 	{
-		if(msg->axes[0] != 0 || msg->axes[1] != 0 || msg->axes[2] != 0 || msg->axes[3] != 0)
+		if(abs(msg->axes[0]) >.05 || abs(msg->axes[1])>.05 || abs(msg->axes[2]) >.05 || abs(msg->axes[3]) >.05)
 		{
 			// Clear any previous RC commands
 			rcCommand.axes.clear();

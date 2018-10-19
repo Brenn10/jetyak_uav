@@ -39,6 +39,7 @@
 //Custom Lib includes
 #include "../lib/bsc_common/include/pid.h"
 #include "../lib/bsc_common/include/util.h"
+#include "../lib/bsc_common/include/pose4d.h"
 
 class behaviors {
 private:
@@ -80,7 +81,8 @@ private:
   geometry_msgs::QuaternionStamped uavAttitude_;
   sensor_msgs::Imu uavImu_, boatImu_;
   geometry_msgs::PoseStamped tagPose_;
-  geometry_msgs::QuaternionStamped actualPose_;
+
+  bsc_common::pose4d_t actualPose_;
 
   /*********************************************
   * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
