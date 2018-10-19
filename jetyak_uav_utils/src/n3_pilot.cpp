@@ -1,5 +1,5 @@
 #include "jetyak_uav_utils/n3_pilot.h"
-#include <algorithm>
+#include <cmath>
 #define clip(x,low,high) (((x)>(low)) ? (((high)>(x))?(x):(high)) : (low))
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
