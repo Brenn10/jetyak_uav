@@ -39,3 +39,5 @@ land_z_ki: 0
 land_w_kp: 0
 land_w_kd: 0
 land_w_ki: 0
+
+land_collapse: .98

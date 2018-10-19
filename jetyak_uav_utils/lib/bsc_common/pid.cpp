@@ -1,4 +1,5 @@
 #include "include/pid.h"
+#include <iostream>
 namespace bsc_common {
 PID::PID() : PID(0.0,0.0,0.0){};
 
@@ -38,7 +39,7 @@ void PID::update(double error,double utime)
     i = integral_*ki_;
 
     //differential
-    d = kd_*(last_error_-error)/dt;
+    d = kd_*(error-last_error_)/dt;
 
     signal_ += i+d;
 
@@ -68,6 +69,7 @@ void PID::reset()
   last_error_=0;
   last_time_=0;
   integral_=0;
-  past_integral_contributions.clear();
+  if(!past_integral_contributions.empty())
+    past_integral_contributions.clear();
 }
 } // namespace bsc_common
