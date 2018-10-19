@@ -1,6 +1,6 @@
 #include "jetyak_uav_utils/behaviors.h"
 
-behaviors::behaviors(ros::NodeHandle& nh):
+behaviors::behaviors(ros::NodeHandle& nh) :
   xpid_(NULL),
   ypid_(NULL),
   zpid_(NULL),
@@ -46,6 +46,9 @@ behaviors::behaviors(ros::NodeHandle& nh):
   ros::param::param<double>("land_z_ki", land_.ki.z, 0);
   ros::param::param<double>("land_w_ki", land_.ki.w, 0);
 
+  ros::param::param<double>("land_collapse", land_.collapseRatio, .99);
+
+
   //follow
   ros::param::param<double>("follow_x_kp", follow_.kp.x, 0);
   ros::param::param<double>("follow_y_kp", follow_.kp.y, 0);
@@ -66,6 +69,7 @@ behaviors::behaviors(ros::NodeHandle& nh):
   ros::param::param<double>("follow_y", follow_.follow_pose.y, 0);
   ros::param::param<double>("follow_z", follow_.follow_pose.z, 0);
   ros::param::param<double>("follow_w", follow_.follow_pose.w, 0);
+
 }
 
 behaviors::~behaviors() {}

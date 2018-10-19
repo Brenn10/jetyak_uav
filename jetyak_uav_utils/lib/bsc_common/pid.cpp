@@ -38,7 +38,7 @@ void PID::update(double error,double utime)
     i = integral_*ki_;
 
     //differential
-    d = kd_*(last_error_-error)/dt;
+    d = kd_*(error-last_error_)/dt;
 
     signal_ += i+d;
 

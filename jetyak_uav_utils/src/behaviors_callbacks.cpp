@@ -5,6 +5,7 @@ bool behaviors::setModeCallback(jetyak_uav_utils::SetMode::Request  &req, jetyak
   currentMode_=(Mode)req.mode;
   behaviorChanged_=true;
   res.success=true;
+  ROS_WARN("Mode changed to %i",currentMode_);
   return true;
 }
 
