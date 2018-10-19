@@ -1,10 +1,10 @@
 #include "jetyak_uav_utils/behaviors.h"
 
 behaviors::behaviors(ros::NodeHandle& nh) :
-  xpid_(NULL),
-  ypid_(NULL),
-  zpid_(NULL),
-  wpid_(NULL)
+  xpid_(),
+  ypid_(),
+  zpid_(),
+  wpid_()
 {
   //initialize mode
   currentMode_=Mode::HOVER;
