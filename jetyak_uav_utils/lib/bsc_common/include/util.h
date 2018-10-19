@@ -16,6 +16,9 @@ namespace bsc_common {
 
 class util {
 public:
+
+
+
   static constexpr long double C_PI = 3.14159265358979323846; // My long PI value
 
   /* rpy_from_quat

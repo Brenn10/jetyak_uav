@@ -38,12 +38,12 @@ void behaviors::followBehavior() {
   } else {
 
     // line up with pad
-    xpid_->update(follow_.follow_pose.x-actualPose_.quaternion.x,actualPose_.header.stamp.toSec());
-    ypid_->update(follow_.follow_pose.y-actualPose_.quaternion.y,actualPose_.header.stamp.toSec());
-    zpid_->update(follow_.follow_pose.z-actualPose_.quaternion.z,actualPose_.header.stamp.toSec());
+    xpid_->update(follow_.follow_pose.x-actualPose_.x,actualPose_.t);
+    ypid_->update(follow_.follow_pose.y-actualPose_.y,actualPose_.t);
+    zpid_->update(follow_.follow_pose.z-actualPose_.z,actualPose_.t);
 
     //point at tag
-    wpid_->update(follow_.follow_pose.w-actualPose_.quaternion.w,actualPose_.header.stamp.toSec());
+    wpid_->update(follow_.follow_pose.w-actualPose_.w,actualPose_.t);
 
 /*    //rotate velocities in reference to the tag
     double rotated_x;

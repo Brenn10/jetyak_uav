@@ -25,6 +25,47 @@ behaviors::behaviors(ros::NodeHandle& nh):
   // Service servers
   setModeService_ = nh.advertiseService("setMode",&behaviors::setModeCallback,this);
   getModeService_ = nh.advertiseService("getMode",&behaviors::getModeCallback,this);
+
+
+  /****************************************
+  * ASSIGNING ROS PARAMETERS TO THE NODE
+  ***************************************/
+  //land pid
+  ros::param::param<double>("land_x_kp", land_.kp.x, 0);
+  ros::param::param<double>("land_y_kp", land_.kp.y, 0);
+  ros::param::param<double>("land_z_kp", land_.kp.z, 0);
+  ros::param::param<double>("land_w_kp", land_.kp.w, 0);
+
+  ros::param::param<double>("land_x_kd", land_.kd.x, 0);
+  ros::param::param<double>("land_y_kd", land_.kd.y, 0);
+  ros::param::param<double>("land_z_kd", land_.kd.z, 0);
+  ros::param::param<double>("land_w_kd", land_.kd.w, 0);
+
+  ros::param::param<double>("land_x_ki", land_.ki.x, 0);
+  ros::param::param<double>("land_y_ki", land_.ki.y, 0);
+  ros::param::param<double>("land_z_ki", land_.ki.z, 0);
+  ros::param::param<double>("land_w_ki", land_.ki.w, 0);
+
+  //follow
+  ros::param::param<double>("follow_x_kp", follow_.kp.x, 0);
+  ros::param::param<double>("follow_y_kp", follow_.kp.y, 0);
+  ros::param::param<double>("follow_z_kp", follow_.kp.z, 0);
+  ros::param::param<double>("follow_w_kp", follow_.kp.w, 0);
+
+  ros::param::param<double>("follow_x_kd", follow_.kd.x, 0);
+  ros::param::param<double>("follow_y_kd", follow_.kd.y, 0);
+  ros::param::param<double>("follow_z_kd", follow_.kd.z, 0);
+  ros::param::param<double>("follow_w_kd", follow_.kd.w, 0);
+
+  ros::param::param<double>("follow_x_ki", follow_.ki.x, 0);
+  ros::param::param<double>("follow_y_ki", follow_.ki.y, 0);
+  ros::param::param<double>("follow_z_ki", follow_.ki.z, 0);
+  ros::param::param<double>("follow_w_ki", follow_.ki.w, 0);
+
+  ros::param::param<double>("follow_x", follow_.follow_pose.x, 0);
+  ros::param::param<double>("follow_y", follow_.follow_pose.y, 0);
+  ros::param::param<double>("follow_z", follow_.follow_pose.z, 0);
+  ros::param::param<double>("follow_w", follow_.follow_pose.w, 0);
 }
 
 behaviors::~behaviors() {}
@@ -32,16 +73,19 @@ behaviors::~behaviors() {}
 void behaviors::doBehaviorAction() {
 
 
-  actualPose_.quaternion.x=tagPose_.pose.position.x;
-  actualPose_.quaternion.y=tagPose_.pose.position.y;
-  actualPose_.quaternion.z=tagPose_.pose.position.z;
+  actualPose_.x=tagPose_.pose.position.x;
+  actualPose_.y=tagPose_.pose.position.y;
+  actualPose_.z=tagPose_.pose.position.z;
 
-  actualPose_.quaternion.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+  actualPose_.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+
+  actualPose_.t=tagPose_.header.stamp.toSec();
+
   ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
-      actualPose_.quaternion.x,
-      actualPose_.quaternion.y,
-      actualPose_.quaternion.z,
-      actualPose_.quaternion.w);
+      actualPose_.x,
+      actualPose_.y,
+      actualPose_.z,
+      actualPose_.w);
 
   // //
   // // Find the UAV pose from the boat through GPS
@@ -111,30 +155,6 @@ int main(int argc, char **argv) {
   ros::Rate rate(10);
 
 
-  //Create Dynamic reconfiguration node handles
-  ros::NodeHandle nhl("~/land");
-  ros::NodeHandle nhf("~/follow");
-
-  //Create synamic Reconfigure
-  dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig> landCfgServer(nhl);
-  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig> followCfgServer(nhf);
-
-  // define callback types
-  dynamic_reconfigure::Server<jetyak_uav_utils::LandConstantsConfig>::CallbackType landCfgCallback;
-  dynamic_reconfigure::Server<jetyak_uav_utils::FollowConstantsConfig>::CallbackType followCfgCallback;
-
-  // bind callbacks
-  boost::function<void (jetyak_uav_utils::LandConstantsConfig &,int) >
-      landCfgCallback2(boost::bind( &behaviors::landReconfigureCallback,&uav_behaviors, _1, _2 ) );
-  boost::function<void (jetyak_uav_utils::FollowConstantsConfig &,int) >
-      followCfgCallback2(boost::bind( &behaviors::followReconfigureCallback,&uav_behaviors, _1, _2 ) );
-
-  landCfgCallback=landCfgCallback2;
-  followCfgCallback=followCfgCallback2;
-
-  //set callbacks in server
-  landCfgServer.setCallback(landCfgCallback);
-  followCfgServer.setCallback(followCfgCallback);
 
   while(ros::ok())
   {

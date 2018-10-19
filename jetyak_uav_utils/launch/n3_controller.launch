@@ -1,7 +1,9 @@
 <launch>
   <group ns="jetyak_uav_utils">
     <node name="uav_controller" pkg="jetyak_uav_utils" type="n3_pilot_node" output="screen" />
-    <node name="uav_behaviors" pkg="jetyak_uav_utils" type="behaviors_node" output="screen"/>
+    <node name="uav_behaviors" pkg="jetyak_uav_utils" type="behaviors_node" output="screen">
+      <rosparam command="load" file="cfg/behaviors.yaml" />
+    </node>
   </group>
 
 	<!-- Start capturing the flight data -->

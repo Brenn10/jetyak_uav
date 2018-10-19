@@ -31,7 +31,7 @@ void PID::update(double error,double utime)
     double i,d;
 
     // get change in time
-    double dt = last_time_-utime;
+    double dt = utime-last_time_;
 
     // integral
     integral_+=error*dt;
