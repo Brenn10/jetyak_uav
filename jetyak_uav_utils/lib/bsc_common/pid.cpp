@@ -66,12 +66,10 @@ void PID::updateParams(double kp, double ki, double kd) {
 
 void PID::reset()
 {
-  std::cout << "RESETTING PID" << std::endl;
   last_error_=0;
-  //last_time_=0;
-  //integral_=0;
-  //if(!past_integral_contributions.empty())
-    //past_integral_contributions.clear();
-  std::cout << "DONE RESETTING" <<std::endl;
+  last_time_=0;
+  integral_=0;
+  if(!past_integral_contributions.empty())
+    past_integral_contributions.clear();
 }
 } // namespace bsc_common
