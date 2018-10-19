@@ -2,7 +2,7 @@
 #include <iostream>
 
 int main() {
-  bsc_common::PID pid = bsc_common::PID(NULL);
-  pid.reset();
+  bsc_common::PID *pid = new bsc_common::PID();
+  pid->reset();
   return 0;
 }
