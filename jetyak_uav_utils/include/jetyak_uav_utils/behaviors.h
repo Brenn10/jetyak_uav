@@ -21,8 +21,6 @@
 #include "Mode.h"
 #include "jetyak_uav_utils/SetMode.h"
 #include "jetyak_uav_utils/GetMode.h"
-#include "jetyak_uav_utils/LandConstantsConfig.h"
-#include "jetyak_uav_utils/FollowConstantsConfig.h"
 
 //ROS Core includes
 #include <sensor_msgs/Joy.h>
@@ -34,7 +32,6 @@
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <dji_sdk/DroneArmControl.h>
-#include <dynamic_reconfigure/server.h>
 
 //Custom Lib includes
 #include "../lib/bsc_common/include/pid.h"
@@ -89,7 +86,7 @@ private:
   **********************************************/
   // Land specific constants
   struct {
-    geometry_msgs::Quaternion kp,kd,ki;
+    bsc_common::pose4d_t kp,kd,ki;
     double currGoalHeight;
     double collapseRatio;
 
@@ -97,8 +94,8 @@ private:
 
   // follow specific constants
   struct {
-    geometry_msgs::Quaternion kp,kd,ki;
-    geometry_msgs::Quaternion follow_pose;
+    bsc_common::pose4d_t kp,kd,ki;
+    bsc_common::pose4d_t follow_pose;
   } follow_;
 
   /*********************
@@ -225,23 +222,7 @@ public:
   void doBehaviorAction();
 
 
-  /*************************
-  * Reconfigure callbacks
-  *************************/
 
-  /** landReconfigureCallback
-  * Listens for changes to the configuration of the Landing behaviors
-  *
-  * @param config Provides the configuration parameters which we will save for the landing method
-  */
-  void landReconfigureCallback(jetyak_uav_utils::LandConstantsConfig &config, uint32_t level);
-
-  /** followReconfigureCallback
-  * Listens for changes to the configuration of the Following behaviors
-  *
-  * @param config Provides the configuration parameters which we will save for the following method
-  */
-  void followReconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level);
 
 };
 
