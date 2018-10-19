@@ -66,6 +66,12 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("follow_z", follow_.follow_pose.z, 0);
   ros::param::param<double>("follow_w", follow_.follow_pose.w, 0);
 
+  ROS_WARN("X PARAMS: kp: %f, ki: %f, kd: %f, pose: %f",
+    follow_.kp.x,
+    follow_.ki.x,
+    follow_.kd.x,
+    follow_.follow_pose.x
+  );
   xpid_ = new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
   ypid_ = new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
   zpid_ = new bsc_common::PID(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
