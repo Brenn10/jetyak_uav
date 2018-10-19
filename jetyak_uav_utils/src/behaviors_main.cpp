@@ -1,6 +1,7 @@
 #include "jetyak_uav_utils/behaviors.h"
 
-behaviors::behaviors(ros::NodeHandle& nh)
+behaviors::behaviors(ros::NodeHandle& nh) :
+  xpid_(),ypid_(),zpid_(),wpid_()
 {
   //initialize mode
   currentMode_=Mode::HOVER;
@@ -65,7 +66,7 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("follow_y", follow_.follow_pose.y, 0);
   ros::param::param<double>("follow_z", follow_.follow_pose.z, 0);
   ros::param::param<double>("follow_w", follow_.follow_pose.w, 0);
-  
+
 }
 
 behaviors::~behaviors() {}
