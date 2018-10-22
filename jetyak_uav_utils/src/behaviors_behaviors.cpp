@@ -47,7 +47,7 @@ void behaviors::followBehavior() {
     double rotated_x;
     double rotated_y;
     bsc_common::util::rotate_vector(
-      xpid_->get_signal(),ypid_->get_signal(),-actualPose_.quaternion.w,rotated_x,rotated_y);
+      xpid_->get_signal(),ypid_->get_signal(),-actualPose_.w,rotated_x,rotated_y);
 */
     ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
       -xpid_->get_signal(),
