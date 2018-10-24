@@ -104,10 +104,10 @@ void behaviors::doBehaviorAction() {
   // double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
   // double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);
   // //compute relative uav position
-  // actualPose_.quaternion.x=uavGPS_.latitude-boatGPS_.latitude;
-  // actualPose_.quaternion.y=uavGPS_.longitude-boatGPS_.longitude;
-  // actualPose_.quaternion.z=uavGPS_.altitude-boatGPS_.altitude;
-  // actualPose_.quaternion.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
+  // actualPose_.x=uavGPS_.latitude-boatGPS_.latitude;
+  // actualPose_.y=uavGPS_.longitude-boatGPS_.longitude;
+  // actualPose_.z=uavGPS_.altitude-boatGPS_.altitude;
+  // actualPose_.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
   //
   // //Lets grab the most recent time stamp
   // if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
