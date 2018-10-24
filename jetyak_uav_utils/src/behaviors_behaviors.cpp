@@ -25,7 +25,9 @@ void behaviors::followBehavior() {
     ROS_ERROR("%s","Propellors not running, unable to follow");
   }
   else */
-  if(behaviorChanged_) {
+  if(behaviorChanged_) { // if just changed
+    follow_.lastSpotted=actualPose_.t;
+    follow_.lostTagCounter=0;
     xpid_->reset();
     ypid_->reset();
     zpid_->reset();
@@ -36,7 +38,31 @@ void behaviors::followBehavior() {
     wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
     behaviorChanged_=false;
 
-  } else {
+  } else { // DO the loop
+
+    if(follow_.lastSpotted!=actualPose_.t) { //if time changed
+      follow_.lastSpotted=actualPose_.t;
+      follow_.lostTagCounter=0;
+    }
+    else { //if time is same
+      follow_.lostTagCounter++;
+
+      if(follow_.lostTagCounter>3 and follow_.lostTagCounter<=10) { //if time has been same for over 3 tick
+        sensor_msgs::Joy cmd;
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(y>0 ? .1 : -.1); //rotate CCW if lost on left, CW if right
+        cmd.axes.push_back(bodyVelCmdFlag_);
+        cmdPub_.publish(cmd);
+        return;
+      } else if (follow_.lostTagCounter>10){ // if time has been same for over 10 tick
+        behaviorChanged_=true;
+        currentMode_=Mode::HOVER;
+        return;
+      }
+    }
+
     // line up with pad
     xpid_->update(follow_.follow_pose.x-actualPose_.x,actualPose_.t);
     ypid_->update(follow_.follow_pose.y-actualPose_.y,actualPose_.t);
@@ -62,6 +88,8 @@ void behaviors::followBehavior() {
     cmd.axes.push_back(-wpid_->get_signal());
     cmd.axes.push_back(bodyVelCmdFlag_);
     cmdPub_.publish(cmd);
+
+
   }
 }
 
