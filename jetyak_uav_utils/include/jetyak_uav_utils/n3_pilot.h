@@ -47,6 +47,7 @@ protected:
 	uint8_t commandFlag;
 
 	int modeFlag, pilotFlag;
+	double cmdLow, cmdHigh, rcStickThresh;
 
 	bool isM100;
 };

@@ -46,6 +46,7 @@ private:
 
 	// Data
 	tf::Quaternion qCamera2Gimbal;
+	tf::Quaternion qTag2Gimbal;
 	tf::Quaternion qConstant;
 	tf::Quaternion qOffset;
 	tf::Quaternion qGimbal;

@@ -1,10 +1,15 @@
 #include "jetyak_uav_utils/n3_pilot.h"
+
 #include <cmath>
-#define clip(x,low,high) (((x)>(low)) ? (((high)>(x))?(x):(high)) : (low))
+#include <iostream>
+
+#define clip(X, LOW, HIGH) (((X) > (HIGH)) ? (HIGH) : ((X) < (LOW)) ? (LOW) : (X))
+
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
 	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
+
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
 
 	// Set up command publisher
@@ -15,6 +20,9 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	// Set default values
+	cmdLow  = -1.0;
+	cmdHigh = 1.0;
+	rcStickThresh = 0.05;
 	autopilotOn = false;
 	bypassPilot = false;
 	isM100 = true; //versionCheckM100();
@@ -52,11 +60,11 @@ void n3_pilot::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
 	// Pass the joystick message to the command
 	joyCommand.axes.clear();
-	joyCommand.axes.push_back(clip(msg->axes[0],-1,1)); // Roll
-	joyCommand.axes.push_back(clip(msg->axes[1],-1,1)); // Pitch
-	joyCommand.axes.push_back(clip(msg->axes[2],-1,1)); // Altitude
-	joyCommand.axes.push_back(clip(msg->axes[3],-1,1)); // Yaw
-	joyCommand.axes.push_back(msg->axes[4]); // Command Flag
+	joyCommand.axes.push_back(clip(msg->axes[0], cmdLow, cmdHigh)); // Roll
+	joyCommand.axes.push_back(clip(msg->axes[1], cmdLow, cmdHigh)); // Pitch
+	joyCommand.axes.push_back(clip(msg->axes[2], cmdLow, cmdHigh)); // Altitude
+	joyCommand.axes.push_back(clip(msg->axes[3], cmdLow, cmdHigh)); // Yaw
+	joyCommand.axes.push_back(msg->axes[4]);                        // Flag
 }
 
 void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
@@ -77,10 +85,14 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 			autopilotOn = false;
 	}
 
+	std::cout << "Axis 1 value: " << msg->axes[0] << "\n";
+	std::cout << "Absolute axis 1 value: " << std::abs(msg->axes[0]) << "\n";
+
 	// If it is on P mode and the autopilot is on check if the RC is being used
 	if (msg->axes[4] == modeFlag && autopilotOn)
 	{
-		if(abs(msg->axes[0]) >.05 || abs(msg->axes[1])>.05 || abs(msg->axes[2]) >.05 || abs(msg->axes[3]) >.05)
+		if(abs(msg->axes[0]) > rcStickThresh || abs(msg->axes[1]) > rcStickThresh ||
+		   abs(msg->axes[2]) > rcStickThresh || abs(msg->axes[3]) > rcStickThresh)
 		{
 			// Clear any previous RC commands
 			rcCommand.axes.clear();
@@ -99,13 +111,11 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
 void n3_pilot::setupRCCallback()
 {
-	if (isM100)
-	{
+	if (isM100) {
 		modeFlag = 8000;
 		pilotFlag = -10000;
 	}
-	else
-	{
+	else {
 		modeFlag = 1;
 		pilotFlag = 1;
 	}
@@ -120,13 +130,11 @@ bool n3_pilot::requestControl(int requestFlag)
 	// Request control
 	sdkCtrlAuthorityServ.call(ctrlAuthority);
 
-	if(!ctrlAuthority.response.result)
-	{
+	if(!ctrlAuthority.response.result) {
 		ROS_ERROR("Could not switch control");
 		return false;
 	}
-	else
-	{
+	else {
 		if (requestFlag)
 			ROS_INFO("Control of vehicle is obtained");
 		else
