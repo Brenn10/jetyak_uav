@@ -96,6 +96,8 @@ private:
   struct {
     bsc_common::pose4d_t kp,kd,ki;
     bsc_common::pose4d_t follow_pose;
+    double lastSpotted;
+    int lostTagCounter;
   } follow_;
 
   /*********************

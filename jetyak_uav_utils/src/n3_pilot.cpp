@@ -1,7 +1,6 @@
 #include "jetyak_uav_utils/n3_pilot.h"
 
 #include <cmath>
-#include <iostream>
 
 #define clip(X, LOW, HIGH) (((X) > (HIGH)) ? (HIGH) : ((X) < (LOW)) ? (LOW) : (X))
 
@@ -85,14 +84,14 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 			autopilotOn = false;
 	}
 
-	std::cout << "Axis 1 value: " << msg->axes[0] << "\n";
-	std::cout << "Absolute axis 1 value: " << std::abs(msg->axes[0]) << "\n";
+	ROS_INFO("Axis 1 value: %1.2f" , msg->axes[0]);
+	ROS_INFO("Absolute axis 1 value: %1.2f", std::abs(msg->axes[0]));
 
 	// If it is on P mode and the autopilot is on check if the RC is being used
 	if (msg->axes[4] == modeFlag && autopilotOn)
 	{
-		if(abs(msg->axes[0]) > rcStickThresh || abs(msg->axes[1]) > rcStickThresh ||
-		   abs(msg->axes[2]) > rcStickThresh || abs(msg->axes[3]) > rcStickThresh)
+		if(std::abs(msg->axes[0]) > rcStickThresh || std::abs(msg->axes[1]) > rcStickThresh ||
+		   std::abs(msg->axes[2]) > rcStickThresh || std::abs(msg->axes[3]) > rcStickThresh)
 		{
 			// Clear any previous RC commands
 			rcCommand.axes.clear();
