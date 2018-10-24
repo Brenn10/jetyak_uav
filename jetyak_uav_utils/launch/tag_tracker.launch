@@ -2,5 +2,5 @@
 	<node pkg="jetyak_uav_utils" type="gimbal_tag_node" name="gimbal_tag_node" output="screen" />
 
 	<!-- Start the camera and gimbal controller -->
-	<include file="$(find dji_camera)/launch/tagTrackAndPose.launch"/>
+	<include file="$(find dji_camera)/launch/bundle2TrackAndPose.launch"/>
 </launch>

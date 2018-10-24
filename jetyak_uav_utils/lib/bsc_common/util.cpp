@@ -32,7 +32,7 @@ double util::yaw_from_quat(const geometry_msgs::Quaternion& orientation){
 
   bsc_common::util::rpy_from_quat(orientation,state);
 
-  double yaw = state->x;
+  double yaw = state->z+bsc_common::util::C_PI;
   if(yaw>bsc_common::util::C_PI) {
     yaw=yaw-2*bsc_common::util::C_PI;
   }

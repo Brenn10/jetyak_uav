@@ -47,18 +47,25 @@ void behaviors::followBehavior() {
     else { //if time is same
       follow_.lostTagCounter++;
 
-      if(follow_.lostTagCounter>3 and follow_.lostTagCounter<=10) { //if time has been same for over 3 tick
+      if(follow_.lostTagCounter>3 and follow_.lostTagCounter<=20) { //if time has been same for over 3 tick
+	ROS_WARN("No tag update: %i" , follow_.lostTagCounter);
         sensor_msgs::Joy cmd;
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
-        cmd.axes.push_back(y>0 ? .1 : -.1); //rotate CCW if lost on left, CW if right
+        cmd.axes.push_back(actualPose_.y>0 ? .1 : -.1); //rotate CCW if lost on left, CW if right
         cmd.axes.push_back(bodyVelCmdFlag_);
         cmdPub_.publish(cmd);
         return;
-      } else if (follow_.lostTagCounter>10){ // if time has been same for over 10 tick
-        behaviorChanged_=true;
-        currentMode_=Mode::HOVER;
+      } else if (follow_.lostTagCounter>20){ // if time has been same for over 10 tick
+        ROS_WARN("Tag Lost");
+	sensor_msgs::Joy cmd;
+	cmd.axes.push_back(0);
+	cmd.axes.push_back(0);
+	cmd.axes.push_back(0);
+	cmd.axes.push_back(0);
+	cmd.axes.push_back(bodyVelCmdFlag_);
+	cmdPub_.publish(cmd);
         return;
       }
     }
@@ -95,7 +102,9 @@ void behaviors::followBehavior() {
 
 void behaviors::returnBehavior() {};
 
-void behaviors::landBehavior() {};
+void behaviors::landBehavior() {
+
+};
 
 void behaviors::rideBehavior() {
   if(propellorsRunning) {
