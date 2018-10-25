@@ -1,10 +1,6 @@
 <launch>
-
-	<node name="flight_data_bag" pkg="rosbag" type="record" output="screen"
-		args="record -o flightdata /joy /jetyak_uav_utils/uav_mode /jetyak_uav_utils/raw_cmd_pos_ENU /jetyak_uav_utils/raw_cmd_vel_FLU /dji_sdk/rc /dji_sdk/flight_control_setpoint_generic /dji_sdk/flight_status /dji_sdk/imu  /dji_sdk/attitude /dji_sdk/gps_position /dji_sdk/gps_health /dji_sdk/local_position /dji_sdk/velocity /dji_sdk/rc /dji_sdk/battery_state"
-	/>
-
-	<node name="camera_bag" pkg="rosbag" type="record" output="screen"
-		args="record -o camera /raspicam_node/image_raw/compressed /raspicam_node/camera_info"
+	<!-- Start recording the flight log data -->
+	<node pkg="rosbag" type="record" name="flight_log_bagfile" output="screen"
+		  args="record -o /media/ubuntu/Manifold/FlightLog/flightData /ar_pose_marker /dji_sdk/attitude /dji_sdk/battery_state /dji_sdk/flight_control_setpoint_generic /dji_sdk/flight_status /dji_sdk/gimbal_angle /dji_sdk/gimbal_angle_cmd /dji_sdk/gimbal_speed_cmd /dji_sdk/gps_health /dji_sdk/gps_position /dji_sdk/height_above_takeoff /dji_sdk/imu /dji_sdk/local_frame_ref /dji_sdk/local_position /dji_sdk/rc /dji_sdk/velocity /dji_sdk/vo_position /joy /tag_pose /jetyak_uav_utils/behavior_cmd"
 	/>
 </launch>

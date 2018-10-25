@@ -1,0 +1,10 @@
+<launch>
+	<-- Start the DJI SDK -->
+	<include file="$(find dji_sdk)/launch/sdk.launch"/>
+
+	<!-- Start the camera and gimbal controller -->
+	<include file="$(find dji_camera)/launch/bundle2TrackAndPose.launch"/>
+
+	<!-- Start the tag positioning -->
+	<node pkg="jetyak_uav_utils" type="gimbal_tag_node" name="gimbal_tag_node" output="screen" />
+</launch>

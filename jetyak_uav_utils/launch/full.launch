@@ -1,5 +1,4 @@
 <launch>
-  <include file="$(find dji_sdk)/launch/sdk.launch"/>
-  <include file="$(find jetyak_uav_utils)/launch/tag_tracker.launch"/>
-  <!--<include file="$(find jetyak_uav_utils)/launch/n3_controller.launch"/>-->
+  <include file="$(find jetyak_uav_utils)/launch/visionAndSDK.launch"/>
+  <include file="$(find jetyak_uav_utils)/launch/n3_controller.launch"/>
 </launch>

@@ -1,3 +1,0 @@
-<launch>
-	<node pkg="jetyak_uav_utils" type="gimbal_tag_node" name="gimbal_tag_node" output="screen"/>
-</launch>
