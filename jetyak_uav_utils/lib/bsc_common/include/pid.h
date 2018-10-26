@@ -8,7 +8,7 @@ private:
   std::list<double> past_integral_contributions;
 public:
   PID();
-  PID(double kp, double ki, double kd,int integral_frame=200);
+  PID(double kp, double ki, double kd,int integral_frame=50);
   void update(double error,double utime);
   void updateParams(double kp, double ki, double kd);
   void reset();
