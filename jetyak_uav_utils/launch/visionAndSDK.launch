@@ -1,5 +1,5 @@
 <launch>
-	<-- Start the DJI SDK -->
+	<!-- Start the DJI SDK -->
 	<include file="$(find dji_sdk)/launch/sdk.launch"/>
 
 	<!-- Start the camera and gimbal controller -->
