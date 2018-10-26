@@ -21,7 +21,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	// Set default values
 	cmdLow  = -1.0;
 	cmdHigh = 1.0;
-	rcStickThresh = 0.05;
+	rcStickThresh = 0.01;
 	autopilotOn = false;
 	bypassPilot = false;
 	isM100 = true; //versionCheckM100();
@@ -83,9 +83,6 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 		if(requestControl(0))
 			autopilotOn = false;
 	}
-
-	ROS_INFO("Axis 1 value: %1.2f" , msg->axes[0]);
-	ROS_INFO("Absolute axis 1 value: %1.2f", std::abs(msg->axes[0]));
 
 	// If it is on P mode and the autopilot is on check if the RC is being used
 	if (msg->axes[4] == modeFlag && autopilotOn)
