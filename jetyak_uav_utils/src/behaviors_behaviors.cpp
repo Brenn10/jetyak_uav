@@ -45,7 +45,7 @@ void behaviors::followBehavior() {
       follow_.lostTagCounter++;
 
       if(follow_.lostTagCounter>3 and follow_.lostTagCounter<=20) { //if time has been same for over 3 tick
-	ROS_WARN("No tag update: %i" , follow_.lostTagCounter);
+        ROS_WARN("No tag update: %i" , follow_.lostTagCounter);
         sensor_msgs::Joy cmd;
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
@@ -56,13 +56,13 @@ void behaviors::followBehavior() {
         return;
       } else if (follow_.lostTagCounter>20){ // if time has been same for over 10 tick
         ROS_WARN("Tag Lost");
-	sensor_msgs::Joy cmd;
-	cmd.axes.push_back(0);
-	cmd.axes.push_back(0);
-	cmd.axes.push_back(0);
-	cmd.axes.push_back(0);
-	cmd.axes.push_back(bodyVelCmdFlag_);
-	cmdPub_.publish(cmd);
+      	sensor_msgs::Joy cmd;
+      	cmd.axes.push_back(0);
+      	cmd.axes.push_back(0);
+      	cmd.axes.push_back(0);
+      	cmd.axes.push_back(0);
+      	cmd.axes.push_back(bodyVelCmdFlag_);
+      	cmdPub_.publish(cmd);
         return;
       }
     }
@@ -116,40 +116,42 @@ void behaviors::landBehavior() {
   } else { // DO the loop
 
     if(follow_.lastSpotted!=actualPose_.t) { //if time changed
-      follow_.lastSpotted=actualPose_.t;
-      follow_.lostTagCounter=0;
+      if(actualPose_.z>-.1 ){}
+
+      land_.lastSpotted=actualPose_.t;
+      land_.lostTagCounter=0;
     }
     else { //if time is same
       follow_.lostTagCounter++;
 
       if(follow_.lostTagCounter>3 and follow_.lostTagCounter<=20) { //if time has been same for over 3 tick
-  ROS_WARN("No tag update: %i" , follow_.lostTagCounter);
+        ROS_WARN("No tag update: %i" , follow_.lostTagCounter);
         sensor_msgs::Joy cmd;
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
+        cmd.axes.push_back(.5); //If tag lost, fly up a bit
         cmd.axes.push_back(0);
-        cmd.axes.push_back(actualPose_.y>0 ? .1 : -.1); //rotate CCW if lost on left, CW if right
         cmd.axes.push_back(bodyVelCmdFlag_);
         cmdPub_.publish(cmd);
         return;
       } else if (follow_.lostTagCounter>20){ // if time has been same for over 10 tick
         ROS_WARN("Tag Lost");
-  sensor_msgs::Joy cmd;
-  cmd.axes.push_back(0);
-  cmd.axes.push_back(0);
-  cmd.axes.push_back(0);
-  cmd.axes.push_back(0);
-  cmd.axes.push_back(bodyVelCmdFlag_);
-  cmdPub_.publish(cmd);
+        sensor_msgs::Joy cmd;
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(0);
+        cmd.axes.push_back(bodyVelCmdFlag_);
+        cmdPub_.publish(cmd);
         return;
       }
     }
 
     // line up with pad
-    xpid_->update(follow_.follow_pose.x-actualPose_.x,actualPose_.t);
-    ypid_->update(follow_.follow_pose.y-actualPose_.y,actualPose_.t);
-    zpid_->update(follow_.follow_pose.z-actualPose_.z,actualPose_.t);
-    wpid_->update(follow_.follow_pose.w-actualPose_.w,actualPose_.t);
+    xpid_->update(land_.land_pose.x-actualPose_.x,actualPose_.t);
+    ypid_->update(land_.land_pose.y-actualPose_.y,actualPose_.t);
+    zpid_->update(land_.land_pose.z-actualPose_.z,actualPose_.t);
+    wpid_->update(land_.land_pose.w-actualPose_.w,actualPose_.t);
 
   /*    //rotate velocities in reference to the tag
     double rotated_x;

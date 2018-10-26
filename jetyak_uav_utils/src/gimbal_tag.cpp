@@ -68,9 +68,9 @@ void gimbal_tag::publishTagPose()
 		tagPoseBody.header.stamp = time;
 		tagPoseBody.header.frame_id = "body_FLU";
 
-		tagPoseBody.pose.position.x = RAD2DEG(t_rf); //positonTagBody[0];
-		tagPoseBody.pose.position.y = RAD2DEG(t_pf); //positonTagBody[1];
-		tagPoseBody.pose.position.z = RAD2DEG(t_yf); //positonTagBody[2];
+		tagPoseBody.pose.position.x = positonTagBody[0];
+		tagPoseBody.pose.position.y = positonTagBody[1];
+		tagPoseBody.pose.position.z = positonTagBody[2];
 
 		tf::quaternionTFToMsg(qTagBody, tagPoseBody.pose.orientation);
 
