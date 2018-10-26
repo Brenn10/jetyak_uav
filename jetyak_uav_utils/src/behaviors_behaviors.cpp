@@ -2,21 +2,23 @@
 
 void behaviors::takeoffBehavior() {
   if(!propellorsRunning) {
-    dji_sdk::DroneArmControl srv;
-    srv.request.arm=1;
-    armSrv_.call(srv);
+    dji_sdk::DroneTaskControl srv;
+    srv.request.task=4;
+    taskSrv_.call(srv);
     if(srv.response.result) {
-      ROS_WARN("ARMS ENABLED");
+      ROS_INFO("Takeoff successful");
       behaviorChanged_=true;
       currentMode_=Mode::FOLLOW;
       propellorsRunning=true;
     } else {
-      ROS_WARN("FAILED TO ENABLE ARMS");
+      ROS_WARN("Failure to Takeoff");
     }
   }
   else {
-    ROS_WARN("ARMS ALREADY GOING");
+    ROS_INFO("Already up");
+    behaviorChanged_=true;
     currentMode_=Mode::FOLLOW;
+    propellorsRunning=true;
   }
 }
 
@@ -50,7 +52,7 @@ void behaviors::followBehavior() {
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
-        cmd.axes.push_back(actualPose_.y>0 ? .1 : -.1); //rotate CCW if lost on left, CW if right
+        cmd.axes.push_back(actualPose_.y>0 ? .3 : -.3); //rotate CCW if lost on left, CW if right
         cmd.axes.push_back(bodyVelCmdFlag_);
         cmdPub_.publish(cmd);
         return;
@@ -116,7 +118,21 @@ void behaviors::landBehavior() {
   } else { // DO the loop
 
     if(follow_.lastSpotted!=actualPose_.t) { //if time changed
-      if(actualPose_.z>-.1 ){}
+
+      // If pose is within a cylinder of radius .1 and height .1
+      if((land_.land_pose.z-actualPose_.z)<.1 and
+        pow(land_.land_pose.x-actualPose_.x,2)+
+        pow(land_.land_pose.y-actualPose_.y,2)<pow(.1,2))
+      {
+        dji_sdk::DroneTaskControl srv;
+        srv.request.task=6;
+        taskSrv_.call(srv);
+        if(srv.response.result)
+        {
+          currentMode_=Mode::RIDE;
+          return;
+        }
+      }
 
       land_.lastSpotted=actualPose_.t;
       land_.lostTagCounter=0;
@@ -179,9 +195,9 @@ void behaviors::landBehavior() {
 
 void behaviors::rideBehavior() {
   if(propellorsRunning) {
-    dji_sdk::DroneArmControl srv;
-    srv.request.arm=0;
-    armSrv_.call(srv);
+    dji_sdk::DroneTaskControl srv;
+    srv.request.task=6;
+    taskSrv_.call(srv);
     propellorsRunning=srv.response.result;
     if(srv.response.result) {
       ROS_WARN("Arms deactivated");

@@ -31,7 +31,7 @@
 
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
-#include <dji_sdk/DroneArmControl.h>
+#include <dji_sdk/DroneTaskControl.h>
 
 //Custom Lib includes
 #include "../lib/bsc_common/include/pid.h"
@@ -47,7 +47,7 @@ private:
   *********************************************/
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
-  ros::ServiceClient armSrv_;
+  ros::ServiceClient taskSrv_;
   ros::ServiceServer setModeService_,getModeService_;
 
   /**********************
