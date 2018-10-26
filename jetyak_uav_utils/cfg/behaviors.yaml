@@ -1,7 +1,7 @@
 #
 # Follow Parameters
 #
-follow_x: .5
+follow_x: 1
 follow_x_kp: .3
 follow_x_kd: .2
 follow_x_ki: 0
@@ -11,7 +11,7 @@ follow_y_kp: .3
 follow_y_kd: .2
 follow_y_ki: 0
 
-follow_z: 0
+follow_z: 2
 follow_z_kp: .2
 follow_z_kd: 0
 follow_z_ki: 0
@@ -24,20 +24,22 @@ follow_w_ki: 0
 #
 # Land Parameters
 #
+land_x: .5
 land_x_kp: .3
 land_x_kd: .2
 land_x_ki: 0
 
+land_y: 0
 land_y_kp: .3
 land_y_kd: .2
 land_y_ki: 0
 
+land_z: 0
 land_z_kp: .2
 land_z_kd: 0
 land_z_ki: 0
 
+land_w: 0
 land_w_kp: 0
 land_w_kd: 0
 land_w_ki: 0
-
-land_collapse: .95

@@ -1,5 +1,5 @@
 # Run on client machine
 
-ssh ubuntu@10.34.7.41 ".//media/ubuntu/Manifold/FlightLog/updateLatest.sh"
-scp -r ubuntu@10.34.7.41:/media/ubuntu/Manifold/FlightLog/latest .
-python plotter.py $(ls -rt target-directory | tail -n1)
+ssh ubuntu@10.34.7.41 "./git/jetyak_uav/jetyak_uav_utils/scripts/updateLatest.sh"
+scp -r ubuntu@10.34.7.41:~/git/jetyak_uav/jetyak_uav_utils/scripts/latest .
+python plotter.py $(ls -rt . | tail -n1)

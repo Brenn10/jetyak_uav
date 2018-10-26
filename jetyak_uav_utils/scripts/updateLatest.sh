@@ -1,3 +1,5 @@
 # Place in the flight log directory of the robot
 
-ln -s `ls -rt target-directory | tail -n1` latest
+
+rm latest
+ln -s /media/ubuntu/Manifold/FlightLog/`ls -rt /media/ubuntu/Manifold/FlightLog | tail -n1` latest
