@@ -36,6 +36,16 @@ bool gimbal_tag::versionCheckM100()
 	return false;
 }
 
+void gimbal_tag::changeTagAxes(tf::Quaternion& qTagBody)
+{
+	tf::Matrix3x3 rTagBody(qTagBody);
+	double tR, tP, tY;
+	rTagBody.getRPY(tR, tP, tY);
+
+	qTagBody = tf::createQuaternionFromRPY(-tY, -tR, tP);
+	qTagBody.normalize();
+}
+
 void gimbal_tag::publishTagPose()
 {
 	if(tagFound)
@@ -47,6 +57,7 @@ void gimbal_tag::publishTagPose()
 		// Apply rotation to go from gimbal frame to body frame
 		tf::Quaternion qTagBody = qTagFix*qOffset*qTag;
 		qTagBody.normalize();
+		changeTagAxes(qTagBody);
 		tf::Quaternion positonTagBody = qOffset*posTag*qOffset.inverse();
 		geometry_msgs::PoseStamped tagPoseBody;
 

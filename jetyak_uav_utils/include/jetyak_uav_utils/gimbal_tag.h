@@ -37,6 +37,7 @@ private:
 	ros::ServiceClient droneVersionServ;
 
 	// Functions
+	void changeTagAxes(tf::Quaternion& tagBody);
 	bool versionCheckM100();
 
 	// Callbacks
