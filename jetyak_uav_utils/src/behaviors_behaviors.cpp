@@ -99,7 +99,24 @@ void behaviors::followBehavior() {
   }
 }
 
-void behaviors::returnBehavior() {};
+void behaviors::returnBehavior() {
+  /* Algorithm 2
+  If first time
+    Set boat's GPS coordinates as the waypoint
+    Upload waypoint
+    Start navigation
+  else if tag found
+    if yaw~0, x~2, y~0, z~(mast height+1)
+      enter follow modes
+    else
+      PID to the correct points
+  else
+    Yaw or elevate or translate to recover tags
+    If lost for too long, return to gps following
+  */
+
+
+};
 
 void behaviors::landBehavior() {
   if(behaviorChanged_) { // if just changed
