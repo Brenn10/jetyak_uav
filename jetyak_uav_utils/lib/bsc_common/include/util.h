@@ -77,6 +77,13 @@ public:
    * @param rad=true using radians if true (default)
   */
    static double ang_dist(double start,double stop, bool rad=true);
+
+   /* latlongdist
+    * finds the shortest distance between two latitude and longitude
+    * measurements in meters
+    * Ported from a javascript implementation by Brent Hamby on StackOverflow
+   */
+   static double latlondist(double lat1,double lon1,double lat2,double lon2);
 };
 
 } // namespace bsc_common

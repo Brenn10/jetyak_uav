@@ -85,19 +85,19 @@ behaviors::~behaviors() {}
 void behaviors::doBehaviorAction() {
 
 
-  actualPose_.x=tagPose_.pose.position.x;
-  actualPose_.y=tagPose_.pose.position.y;
-  actualPose_.z=tagPose_.pose.position.z;
+  simpleTag_.x=tagPose_.pose.position.x;
+  simpleTag_.y=tagPose_.pose.position.y;
+  simpleTag_.z=tagPose_.pose.position.z;
 
-  actualPose_.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+  simpleTag_.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
 
-  actualPose_.t=tagPose_.header.stamp.toSec();
+  simpleTag_.t=tagPose_.header.stamp.toSec();
 
   ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
-      actualPose_.x,
-      actualPose_.y,
-      actualPose_.z,
-      actualPose_.w);
+      simpleTag_.x,
+      simpleTag_.y,
+      simpleTag_.z,
+      simpleTag_.w);
 
   // //
   // // Find the UAV pose from the boat through GPS
@@ -106,16 +106,16 @@ void behaviors::doBehaviorAction() {
   // double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
   // double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);
   // //compute relative uav position
-  // actualPose_.x=uavGPS_.latitude-boatGPS_.latitude;
-  // actualPose_.y=uavGPS_.longitude-boatGPS_.longitude;
-  // actualPose_.z=uavGPS_.altitude-boatGPS_.altitude;
-  // actualPose_.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
+  // simpleTag_.x=uavGPS_.latitude-boatGPS_.latitude;
+  // simpleTag_.y=uavGPS_.longitude-boatGPS_.longitude;
+  // simpleTag_.z=uavGPS_.altitude-boatGPS_.altitude;
+  // simpleTag_.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
   //
   // //Lets grab the most recent time stamp
   // if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
-  //   actualPose_.header.stamp = uavGPS_.header.stamp;
+  //   simpleTag_.header.stamp = uavGPS_.header.stamp;
   // else
-  //   actualPose_.header.stamp = uavGPS_.header.stamp;
+  //   simpleTag_.header.stamp = uavGPS_.header.stamp;
 
   switch(currentMode_) {
     case Mode::TAKEOFF: {

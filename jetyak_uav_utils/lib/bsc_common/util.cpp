@@ -72,4 +72,19 @@ double util::ang_dist(double start,double stop, bool rad) {
   return d1;
 }
 
+double util::latlondist(double lat1,double lon1,double lat2,double lon2){
+  double R = 6378137; // Radius of earth in m
+
+  double rLat1 = lat1 * C_PI / 180;
+  double rLat2 = lat2 * C_PI / 180;
+  double rLon1 = lon1 * C_PI / 180;
+  double rLon2 = lon2 * C_PI / 180;
+
+  double dLat = rLat2-rLat1;
+  double dLon = rLon2-rLon1;
+  //a = sin^2(dla/2)+cos(la1)cos(la2)sin^2(dlo/2)
+  double a = pow(sin(dLat/2),2)+cos(rLat1)*cos(rLat2)*pow(sin(dLon/2),2);
+  return R * 2 * atan2(sqrt(a), sqrt(1-a));
+}
+
 } // namespace bsc_common
