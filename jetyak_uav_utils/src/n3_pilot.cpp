@@ -19,8 +19,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	// Set default values
-	cmdLow  = -1.0;
-	cmdHigh = 1.0;
+	setClipingThreshods();
 	rcStickThresh = 0.01;
 	autopilotOn = false;
 	bypassPilot = false;
@@ -138,6 +137,59 @@ bool n3_pilot::requestControl(int requestFlag)
 	}
 
 	return true;
+}
+
+void n3_pilot::setClipingThreshods()
+{
+	// Horizontal
+	hVelcmdMax   = 30;            // m/sec
+	hARatecmdMax = 5.0*C_PI/6.0;  // rad/sec
+	hAnglecmdMax = 0.611;         // rad
+
+	// Vertical
+	vVelcmdMax    = 5;            // m/sec
+	vPoscmdMax    = 120;          // m
+	vPoscmdMin    = 0.0;          // *100% of max thrust
+	vThrustcmdMax = 1.0;          // *100% of max thrust
+
+	// Yaw
+	yARateMax = 5.0*C_PI/6.0;     // rad/sec
+	yAngleMax = C_PI;             // rad
+}
+
+void n3_pilot::adaptiveCliping()
+{
+	// Horizontal Logic
+	if(joyCommand.axes[4] && DJISDK::HORIZONTAL_ANGULAR_RATE) {
+		joyCommand.axes[0] = clip(joyCommand.axes[0], -hARatecmdMax, hARatecmdMax);
+		joyCommand.axes[1] = clip(joyCommand.axes[1], -hARatecmdMax, hARatecmdMax);
+	}
+	else if(joyCommand.axes[4] && DJISDK::HORIZONTAL_POSITION) {
+		joyCommand.axes[0] = joyCommand.axes[0];
+		joyCommand.axes[1] = joyCommand.axes[1];
+	}
+	else if(joyCommand.axes[4] && DJISDK::HORIZONTAL_VELOCITY) {
+		joyCommand.axes[0] = clip(joyCommand.axes[0], -hVelcmdMax, hVelcmdMax);
+		joyCommand.axes[1] = clip(joyCommand.axes[1], -hVelcmdMax, hVelcmdMax);
+	}
+	else {
+		joyCommand.axes[0] = clip(joyCommand.axes[0], -hAnglecmdMax, hAnglecmdMax);
+		joyCommand.axes[1] = clip(joyCommand.axes[1], -hAnglecmdMax, hAnglecmdMax);
+	}
+
+	// Vertical Logic
+	if(joyCommand.axes[4] && DJISDK::VERTICAL_THRUST)
+		joyCommand.axes[3] = clip(joyCommand.axes[3], 0, vThrustcmdMax);
+	else if (joyCommand.axes[4] && DJISDK::VERTICAL_POSITION)
+		joyCommand.axes[3] = clip(joyCommand.axes[3], vPoscmdMin, vPoscmdMax);
+	else
+		joyCommand.axes[3] = clip(joyCommand.axes[3], -vVelcmdMax, vVelcmdMax);
+
+	// Yaw Logic
+	if(joyCommand.axes[4] && DJISDK::YAW_RATE)
+		joyCommand.axes[2] = clip(joyCommand.axes[2], -yARateMax, yARateMax);
+	else
+		joyCommand.axes[2] = clip(joyCommand.axes[2], -yAngleMax, yAngleMax);
 }
 
 bool n3_pilot::versionCheckM100()
