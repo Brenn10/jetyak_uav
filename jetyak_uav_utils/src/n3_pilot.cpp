@@ -21,6 +21,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	// Set default values
 	cmdLow  = -1.0;
 	cmdHigh = 1.0;
+
 	rcStickThresh = 0.01;
 	autopilotOn = false;
 	bypassPilot = false;
@@ -62,7 +63,7 @@ void n3_pilot::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 	joyCommand.axes.push_back(clip(msg->axes[0], cmdLow, cmdHigh)); // Roll
 	joyCommand.axes.push_back(clip(msg->axes[1], cmdLow, cmdHigh)); // Pitch
 	joyCommand.axes.push_back(clip(msg->axes[2], cmdLow, cmdHigh)); // Altitude
-	joyCommand.axes.push_back(clip(msg->axes[3], cmdLow, cmdHigh)); // Yaw
+	joyCommand.axes.push_back(clip(msg->axes[3], -3.14, 3.14)); // Yaw
 	joyCommand.axes.push_back(msg->axes[4]);                        // Flag
 }
 

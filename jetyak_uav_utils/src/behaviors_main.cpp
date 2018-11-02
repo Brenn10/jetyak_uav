@@ -68,12 +68,16 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/follow_z", follow_.follow_pose.z, 0);
   ros::param::param<double>("uav_behaviors/follow_w", follow_.follow_pose.w, 0);
 
-  ROS_WARN("X PARAMS: kp: %f, ki: %f, kd: %f, pose: %f",
-    follow_.kp.x,
-    follow_.ki.x,
-    follow_.kd.x,
-    follow_.follow_pose.x
-  );
+  //Return
+  double settleRadius;
+  ros::param::param<double>("uav_behaviors/return_gotoHeight", return_.gotoHeight, 5);
+  ros::param::param<double>("uav_behaviors/return_finalHeight", return_.finalHeight, 3);
+  ros::param::param<double>("uav_behaviors/return_downRadius", return_.downRadius, 1);
+  ros::param::param<double>("uav_behaviors/return_settleRadius", settleRadius, .5);
+  ros::param::param<double>("uav_behaviors/return_tagTime", return_.tagTime, 1);
+  return_.settleRadiusSquared = settleRadius*settleRadius;
+
+ 
   xpid_ = new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
   ypid_ = new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
   zpid_ = new bsc_common::PID(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
@@ -93,11 +97,11 @@ void behaviors::doBehaviorAction() {
 
   simpleTag_.t=tagPose_.header.stamp.toSec();
 
-  ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
+  /*ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
       simpleTag_.x,
       simpleTag_.y,
       simpleTag_.z,
-      simpleTag_.w);
+      simpleTag_.w);*/
 
   // //
   // // Find the UAV pose from the boat through GPS
