@@ -42,8 +42,6 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/land_z_ki", land_.ki.z, 0);
   ros::param::param<double>("uav_behaviors/land_w_ki", land_.ki.w, 0);
 
-  ros::param::param<double>("uav_behaviors/land_collapse", land_.collapseRatio, .99);
-
 
   //follow
   ros::param::param<double>("uav_behaviors/follow_x_kp", follow_.kp.x, 0);

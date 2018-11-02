@@ -87,15 +87,16 @@ private:
   // Land specific constants
   struct {
     bsc_common::pose4d_t kp,kd,ki;
-    double currGoalHeight;
-    double collapseRatio;
+    bsc_common::pose4d_t land_pose; //landing goal
+    double lastSpotted;
+    int lostTagCounter;
 
   } land_;
 
   // follow specific constants
   struct {
     bsc_common::pose4d_t kp,kd,ki;
-    bsc_common::pose4d_t follow_pose;
+    bsc_common::pose4d_t follow_pose; // follow goal
     double lastSpotted;
     int lostTagCounter;
   } follow_;
