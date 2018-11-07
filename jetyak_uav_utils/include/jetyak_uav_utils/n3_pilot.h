@@ -40,7 +40,7 @@ protected:
 	// Functions
 	void setupRCCallback();
 	bool requestControl(int requestFlag);
-	void setClipingThreshods();
+	void setClipingThresholds();
 	void adaptiveCliping();
 	bool versionCheckM100();
 
@@ -51,8 +51,8 @@ protected:
 	uint8_t commandFlag;
 
 	int modeFlag, pilotFlag;
-	double hVelcmdMax, hARatecmdMax, hAnglecmdMax;
-	double vVelcmdMax, vPoscmdMax, vPoscmdMin, vThrustcmdMax;
+	double hVelcmdMaxBody, hVelcmdMaxGround, hARatecmdMax, hAnglecmdMax;
+	double vVelcmdMaxBody, vVelcmdMaxGround, vPoscmdMax, vPoscmdMin, vThrustcmdMax;
 	double yARateMax, yAngleMax;
 	double rcStickThresh;
 
