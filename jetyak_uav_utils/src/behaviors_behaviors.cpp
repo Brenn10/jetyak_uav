@@ -132,23 +132,32 @@ void behaviors::returnBehavior() {
   */
   double east = bsc_common::util::latlondist(0,boatGPS_.longitude,0,uavGPS_.longitude);
   double north = bsc_common::util::latlondist(boatGPS_.latitude,0,uavGPS_.latitude,0);
-  double heading = atan2(north,east);
 
+  if(boatGPS_.longitude<uavGPS_.longitude)
+    east=-east;
+  if(boatGPS_.latitude<uavGPS_.latitude)
+    north=-north;
+
+  double heading = atan2(north,east);
+  ROS_WARN("Heading: %1.3f",heading);
 
   if(ros::Time::now().toSec()-tagPose_.header.stamp.toSec()<return_.tagTime){
+    ROS_WARN("Tag Spotted");
     /*
       set stage to SETTLE
-      if yaw~0, x~2, y~0, z~(mast height+1)
+      if yaw~0, x~2, y~0, z~(mast height)
         enter follow modes
       else
         PID to the correct points
     */
     return_.stage=return_.SETTLE;
-    if(pow(follow_.follow_pose.x-simpleTag_.x,2)<return_.settleRadiusSquared and
-       pow(follow_.follow_pose.x-simpleTag_.y,2)<return_.settleRadiusSquared and
-       pow(follow_.follow_pose.w-simpleTag_.w,2)<return_.settleRadiusSquared)
+    if((pow(follow_.follow_pose.x-simpleTag_.x,2)+
+       pow(follow_.follow_pose.x-simpleTag_.y,2)+
+       pow(follow_.follow_pose.w-simpleTag_.w,2))<return_.settleRadiusSquared)
     {
+      ROS_WARN("Settled, now following");
       currentMode_=Mode::FOLLOW;
+      behaviorChanged_=true;
     } else {// line up with pad
       xpid_->update(follow_.follow_pose.x-simpleTag_.x,simpleTag_.t);
       ypid_->update(follow_.follow_pose.y-simpleTag_.y,simpleTag_.t);
@@ -172,6 +181,7 @@ void behaviors::returnBehavior() {
       set behavior changed to false
       init pid
     */
+    ROS_WARN("Behavior is now return");
     xpid_->reset();
     ypid_->reset();
     zpid_->reset();
@@ -186,19 +196,19 @@ void behaviors::returnBehavior() {
   }
 
   else if(return_.stage==return_.UP) {
+    ROS_WARN("Going UP");
     /*if altitude is >gotoHeight
         set stage to Over
       else
         command 0xy and the goal height-altitude
     */
     if(uavGPS_.altitude-boatGPS_.altitude>return_.gotoHeight) {
+      ROS_WARN("Changed to OVER");
       return_.stage=return_.OVER;
     }
     else {
-      double z_correction=follow_.kp.z*(
-        return_.gotoHeight-(uavGPS_.altitude-boatGPS_.altitude)
-      );
-
+      double z_correction=return_.gotoHeight-(uavGPS_.altitude-boatGPS_.altitude);
+      ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude-boatGPS_.altitude);
       sensor_msgs::Joy cmd;
       cmd.axes.push_back(0);
       cmd.axes.push_back(0);
@@ -209,6 +219,7 @@ void behaviors::returnBehavior() {
     }
   }
   else if(return_.stage==return_.OVER) {
+    ROS_WARN("Going OVER");
     /*
       saturate x and y with directions
       z_cmd = gotoHeight-altitude
@@ -218,6 +229,7 @@ void behaviors::returnBehavior() {
     if(bsc_common::util::latlondist(uavGPS_.latitude,uavGPS_.longitude,
         boatGPS_.latitude,boatGPS_.longitude) < return_.downRadius)
     {
+      ROS_WARN("Changed to DOWN");
       return_.stage=return_.DOWN;
     }
     else {
@@ -240,6 +252,7 @@ void behaviors::returnBehavior() {
     z=finalHeight-altitude
     we wont change the mode here as it should search for the tags and hopefully find one
   */
+    ROS_WARN("Going DOWN");
     double z_correction=follow_.kp.z*(
       return_.finalHeight-(uavGPS_.altitude-boatGPS_.altitude)
     );
@@ -248,7 +261,7 @@ void behaviors::returnBehavior() {
     cmd.axes.push_back(east);
     cmd.axes.push_back(north);
     cmd.axes.push_back(z_correction);
-    cmd.axes.push_back(heading);
+    cmd.axes.push_back(-heading);
     cmd.axes.push_back(worldPosCmdFlag_);
     cmdPub_.publish(cmd);
   }
@@ -332,12 +345,12 @@ void behaviors::landBehavior() {
     bsc_common::util::rotate_vector(
       xpid_->get_signal(),ypid_->get_signal(),-simpleTag_.w,rotated_x,rotated_y);
   */
-    ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
+    /*ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
       -xpid_->get_signal(),
       -ypid_->get_signal(),
       -zpid_->get_signal(),
       -wpid_->get_signal()
-    );
+    );*/
     sensor_msgs::Joy cmd;
     cmd.axes.push_back(-xpid_->get_signal());
     cmd.axes.push_back(-ypid_->get_signal());
@@ -371,6 +384,6 @@ void behaviors::hoverBehavior() {
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
-  cmd.axes.push_back(bodyVelCmdFlag_);
+  cmd.axes.push_back(worldPosCmdFlag_);
   cmdPub_.publish(cmd);
 };

@@ -43,3 +43,12 @@ land_w: 0
 land_w_kp: .2
 land_w_kd: 0
 land_w_ki: 0
+
+#
+# Return Parameters
+#
+return_gotoHeight: 5
+return_finalHeight: 3
+return_downRadius: 1
+return_settleRadius: .5
+return_tagTime: 1
