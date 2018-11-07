@@ -33,3 +33,7 @@
 
 # Temporary files
 *~
+
+# Local files
+*.ignore
+*.bag
