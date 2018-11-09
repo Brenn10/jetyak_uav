@@ -12,8 +12,6 @@
 #include "dji_sdk/SDKControlAuthority.h"
 #include "dji_sdk/QueryDroneVersion.h"
 
-#define C_PI (double)3.141592653589793
-
 class n3_pilot
 {
 public:
@@ -40,8 +38,8 @@ protected:
 	// Functions
 	void setupRCCallback();
 	bool requestControl(int requestFlag);
-	void setClipingThresholds();
-	void adaptiveCliping();
+	void setClippingThresholds();
+	sensor_msgs::Joy adaptiveClipping(sensor_msgs::Joy msg);
 	bool versionCheckM100();
 
 	// Data

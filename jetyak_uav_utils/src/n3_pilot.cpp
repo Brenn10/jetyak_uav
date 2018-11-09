@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#define C_PI (double)3.141592653589793
 #define clip(X, LOW, HIGH) (((X) > (HIGH)) ? (HIGH) : ((X) < (LOW)) ? (LOW) : (X))
 
 n3_pilot::n3_pilot(ros::NodeHandle& nh)
@@ -19,7 +20,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	// Set default values
-	setClipingThresholds();
+	setClippingThresholds();
 	rcStickThresh = 0.0;
 	autopilotOn = false;
 	bypassPilot = false;
@@ -58,14 +59,9 @@ void n3_pilot::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
 	// Pass the joystick message to the command
 	joyCommand.axes.clear();
-	joyCommand.axes.push_back(msg->axes[0]); // Roll
-	joyCommand.axes.push_back(msg->axes[1]); // Pitch
-	joyCommand.axes.push_back(msg->axes[2]); // Altitude
-	joyCommand.axes.push_back(msg->axes[3]); // Yaw
-	joyCommand.axes.push_back(msg->axes[4]); // Flag
 
-	// Clip commands
-	adaptiveCliping();
+	// Clip commands according to flag
+	joyCommand = adaptiveClipping(*msg);
 }
 
 void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
@@ -142,13 +138,13 @@ bool n3_pilot::requestControl(int requestFlag)
 	return true;
 }
 
-void n3_pilot::setClipingThresholds()
+void n3_pilot::setClippingThresholds()
 {
 	// Horizontal
-	hVelcmdMaxBody   = 1.0;            // m/sec
-	hVelcmdMaxGround = 5.0;            // m/sec
-	hARatecmdMax     = 5.0*C_PI/6.0;   // rad/sec
-	hAnglecmdMax     = 0.611;          // rad
+	hVelcmdMaxBody    = 1.0;           // m/sec
+	hVelcmdMaxGround  = 5.0;           // m/sec
+	hARatecmdMax      = 5.0*C_PI/6.0;  // rad/sec
+	hAnglecmdMax      = 0.611;         // rad
 
 	// Vertical
 	vVelcmdMaxBody    = 1.0;           // m/sec
@@ -158,15 +154,23 @@ void n3_pilot::setClipingThresholds()
 	vThrustcmdMax     = 1.0;           // *100% of max thrust
 
 	// Yaw
-	yARateMax = 5.0*C_PI/6.0;          // rad/sec
-	yAngleMax = C_PI;                  // rad
+	yARateMax         = 5.0*C_PI/6.0;  // rad/sec
+	yAngleMax         = C_PI;          // rad
 }
 
-void n3_pilot::adaptiveCliping()
+sensor_msgs::Joy n3_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 {
+	// Create command buffer
+	sensor_msgs::Joy cmdBuffer;
+	cmdBuffer.axes.clear();
+	for (int i = 0; i < 4; ++i)
+		cmdBuffer.axes.push_back(0);
+	cmdBuffer.axes.push_back(msg.axes[4]);
+
 	// Coordinate frame
 	double hVelcmdMax, vVelcmdMax;
-	if (joyCommand.axes[4] && DJISDK::HORIZONTAL_BODY) {
+	if (((int)msg.axes[4] & DJISDK::HORIZONTAL_BODY) ==
+		DJISDK::HORIZONTAL_BODY) {
 		hVelcmdMax = hVelcmdMaxBody;
 		vVelcmdMax = vVelcmdMaxBody;
 	}
@@ -176,36 +180,43 @@ void n3_pilot::adaptiveCliping()
 	}
 
 	// Horizontal Logic
-	if(joyCommand.axes[4] && DJISDK::HORIZONTAL_ANGULAR_RATE) {
-		joyCommand.axes[0] = clip(joyCommand.axes[0], -hARatecmdMax, hARatecmdMax);
-		joyCommand.axes[1] = clip(joyCommand.axes[1], -hARatecmdMax, hARatecmdMax);
+	if(((int)msg.axes[4] & DJISDK::HORIZONTAL_ANGULAR_RATE) ==
+		DJISDK::HORIZONTAL_ANGULAR_RATE) {
+		cmdBuffer.axes[0] = clip(msg.axes[0], -hARatecmdMax, hARatecmdMax);
+		cmdBuffer.axes[1] = clip(msg.axes[1], -hARatecmdMax, hARatecmdMax);
 	}
-	else if(joyCommand.axes[4] && DJISDK::HORIZONTAL_POSITION) {
-		joyCommand.axes[0] = joyCommand.axes[0];
-		joyCommand.axes[1] = joyCommand.axes[1];
+	else if(((int)msg.axes[4] & DJISDK::HORIZONTAL_POSITION) ==
+		DJISDK::HORIZONTAL_POSITION) {
+		cmdBuffer.axes[0] = msg.axes[0];
+		cmdBuffer.axes[1] = msg.axes[1];
 	}
-	else if(joyCommand.axes[4] && DJISDK::HORIZONTAL_VELOCITY) {
-		joyCommand.axes[0] = clip(joyCommand.axes[0], -hVelcmdMax, hVelcmdMax);
-		joyCommand.axes[1] = clip(joyCommand.axes[1], -hVelcmdMax, hVelcmdMax);
+	else if(((int)msg.axes[4] & DJISDK::HORIZONTAL_VELOCITY) ==
+		DJISDK::HORIZONTAL_VELOCITY) {
+		cmdBuffer.axes[0] = clip(msg.axes[0], -hVelcmdMax, hVelcmdMax);
+		cmdBuffer.axes[1] = clip(msg.axes[1], -hVelcmdMax, hVelcmdMax);
 	}
 	else {
-		joyCommand.axes[0] = clip(joyCommand.axes[0], -hAnglecmdMax, hAnglecmdMax);
-		joyCommand.axes[1] = clip(joyCommand.axes[1], -hAnglecmdMax, hAnglecmdMax);
+		cmdBuffer.axes[0] = clip(msg.axes[0], -hAnglecmdMax, hAnglecmdMax);
+		cmdBuffer.axes[1] = clip(msg.axes[1], -hAnglecmdMax, hAnglecmdMax);
 	}
 
 	// Vertical Logic
-	if(joyCommand.axes[4] && DJISDK::VERTICAL_THRUST)
-		joyCommand.axes[3] = clip(joyCommand.axes[3], 0, vThrustcmdMax);
-	else if (joyCommand.axes[4] && DJISDK::VERTICAL_POSITION)
-		joyCommand.axes[3] = clip(joyCommand.axes[3], vPoscmdMin, vPoscmdMax);
+	if(((int)msg.axes[4] & DJISDK::VERTICAL_THRUST) ==
+		DJISDK::VERTICAL_THRUST)
+		cmdBuffer.axes[3] = clip(msg.axes[3], 0, vThrustcmdMax);
+	else if (((int)msg.axes[4] & DJISDK::VERTICAL_POSITION) == 
+		DJISDK::VERTICAL_POSITION)
+		cmdBuffer.axes[3] = clip(msg.axes[3], vPoscmdMin, vPoscmdMax);
 	else
-		joyCommand.axes[3] = clip(joyCommand.axes[3], -vVelcmdMax, vVelcmdMax);
+		cmdBuffer.axes[3] = clip(msg.axes[3], -vVelcmdMax, vVelcmdMax);
 
 	// Yaw Logic
-	if(joyCommand.axes[4] && DJISDK::YAW_RATE)
-		joyCommand.axes[2] = clip(joyCommand.axes[2], -yARateMax, yARateMax);
+	if(((int)msg.axes[4] & DJISDK::YAW_RATE) == DJISDK::YAW_RATE)
+		cmdBuffer.axes[2] = clip(msg.axes[2], -yARateMax, yARateMax);
 	else
-		joyCommand.axes[2] = clip(joyCommand.axes[2], -yAngleMax, yAngleMax);
+		cmdBuffer.axes[2] = clip(msg.axes[2], -yAngleMax, yAngleMax);
+
+	return cmdBuffer;
 }
 
 bool n3_pilot::versionCheckM100()
