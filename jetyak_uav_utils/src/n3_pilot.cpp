@@ -20,7 +20,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 
 	// Set default values
 	setClipingThresholds();
-	rcStickThresh = 0;
+	rcStickThresh = 0.0;
 	autopilotOn = false;
 	bypassPilot = false;
 	isM100 = false; //versionCheckM100();
