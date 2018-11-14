@@ -1,0 +1,33 @@
+plugin_blacklist:
+#- 3dr_radio
+#- actuator_control
+#- altitude
+#- cam_imu_sync
+#- command
+- distance_sensor
+- ftp
+#- global_position
+- hil_controls
+- image_pub
+#- imu_pub
+#- local_position
+#- manual_control
+- mocap_pose_estimate
+- param
+- px4flow
+#- rc_io
+- safety_area
+- setpoint_accel
+- setpoint_attitude
+- setpoint_position
+- setpoint_raw
+- setpoint_velocity
+#- sys_status
+#- sys_time
+#- vfr_hud
+- vibration
+- vision_pose_estimate
+- vision_speed_estimate
+- waypoint
+
+plugin_whitelist: []

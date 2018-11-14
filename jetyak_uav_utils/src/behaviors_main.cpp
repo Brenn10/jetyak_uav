@@ -16,7 +16,7 @@ behaviors::behaviors(ros::NodeHandle& nh)
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd",1);
 
   //service clients
-  armSrv_ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
+  taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
 
   // Service servers
   setModeService_ = nh.advertiseService("setMode",&behaviors::setModeCallback,this);
@@ -42,6 +42,10 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/land_z_ki", land_.ki.z, 0);
   ros::param::param<double>("uav_behaviors/land_w_ki", land_.ki.w, 0);
 
+  ros::param::param<double>("uav_behaviors/land_x", land_.land_pose.x, 0);
+  ros::param::param<double>("uav_behaviors/land_y", land_.land_pose.y, 0);
+  ros::param::param<double>("uav_behaviors/land_z", land_.land_pose.z, 0);
+  ros::param::param<double>("uav_behaviors/land_w", land_.land_pose.w, 0);
 
   //follow
   ros::param::param<double>("uav_behaviors/follow_x_kp", follow_.kp.x, 0);
@@ -64,12 +68,16 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/follow_z", follow_.follow_pose.z, 0);
   ros::param::param<double>("uav_behaviors/follow_w", follow_.follow_pose.w, 0);
 
-  ROS_WARN("X PARAMS: kp: %f, ki: %f, kd: %f, pose: %f",
-    follow_.kp.x,
-    follow_.ki.x,
-    follow_.kd.x,
-    follow_.follow_pose.x
-  );
+  //Return
+  double settleRadius;
+  ros::param::param<double>("uav_behaviors/return_gotoHeight", return_.gotoHeight, 5);
+  ros::param::param<double>("uav_behaviors/return_finalHeight", return_.finalHeight, 3);
+  ros::param::param<double>("uav_behaviors/return_downRadius", return_.downRadius, 1);
+  ros::param::param<double>("uav_behaviors/return_settleRadius", settleRadius, .5);
+  ros::param::param<double>("uav_behaviors/return_tagTime", return_.tagTime, 1);
+  return_.settleRadiusSquared = settleRadius*settleRadius;
+
+ 
   xpid_ = new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
   ypid_ = new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
   zpid_ = new bsc_common::PID(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
@@ -81,19 +89,19 @@ behaviors::~behaviors() {}
 void behaviors::doBehaviorAction() {
 
 
-  actualPose_.x=tagPose_.pose.position.x;
-  actualPose_.y=tagPose_.pose.position.y;
-  actualPose_.z=tagPose_.pose.position.z;
+  simpleTag_.x=tagPose_.pose.position.x;
+  simpleTag_.y=tagPose_.pose.position.y;
+  simpleTag_.z=tagPose_.pose.position.z;
 
-  actualPose_.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+  simpleTag_.w=bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
 
-  actualPose_.t=tagPose_.header.stamp.toSec();
+  simpleTag_.t=tagPose_.header.stamp.toSec();
 
-  ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
-      actualPose_.x,
-      actualPose_.y,
-      actualPose_.z,
-      actualPose_.w);
+  /*ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
+      simpleTag_.x,
+      simpleTag_.y,
+      simpleTag_.z,
+      simpleTag_.w);*/
 
   // //
   // // Find the UAV pose from the boat through GPS
@@ -102,16 +110,16 @@ void behaviors::doBehaviorAction() {
   // double boatHeading=bsc_common::util::yaw_from_quat(boatImu_.orientation);
   // double uavHeading=bsc_common::util::yaw_from_quat(uavImu_.orientation);
   // //compute relative uav position
-  // actualPose_.x=uavGPS_.latitude-boatGPS_.latitude;
-  // actualPose_.y=uavGPS_.longitude-boatGPS_.longitude;
-  // actualPose_.z=uavGPS_.altitude-boatGPS_.altitude;
-  // actualPose_.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
+  // simpleTag_.x=uavGPS_.latitude-boatGPS_.latitude;
+  // simpleTag_.y=uavGPS_.longitude-boatGPS_.longitude;
+  // simpleTag_.z=uavGPS_.altitude-boatGPS_.altitude;
+  // simpleTag_.w=bsc_common::util::ang_dist(boatHeading,uavHeading);
   //
   // //Lets grab the most recent time stamp
   // if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
-  //   actualPose_.header.stamp = uavGPS_.header.stamp;
+  //   simpleTag_.header.stamp = uavGPS_.header.stamp;
   // else
-  //   actualPose_.header.stamp = uavGPS_.header.stamp;
+  //   simpleTag_.header.stamp = uavGPS_.header.stamp;
 
   switch(currentMode_) {
     case Mode::TAKEOFF: {

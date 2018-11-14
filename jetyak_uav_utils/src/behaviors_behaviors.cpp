@@ -2,28 +2,30 @@
 
 void behaviors::takeoffBehavior() {
   if(!propellorsRunning) {
-    dji_sdk::DroneArmControl srv;
-    srv.request.arm=1;
-    armSrv_.call(srv);
+    dji_sdk::DroneTaskControl srv;
+    srv.request.task=4;
+    taskSrv_.call(srv);
     if(srv.response.result) {
-      ROS_WARN("ARMS ENABLED");
+      ROS_INFO("Takeoff successful");
       behaviorChanged_=true;
       currentMode_=Mode::FOLLOW;
       propellorsRunning=true;
     } else {
-      ROS_WARN("FAILED TO ENABLE ARMS");
+      ROS_WARN("Failure to Takeoff");
     }
   }
   else {
-    ROS_WARN("ARMS ALREADY GOING");
+    ROS_INFO("Already up");
+    behaviorChanged_=true;
     currentMode_=Mode::FOLLOW;
+    propellorsRunning=true;
   }
 }
 
 void behaviors::followBehavior() {
 
   if(behaviorChanged_) { // if just changed
-    follow_.lastSpotted=actualPose_.t;
+    follow_.lastSpotted=simpleTag_.t;
     follow_.lostTagCounter=0;
     xpid_->reset();
     ypid_->reset();
@@ -37,8 +39,8 @@ void behaviors::followBehavior() {
 
   } else { // DO the loop
 
-    if(follow_.lastSpotted!=actualPose_.t) { //if time changed
-      follow_.lastSpotted=actualPose_.t;
+    if(follow_.lastSpotted!=simpleTag_.t) { //if time changed
+      follow_.lastSpotted=simpleTag_.t;
       follow_.lostTagCounter=0;
     }
     else { //if time is same
@@ -50,7 +52,7 @@ void behaviors::followBehavior() {
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
-        cmd.axes.push_back(actualPose_.y>0 ? .1 : -.1); //rotate CCW if lost on left, CW if right
+        cmd.axes.push_back(simpleTag_.y>0 ? .3 : -.3); //rotate CCW if lost on left, CW if right
         cmd.axes.push_back(bodyVelCmdFlag_);
         cmdPub_.publish(cmd);
         return;
@@ -68,16 +70,16 @@ void behaviors::followBehavior() {
     }
 
     // line up with pad
-    xpid_->update(follow_.follow_pose.x-actualPose_.x,actualPose_.t);
-    ypid_->update(follow_.follow_pose.y-actualPose_.y,actualPose_.t);
-    zpid_->update(follow_.follow_pose.z-actualPose_.z,actualPose_.t);
-    wpid_->update(follow_.follow_pose.w-actualPose_.w,actualPose_.t);
+    xpid_->update(follow_.follow_pose.x-simpleTag_.x,simpleTag_.t);
+    ypid_->update(follow_.follow_pose.y-simpleTag_.y,simpleTag_.t);
+    zpid_->update(follow_.follow_pose.z-simpleTag_.z,simpleTag_.t);
+    wpid_->update(follow_.follow_pose.w-simpleTag_.w,simpleTag_.t);
 
 /*    //rotate velocities in reference to the tag
     double rotated_x;
     double rotated_y;
     bsc_common::util::rotate_vector(
-      xpid_->get_signal(),ypid_->get_signal(),-actualPose_.w,rotated_x,rotated_y);
+      xpid_->get_signal(),ypid_->get_signal(),-simpleTag_.w,rotated_x,rotated_y);
 */
     ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
       -xpid_->get_signal(),
@@ -97,11 +99,181 @@ void behaviors::followBehavior() {
   }
 }
 
-void behaviors::returnBehavior() {};
+void behaviors::returnBehavior() {
+  /* Algorithm 2
+  if tag found in last X second
+    set stage to SETTLE
+    if yaw~0, x~2, y~0, z~(mast height+1)
+      enter follow modes
+    else
+      PID to the correct points
+
+  elif first time
+    Set stage to UP
+    init PID
+
+  elif stage == up
+    if altitude is >gotoHeight
+      set stage to Over
+    else
+      command 0xy and the goal height-altitude
+  elif stage==over
+    saturate x and y with directions
+    z_cmd = gotoHeight-altitude
+    if in sphere around goal
+      set stage to DOWN
+  elif stage==down
+    find proper pid constants to maintain location more or less
+    z=finalHeight-altitude
+    we wont change the mode here as it should search for the tags and hopefully find one
+  elif stage=settle
+    Yaw or elevate or translate to recover tags
+    If lost for too long, return to gps following
+  */
+  double east = bsc_common::util::latlondist(0,boatGPS_.longitude,0,uavGPS_.longitude);
+  double north = bsc_common::util::latlondist(boatGPS_.latitude,0,uavGPS_.latitude,0);
+
+  if(boatGPS_.longitude<uavGPS_.longitude)
+    east=-east;
+  if(boatGPS_.latitude<uavGPS_.latitude)
+    north=-north;
+
+  double heading = atan2(north,east);
+  ROS_WARN("Heading: %1.3f",heading);
+
+  if(ros::Time::now().toSec()-tagPose_.header.stamp.toSec()<return_.tagTime){
+    ROS_WARN("Tag Spotted");
+    /*
+      set stage to SETTLE
+      if yaw~0, x~2, y~0, z~(mast height)
+        enter follow modes
+      else
+        PID to the correct points
+    */
+    return_.stage=return_.SETTLE;
+    if((pow(follow_.follow_pose.x-simpleTag_.x,2)+
+       pow(follow_.follow_pose.x-simpleTag_.y,2)+
+       pow(follow_.follow_pose.w-simpleTag_.w,2))<return_.settleRadiusSquared)
+    {
+      ROS_WARN("Settled, now following");
+      currentMode_=Mode::FOLLOW;
+      behaviorChanged_=true;
+    } else {// line up with pad
+      xpid_->update(follow_.follow_pose.x-simpleTag_.x,simpleTag_.t);
+      ypid_->update(follow_.follow_pose.y-simpleTag_.y,simpleTag_.t);
+      zpid_->update(return_.finalHeight-simpleTag_.z,simpleTag_.t);
+      wpid_->update(follow_.follow_pose.w-simpleTag_.w,simpleTag_.t);
+
+
+      sensor_msgs::Joy cmd;
+      cmd.axes.push_back(-xpid_->get_signal());
+      cmd.axes.push_back(-ypid_->get_signal());
+      cmd.axes.push_back(-zpid_->get_signal());
+      cmd.axes.push_back(-wpid_->get_signal());
+      cmd.axes.push_back(bodyVelCmdFlag_);
+      cmdPub_.publish(cmd);
+    }
+  }
+
+  else if(behaviorChanged_) {
+    /*
+      set stage to up
+      set behavior changed to false
+      init pid
+    */
+    ROS_WARN("Behavior is now return");
+    xpid_->reset();
+    ypid_->reset();
+    zpid_->reset();
+    wpid_->reset();
+    xpid_->updateParams(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
+    ypid_->updateParams(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
+    zpid_->updateParams(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
+    wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
+    behaviorChanged_=false;
+    return_.stage=return_.UP;
+
+  }
+
+  else if(return_.stage==return_.UP) {
+    ROS_WARN("Going UP");
+    /*if altitude is >gotoHeight
+        set stage to Over
+      else
+        command 0xy and the goal height-altitude
+    */
+    if(uavGPS_.altitude-boatGPS_.altitude>return_.gotoHeight) {
+      ROS_WARN("Changed to OVER");
+      return_.stage=return_.OVER;
+    }
+    else {
+      double z_correction=return_.gotoHeight-(uavGPS_.altitude-boatGPS_.altitude);
+      ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude-boatGPS_.altitude);
+      sensor_msgs::Joy cmd;
+      cmd.axes.push_back(0);
+      cmd.axes.push_back(0);
+      cmd.axes.push_back(z_correction);
+      cmd.axes.push_back(heading);
+      cmd.axes.push_back(worldPosCmdFlag_);
+      cmdPub_.publish(cmd);
+    }
+  }
+  else if(return_.stage==return_.OVER) {
+    ROS_WARN("Going OVER");
+    /*
+      saturate x and y with directions
+      z_cmd = gotoHeight-altitude
+      if in sphere around goal
+        set stage to DOWN
+    */
+    if(bsc_common::util::latlondist(uavGPS_.latitude,uavGPS_.longitude,
+        boatGPS_.latitude,boatGPS_.longitude) < return_.downRadius)
+    {
+      ROS_WARN("Changed to DOWN");
+      return_.stage=return_.DOWN;
+    }
+    else {
+      double z_correction=follow_.kp.z*(
+        return_.gotoHeight+.1-(uavGPS_.altitude-boatGPS_.altitude)
+      );
+
+      sensor_msgs::Joy cmd;
+      cmd.axes.push_back(east);
+      cmd.axes.push_back(north);
+      cmd.axes.push_back(z_correction);
+      cmd.axes.push_back(heading);
+      cmd.axes.push_back(worldPosCmdFlag_);
+      cmdPub_.publish(cmd);
+    }
+  }
+  else if(return_.stage=return_.DOWN) {
+  /*
+    find proper pid constants to maintain location more or less
+    z=finalHeight-altitude
+    we wont change the mode here as it should search for the tags and hopefully find one
+  */
+    ROS_WARN("Going DOWN");
+    double z_correction=follow_.kp.z*(
+      return_.finalHeight-(uavGPS_.altitude-boatGPS_.altitude)
+    );
+
+    sensor_msgs::Joy cmd;
+    cmd.axes.push_back(east);
+    cmd.axes.push_back(north);
+    cmd.axes.push_back(z_correction);
+    cmd.axes.push_back(-heading);
+    cmd.axes.push_back(worldPosCmdFlag_);
+    cmdPub_.publish(cmd);
+  }
+  else {
+    ROS_ERROR_ONCE("BAD CONDITIONALS, DEFAULTING TO HOVER");
+    currentMode_=Mode::HOVER;
+  }
+};
 
 void behaviors::landBehavior() {
   if(behaviorChanged_) { // if just changed
-    land_.lastSpotted=actualPose_.t;
+    land_.lastSpotted=simpleTag_.t;
     land_.lostTagCounter=0;
     xpid_->reset();
     ypid_->reset();
@@ -115,10 +287,24 @@ void behaviors::landBehavior() {
 
   } else { // DO the loop
 
-    if(follow_.lastSpotted!=actualPose_.t) { //if time changed
-      if(actualPose_.z>-.1 ){}
+    if(follow_.lastSpotted!=simpleTag_.t) { //if time changed
 
-      land_.lastSpotted=actualPose_.t;
+      // If pose is within a cylinder of radius .1 and height .1
+      if((land_.land_pose.z-simpleTag_.z)<.1 and
+        pow(land_.land_pose.x-simpleTag_.x,2)+
+        pow(land_.land_pose.y-simpleTag_.y,2)<pow(.1,2))
+      {
+        dji_sdk::DroneTaskControl srv;
+        srv.request.task=6;
+        taskSrv_.call(srv);
+        if(srv.response.result)
+        {
+          currentMode_=Mode::RIDE;
+          return;
+        }
+      }
+
+      land_.lastSpotted=simpleTag_.t;
       land_.lostTagCounter=0;
     }
     else { //if time is same
@@ -148,23 +334,23 @@ void behaviors::landBehavior() {
     }
 
     // line up with pad
-    xpid_->update(land_.land_pose.x-actualPose_.x,actualPose_.t);
-    ypid_->update(land_.land_pose.y-actualPose_.y,actualPose_.t);
-    zpid_->update(land_.land_pose.z-actualPose_.z,actualPose_.t);
-    wpid_->update(land_.land_pose.w-actualPose_.w,actualPose_.t);
+    xpid_->update(land_.land_pose.x-simpleTag_.x,simpleTag_.t);
+    ypid_->update(land_.land_pose.y-simpleTag_.y,simpleTag_.t);
+    zpid_->update(land_.land_pose.z-simpleTag_.z,simpleTag_.t);
+    wpid_->update(land_.land_pose.w-simpleTag_.w,simpleTag_.t);
 
   /*    //rotate velocities in reference to the tag
     double rotated_x;
     double rotated_y;
     bsc_common::util::rotate_vector(
-      xpid_->get_signal(),ypid_->get_signal(),-actualPose_.w,rotated_x,rotated_y);
+      xpid_->get_signal(),ypid_->get_signal(),-simpleTag_.w,rotated_x,rotated_y);
   */
-    ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
+    /*ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
       -xpid_->get_signal(),
       -ypid_->get_signal(),
       -zpid_->get_signal(),
       -wpid_->get_signal()
-    );
+    );*/
     sensor_msgs::Joy cmd;
     cmd.axes.push_back(-xpid_->get_signal());
     cmd.axes.push_back(-ypid_->get_signal());
@@ -179,9 +365,9 @@ void behaviors::landBehavior() {
 
 void behaviors::rideBehavior() {
   if(propellorsRunning) {
-    dji_sdk::DroneArmControl srv;
-    srv.request.arm=0;
-    armSrv_.call(srv);
+    dji_sdk::DroneTaskControl srv;
+    srv.request.task=6;
+    taskSrv_.call(srv);
     propellorsRunning=srv.response.result;
     if(srv.response.result) {
       ROS_WARN("Arms deactivated");
@@ -198,6 +384,6 @@ void behaviors::hoverBehavior() {
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
-  cmd.axes.push_back(bodyVelCmdFlag_);
+  cmd.axes.push_back(worldPosCmdFlag_);
   cmdPub_.publish(cmd);
 };

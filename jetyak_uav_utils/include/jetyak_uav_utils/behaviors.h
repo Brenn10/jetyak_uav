@@ -16,6 +16,7 @@
 //C includes
 #include <cstdlib>
 #include <vector>
+#include <cmath>
 
 //Jetyak UAV Includes
 #include "Mode.h"
@@ -31,7 +32,7 @@
 
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
-#include <dji_sdk/DroneArmControl.h>
+#include <dji_sdk/DroneTaskControl.h>
 
 //Custom Lib includes
 #include "../lib/bsc_common/include/pid.h"
@@ -47,7 +48,7 @@ private:
   *********************************************/
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
-  ros::ServiceClient armSrv_;
+  ros::ServiceClient taskSrv_;
   ros::ServiceServer setModeService_,getModeService_;
 
   /**********************
@@ -64,11 +65,11 @@ private:
     DJISDK::HORIZONTAL_BODY     |
     DJISDK::STABLE_DISABLE);
 
-  char worldPositionCmdFlag_ = (
-    DJISDK::VERTICAL_POSITION   |
+  char worldPosCmdFlag_ = (
+    DJISDK::VERTICAL_VELOCITY   |
     DJISDK::HORIZONTAL_POSITION |
-    DJISDK::YAW_ANGLE            |
-    DJISDK::HORIZONTAL_GROUND     |
+    DJISDK::YAW_ANGLE           |
+    DJISDK::HORIZONTAL_GROUND   |
     DJISDK::STABLE_ENABLE);
 
   /************************************
@@ -79,7 +80,7 @@ private:
   sensor_msgs::Imu uavImu_, boatImu_;
   geometry_msgs::PoseStamped tagPose_;
 
-  bsc_common::pose4d_t actualPose_;
+  bsc_common::pose4d_t simpleTag_;
 
   /*********************************************
   * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
@@ -100,6 +101,16 @@ private:
     double lastSpotted;
     int lostTagCounter;
   } follow_;
+
+  // follow specific constants
+  struct {
+    double gotoHeight;
+    double finalHeight;
+    double downRadius;
+    double settleRadiusSquared=1;
+    double tagTime;
+    enum Stage {UP,OVER,DOWN,SETTLE} stage;
+  } return_;
 
   /*********************
   * SERVICE CALLBACKS
