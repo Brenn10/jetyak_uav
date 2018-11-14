@@ -18,9 +18,9 @@
 #include <vector>
 
 //Jetyak UAV Includes
-#include "jetyak_uav_utils/Mode.h"
-#include "jetyak_uav_utils/LandConstantsConfig.h"
-#include "jetyak_uav_utils/FollowConstantsConfig.h"
+#include "Mode.h"
+#include "jetyak_uav_utils/SetMode.h"
+#include "jetyak_uav_utils/GetMode.h"
 
 //ROS Core includes
 #include <sensor_msgs/Joy.h>
@@ -32,11 +32,11 @@
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <dji_sdk/DroneArmControl.h>
-#include <dynamic_reconfigure/server.h>
 
 //Custom Lib includes
 #include "../lib/bsc_common/include/pid.h"
 #include "../lib/bsc_common/include/util.h"
+#include "../lib/bsc_common/include/pose4d.h"
 
 class behaviors {
 private:
@@ -48,20 +48,27 @@ private:
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
   ros::ServiceClient armSrv_;
-  ros::ServiceServer modeService_;
+  ros::ServiceServer setModeService_,getModeService_;
 
   /**********************
   * INSTANCE VARIABLES
   **********************/
   bsc_common::PID *xpid_,*ypid_,*zpid_,*wpid_; // pid controllers
   bool behaviorChanged_=false;
-  char currentMode_=0;
+  Mode currentMode_;
   bool propellorsRunning=false;
-  char commandFlag_ = (
+  char bodyVelCmdFlag_ = (
     DJISDK::VERTICAL_VELOCITY   |
     DJISDK::HORIZONTAL_VELOCITY |
     DJISDK::YAW_RATE            |
     DJISDK::HORIZONTAL_BODY     |
+    DJISDK::STABLE_DISABLE);
+
+  char worldPositionCmdFlag_ = (
+    DJISDK::VERTICAL_POSITION   |
+    DJISDK::HORIZONTAL_POSITION |
+    DJISDK::YAW_ANGLE            |
+    DJISDK::HORIZONTAL_GROUND     |
     DJISDK::STABLE_ENABLE);
 
   /************************************
@@ -72,35 +79,47 @@ private:
   sensor_msgs::Imu uavImu_, boatImu_;
   geometry_msgs::PoseStamped tagPose_;
 
+  bsc_common::pose4d_t actualPose_;
 
   /*********************************************
   * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
   **********************************************/
   // Land specific constants
   struct {
-    geometry_msgs::Quaternion kp,kd,ki;
-    double currGoalHeight;
-    double collapseRatio;
+    bsc_common::pose4d_t kp,kd,ki;
+    bsc_common::pose4d_t land_pose; //landing goal
+    double lastSpotted;
+    int lostTagCounter;
 
   } land_;
 
   // follow specific constants
   struct {
-    geometry_msgs::Quaternion kp,kd,ki;
-    geometry_msgs::Quaternion follow_pose;
+    bsc_common::pose4d_t kp,kd,ki;
+    bsc_common::pose4d_t follow_pose; // follow goal
+    double lastSpotted;
+    int lostTagCounter;
   } follow_;
 
   /*********************
   * SERVICE CALLBACKS
   *********************/
-  /** modeCallback
+  /** setModeCallback
   * Callback for the mode service. Changes the current mode.
   *
-  * @param msg gets the mode from the broadcast
+  * @param req mode to set
+  * @param res successful
   */
-  bool modeCallback(jetyak_uav_utils::Mode::Request  &req,
-                    jetyak_uav_utils::Mode::Response &res);
-
+  bool setModeCallback(jetyak_uav_utils::SetMode::Request  &req,
+                    jetyak_uav_utils::SetMode::Response &res);
+  /** getModeCallback
+  * Callback for the mode service. Changes the current mode.
+  *
+  * @param req empty
+  * @param res contains the mode
+  */
+  bool getModeCallback(jetyak_uav_utils::GetMode::Request  &req,
+                    jetyak_uav_utils::GetMode::Response &res);
 
   /****************************
   * SUBSCRIPTION CALLBACKS
@@ -185,6 +204,10 @@ private:
   */
   void hoverBehavior();
 public:
+
+
+
+
   /** Constructor
   * Start up the Controller Node
   * Create publishers, subscribers, services
@@ -202,23 +225,7 @@ public:
   void doBehaviorAction();
 
 
-  /*************************
-  * Reconfigure callbacks
-  *************************/
 
-  /** landReconfigureCallback
-  * Listens for changes to the configuration of the Landing behaviors
-  *
-  * @param config Provides the configuration parameters which we will save for the landing method
-  */
-  void landReconfigureCallback(jetyak_uav_utils::LandConstantsConfig &config, uint32_t level);
-
-  /** followReconfigureCallback
-  * Listens for changes to the configuration of the Following behaviors
-  *
-  * @param config Provides the configuration parameters which we will save for the following method
-  */
-  void followReconfigureCallback(jetyak_uav_utils::FollowConstantsConfig &config, uint32_t level);
 
 };
 

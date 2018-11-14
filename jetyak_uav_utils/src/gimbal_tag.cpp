@@ -12,28 +12,52 @@ gimbal_tag::gimbal_tag(ros::NodeHandle& nh)
 	// Set up publisher
 	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
 
+	// Set up service
+	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
+
 	tagFound = false;
+	isM100 = true; //versionCheckM100();
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
-	qConstant = tf::Quaternion(0.0, 0.0, -0.707, 0.707);
+	qConstant = tf::Quaternion(0.7071, 0.7071, 0.0, 0.0);
 	qConstant.normalize();
-	qCamera2Gimbal = tf::Quaternion(-0.5, 0.5, -0.5, 0.5);
+	qCamera2Gimbal = tf::Quaternion(0.5, 0.5, 0.5, 0.5);
+	qTagFix = tf::Quaternion(0.5, -0.5, -0.5, -0.5);
+}
+
+bool gimbal_tag::versionCheckM100()
+{
+	dji_sdk::QueryDroneVersion query;
+	droneVersionServ.call(query);
+
+	if(query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
+		return true;
+
+	return false;
+}
+
+void gimbal_tag::changeTagAxes(tf::Quaternion& qTagBody)
+{
+	tf::Matrix3x3 rTagBody(qTagBody);
+	double tR, tP, tY;
+	rTagBody.getRPY(tR, tP, tY);
+
+	qTagBody = tf::createQuaternionFromRPY(-tY, -tR, tP);
+	qTagBody.normalize();
 }
 
 void gimbal_tag::publishTagPose()
 {
 	if(tagFound)
 	{
-		// The vehicle quaternion is the rotation from body_FLU to ground_ENU
-		// The Gimbal rotation is from the ground_ENU to Gimbal body
-
 		// Calculate offset quaternion
-		qOffset = qVehicle.inverse() * qGimbal.inverse();
+		qOffset = qVehicle.inverse()*qGimbal;
 		qOffset.normalize();
 
 		// Apply rotation to go from gimbal frame to body frame
-		tf::Quaternion qTagBody = qOffset*qTag;
+		tf::Quaternion qTagBody = qTagFix*qOffset*qTag;
 		qTagBody.normalize();
+		changeTagAxes(qTagBody);
 		tf::Quaternion positonTagBody = qOffset*posTag*qOffset.inverse();
 		geometry_msgs::PoseStamped tagPoseBody;
 
@@ -61,7 +85,6 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 	{
 		// Update Tag quaternion
 		tf::quaternionMsgToTF(msg.markers[0].pose.pose.orientation, qTag);
-		qTag.normalize();
 
 		// Update Tag position as quaternion
 		posTag[0] = msg.markers[0].pose.pose.position.x;
@@ -71,6 +94,7 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 
 		// Go from Camera frame to Gimbal frame
 		qTag = qCamera2Gimbal*qTag;
+		qTag.normalize();
 		posTag = qCamera2Gimbal*posTag*qCamera2Gimbal.inverse();
 
 		tagFound = true;
@@ -82,8 +106,11 @@ void gimbal_tag::tagCallback(const ar_track_alvar_msgs::AlvarMarkers& msg)
 void gimbal_tag::gimbalCallback(const geometry_msgs::Vector3Stamped& msg)
 {
 	// Update gimbal quaternion
-	qGimbal = tf::createQuaternionFromRPY(
-		DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
+	if (isM100)
+		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.y), DEG2RAD(msg.vector.z));
+	else
+		qGimbal = tf::createQuaternionFromRPY(DEG2RAD(-msg.vector.y), DEG2RAD(msg.vector.x), DEG2RAD(msg.vector.z));
+
 	// Remove the constant offset
 	qGimbal = qConstant*qGimbal;
 	qGimbal.normalize();

@@ -5,11 +5,12 @@
 
 // ROS includes
 #include "ros/ros.h"
-#include <sensor_msgs/Joy.h>
+#include "sensor_msgs/Joy.h"
 
 // DJI SDK includes
 #include "dji_sdk/dji_sdk.h"
-#include <dji_sdk/SDKControlAuthority.h>
+#include "dji_sdk/SDKControlAuthority.h"
+#include "dji_sdk/QueryDroneVersion.h"
 
 class n3_pilot
 {
@@ -28,21 +29,27 @@ protected:
 
 	// ROS Services
 	ros::ServiceClient sdkCtrlAuthorityServ;
+	ros::ServiceClient droneVersionServ;
 
 	// Callback functions
 	void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
 	void rcCallback(const sensor_msgs::Joy::ConstPtr& msg);
 
 	// Functions
+	void setupRCCallback();
 	bool requestControl(int requestFlag);
+	bool versionCheckM100();
 
 	// Data
-	// std::string joyTopic;
 	sensor_msgs::Joy joyCommand, rcCommand;
 	bool autopilotOn;
 	bool bypassPilot;
 	uint8_t commandFlag;
-};
 
+	int modeFlag, pilotFlag;
+	double cmdLow, cmdHigh, rcStickThresh;
+
+	bool isM100;
+};
 
 #endif

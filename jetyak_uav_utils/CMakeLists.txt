@@ -30,7 +30,8 @@ find_package(DJIOSDK REQUIRED)
 #)
 add_service_files(DIRECTORY srv
   FILES
-  Mode.srv
+  GetMode.srv
+  SetMode.srv
 )
 
 generate_messages(
@@ -38,15 +39,15 @@ generate_messages(
   std_msgs
 )
 
-generate_dynamic_reconfigure_options(
-  cfg/FollowConstants.cfg
-  cfg/LandConstants.cfg
-)
+#generate_dynamic_reconfigure_options(
+#  cfg/FollowConstants.cfg
+#  cfg/LandConstants.cfg
+#)
 ## includes, libraries, depends
 catkin_package(
   INCLUDE_DIRS include lib/bsc_common/include
   LIBRARIES jetyak_uav_utils
-  CATKIN_DEPENDS dynamic_reconfigure ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf tf2 tf2_geometry_msgs dji_sdk visualization_msgs message_runtime
+  CATKIN_DEPENDS ar_track_alvar geometry_msgs ar_track_alvar_msgs nav_msgs roscpp rospy sensor_msgs std_msgs tf tf2 tf2_geometry_msgs dji_sdk visualization_msgs message_runtime
   DEPENDS system_lib
 )
 
@@ -67,7 +68,9 @@ add_executable(gimbal_tag_node
                 )
 
 add_executable(behaviors_node
-                src/behaviors.cpp
+                src/behaviors_behaviors.cpp
+                src/behaviors_callbacks.cpp
+                src/behaviors_main.cpp
                 lib/bsc_common/pid.cpp
                 lib/bsc_common/util.cpp
                 )
@@ -75,7 +78,7 @@ add_executable(behaviors_node
 #add dependencies
 add_dependencies(n3_pilot_node ${catkin_EXPORTED_TARGETS} )
 add_dependencies(gimbal_tag_node ${catkin_EXPORTED_TARGETS} )
-add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg ${PROJECT_NAME}_generate_messages_cpp)
+add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp) #${PROJECT_NAME}_gencfg )
 
 ## Link executables
 target_link_libraries(n3_pilot_node
@@ -85,6 +88,7 @@ target_link_libraries(n3_pilot_node
 
 target_link_libraries(gimbal_tag_node
   ${catkin_LIBRARIES}
+  ${DJIOSDK_LIBRARIES}
 )
 
 target_link_libraries(behaviors_node

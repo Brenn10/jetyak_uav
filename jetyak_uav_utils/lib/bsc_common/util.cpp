@@ -1,14 +1,14 @@
 #include "include/util.h"
 namespace bsc_common {
-void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_msgs::Vector3* state) {
+void util::rpy_from_quat(const geometry_msgs::Quaternion &orientation, geometry_msgs::Vector3* state) {
 
 
   // Get message as quaternion, then get roll, pitch, yaw
   tf::Quaternion q(
-    orientation->x,
-    orientation->y,
-    orientation->z,
-    orientation->w
+    orientation.x,
+    orientation.y,
+    orientation.z,
+    orientation.w
   );
   tf::Matrix3x3 m(q);
   double t_r, t_p, t_y;
@@ -26,6 +26,19 @@ void util::rpy_from_quat(const geometry_msgs::Quaternion* orientation, geometry_
     state->z = state->z-2*C_PI;
   }
 }
+
+double util::yaw_from_quat(const geometry_msgs::Quaternion& orientation){
+  geometry_msgs::Vector3* state = new geometry_msgs::Vector3();
+
+  bsc_common::util::rpy_from_quat(orientation,state);
+
+  double yaw = state->z+bsc_common::util::C_PI;
+  if(yaw>bsc_common::util::C_PI) {
+    yaw=yaw-2*bsc_common::util::C_PI;
+  }
+  return yaw;
+}
+
 template <typename T>
 T util::clip(T x, T low, T high) {
   return std::max(std::min(high,x),low);

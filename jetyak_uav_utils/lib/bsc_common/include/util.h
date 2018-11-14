@@ -16,6 +16,9 @@ namespace bsc_common {
 
 class util {
 public:
+
+
+
   static constexpr long double C_PI = 3.14159265358979323846; // My long PI value
 
   /* rpy_from_quat
@@ -24,7 +27,15 @@ public:
    * @param orientation quaternion
    * @param state saves the roll,pitch,yaw encoded as a Vector3
    */
-  static void rpy_from_quat(const geometry_msgs::Quaternion* pose, geometry_msgs::Vector3* state);
+  static void rpy_from_quat(const geometry_msgs::Quaternion& pose, geometry_msgs::Vector3* state);
+
+  /* yaw_from_quat
+   * Gives the roll pitch and yaw in radians given a quaternion
+   *
+   * @param orientation quaternion
+   * @return yaw in range [-pi,pi)
+   */
+  static double yaw_from_quat(const geometry_msgs::Quaternion& orientation);
 
   /* clip
    * clips a value to be between a min and maxSpeed
