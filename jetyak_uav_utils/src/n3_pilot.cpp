@@ -25,7 +25,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	rcStickThresh = 0.01;
 	autopilotOn = false;
 	bypassPilot = false;
-	isM100 = true; //versionCheckM100();
+	isM100 = false; //versionCheckM100();
 
 	// Initialize RC
 	setupRCCallback();
