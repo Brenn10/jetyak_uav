@@ -1,24 +1,59 @@
 #include "jetyak_uav_utils/behaviors.h"
 
 void behaviors::takeoffBehavior() {
+  /*
+  Get altitude/tagpose
+
+  Start props
+  PID using follow constants to 1 m above takeoff
+  Enter following when altitude above .75m
+
+  */
   if(!propellorsRunning) {
-    dji_sdk::DroneTaskControl srv;
-    srv.request.task=4;
-    taskSrv_.call(srv);
+    takeoff_.boatz=simpleTag_.z;
+    dji_sdk::DroneArmControl srv;
+    srv.request.arm=1;
+    armSrv_.call(srv);
     if(srv.response.result) {
-      ROS_INFO("Takeoff successful");
+      ROS_INFO("Propellors running");
       behaviorChanged_=true;
       currentMode_=Mode::FOLLOW;
       propellorsRunning=true;
+
+      xpid_->reset();
+      ypid_->reset();
+      zpid_->reset();
+      wpid_->reset();
+
+      xpid_->updateParams(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
+      ypid_->updateParams(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
+      zpid_->updateParams(follow_.kp.z ,follow_.ki.z,follow_.kd.z);
+      wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
     } else {
-      ROS_WARN("Failure to Takeoff");
+      ROS_WARN("Failure to Start props");
     }
   }
   else {
-    ROS_INFO("Already up");
-    behaviorChanged_=true;
-    currentMode_=Mode::FOLLOW;
-    propellorsRunning=true;
+    if(takeoff_.boatz-simpleTag_.z>takeoff_.threshold) {
+      ROS_WARN("Switching to Following");
+      behaviorChanged_=true;
+      this->currentMode_=Mode::FOLLOW;
+    }
+    else {
+      xpid_->update(land_.land_pose.x-simpleTag_.x,simpleTag_.t);
+      ypid_->update(0-simpleTag_.y,simpleTag_.t);
+      zpid_->update((takeoff_.boatz-takeoff_.fly_to)-simpleTag_.z,simpleTag_.t);
+      wpid_->update(0-simpleTag_.w,simpleTag_.t);
+
+
+      sensor_msgs::Joy cmd;
+      cmd.axes.push_back(-xpid_->get_signal());
+      cmd.axes.push_back(-ypid_->get_signal());
+      cmd.axes.push_back(-zpid_->get_signal());
+      cmd.axes.push_back(-wpid_->get_signal());
+      cmd.axes.push_back(bodyVelCmdFlag_);
+      cmdPub_.publish(cmd);
+    }
   }
 }
 
@@ -52,7 +87,7 @@ void behaviors::followBehavior() {
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
-        cmd.axes.push_back(simpleTag_.y>0 ? .3 : -.3); //rotate CCW if lost on left, CW if right
+        cmd.axes.push_back(simpleTag_.y>0 ? 1 : -1); //rotate CCW if lost on left, CW if right
         cmd.axes.push_back(bodyVelCmdFlag_);
         cmdPub_.publish(cmd);
         return;
@@ -75,18 +110,13 @@ void behaviors::followBehavior() {
     zpid_->update(follow_.follow_pose.z-simpleTag_.z,simpleTag_.t);
     wpid_->update(follow_.follow_pose.w-simpleTag_.w,simpleTag_.t);
 
-/*    //rotate velocities in reference to the tag
-    double rotated_x;
-    double rotated_y;
-    bsc_common::util::rotate_vector(
-      xpid_->get_signal(),ypid_->get_signal(),-simpleTag_.w,rotated_x,rotated_y);
-*/
-    ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
+
+    /*ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
       -xpid_->get_signal(),
       -ypid_->get_signal(),
       -zpid_->get_signal(),
       -wpid_->get_signal()
-    );
+    );*/
     sensor_msgs::Joy cmd;
     cmd.axes.push_back(-xpid_->get_signal());
     cmd.axes.push_back(-ypid_->get_signal());
@@ -192,23 +222,23 @@ void behaviors::returnBehavior() {
     wpid_->updateParams(follow_.kp.w ,follow_.ki.w,follow_.kd.w);
     behaviorChanged_=false;
     return_.stage=return_.UP;
-
+    ROS_WARN("Going Up");
   }
 
   else if(return_.stage==return_.UP) {
-    ROS_WARN("Going UP");
+    //ROS_WARN("Going UP");
     /*if altitude is >gotoHeight
         set stage to Over
       else
         command 0xy and the goal height-altitude
     */
     if(uavGPS_.altitude-boatGPS_.altitude>return_.gotoHeight) {
-      ROS_WARN("Changed to OVER");
+      ROS_WARN("Changed OVER");
       return_.stage=return_.OVER;
     }
     else {
       double z_correction=return_.gotoHeight-(uavGPS_.altitude-boatGPS_.altitude);
-      ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude-boatGPS_.altitude);
+      //ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude-boatGPS_.altitude);
       sensor_msgs::Joy cmd;
       cmd.axes.push_back(0);
       cmd.axes.push_back(0);
@@ -219,7 +249,7 @@ void behaviors::returnBehavior() {
     }
   }
   else if(return_.stage==return_.OVER) {
-    ROS_WARN("Going OVER");
+    //ROS_WARN("Going OVER");
     /*
       saturate x and y with directions
       z_cmd = gotoHeight-altitude
@@ -229,7 +259,7 @@ void behaviors::returnBehavior() {
     if(bsc_common::util::latlondist(uavGPS_.latitude,uavGPS_.longitude,
         boatGPS_.latitude,boatGPS_.longitude) < return_.downRadius)
     {
-      ROS_WARN("Changed to DOWN");
+      ROS_WARN("Changed DOWN");
       return_.stage=return_.DOWN;
     }
     else {

@@ -16,6 +16,7 @@ behaviors::behaviors(ros::NodeHandle& nh)
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd",1);
 
   //service clients
+  armSrv_ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
   taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
 
   // Service servers
@@ -77,7 +78,7 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/return_tagTime", return_.tagTime, 1);
   return_.settleRadiusSquared = settleRadius*settleRadius;
 
- 
+
   xpid_ = new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
   ypid_ = new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
   zpid_ = new bsc_common::PID(follow_.kp.z ,follow_.ki.z,follow_.kd.z);

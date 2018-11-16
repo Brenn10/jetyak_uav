@@ -32,6 +32,7 @@
 
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
+#include <dji_sdk/DroneArmControl.h>
 #include <dji_sdk/DroneTaskControl.h>
 
 //Custom Lib includes
@@ -48,7 +49,7 @@ private:
   *********************************************/
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
-  ros::ServiceClient taskSrv_;
+  ros::ServiceClient armSrv_,taskSrv_;
   ros::ServiceServer setModeService_,getModeService_;
 
   /**********************
@@ -58,6 +59,7 @@ private:
   bool behaviorChanged_=false;
   Mode currentMode_;
   bool propellorsRunning=false;
+
   char bodyVelCmdFlag_ = (
     DJISDK::VERTICAL_VELOCITY   |
     DJISDK::HORIZONTAL_VELOCITY |
@@ -85,6 +87,12 @@ private:
   /*********************************************
   * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
   **********************************************/
+  struct {
+    double boatz;
+    double fly_to;
+    double threshold;
+  } takeoff_;
+
   // Land specific constants
   struct {
     bsc_common::pose4d_t kp,kd,ki;
