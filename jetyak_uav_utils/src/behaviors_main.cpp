@@ -1,7 +1,8 @@
 #include "jetyak_uav_utils/behaviors.h"
 
-behaviors::behaviors(ros::NodeHandle& nh)
+behaviors::behaviors(ros::NodeHandle& nh_param)
 {
+  nh=nh_param;
   //initialize mode
   currentMode_=Mode::HOVER;
 

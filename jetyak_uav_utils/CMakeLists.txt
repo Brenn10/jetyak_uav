@@ -32,6 +32,7 @@ add_service_files(DIRECTORY srv
   FILES
   GetMode.srv
   SetMode.srv
+  SetBoatNS.srv
 )
 
 generate_messages(

@@ -22,6 +22,7 @@
 #include "Mode.h"
 #include "jetyak_uav_utils/SetMode.h"
 #include "jetyak_uav_utils/GetMode.h"
+#include "jetyak_uav_utils/SetBoatNS.h"
 
 //ROS Core includes
 #include <sensor_msgs/Joy.h>
@@ -50,8 +51,8 @@ private:
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
   ros::ServiceClient armSrv_,taskSrv_;
-  ros::ServiceServer setModeService_,getModeService_;
-
+  ros::ServiceServer setModeService_,getModeService_,setBoatNSService_;
+  ros::NodeHandle nh;
   /**********************
   * INSTANCE VARIABLES
   **********************/
@@ -139,6 +140,15 @@ private:
   */
   bool getModeCallback(jetyak_uav_utils::GetMode::Request  &req,
                     jetyak_uav_utils::GetMode::Response &res);
+  /** setBoatNSCallback
+  * Callback for the boat namespace service. This changes the topics for the
+  * boat gps and imu subscriptions.
+  *
+  * @param req string of the root NS of the boat ("/jetyak1")
+  * @param res boolean indicating a success or failure
+  */
+  bool setBoatNSCallback(jetyak_uav_utils::SetBoatNS::Request  &req,
+                    jetyak_uav_utils::SetBoatNS::Response &res);
 
   /****************************
   * SUBSCRIPTION CALLBACKS

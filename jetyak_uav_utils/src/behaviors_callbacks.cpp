@@ -14,6 +14,14 @@ bool behaviors::getModeCallback(jetyak_uav_utils::GetMode::Request  &req, jetyak
   return true;
 }
 
+bool behaviors::setBoatNSCallback(jetyak_uav_utils::SetBoatNS::Request  &req,
+                  jetyak_uav_utils::SetBoatNS::Response &res){
+  std::string ns = req.ns;
+  boatGPSSub_ = nh.subscribe(ns+"/global_posiiton/global",1,&behaviors::boatGPSCallback, this);
+  boatIMUSub_ =  nh.subscribe(ns+"/imu/data",1, &behaviors::boatIMUCallback, this);
+  return true;
+}
+
 void behaviors::tagPoseCallback(const geometry_msgs::PoseStamped::ConstPtr& msg) {
   tagPose_.pose=msg->pose;
   tagPose_.header=msg->header;
