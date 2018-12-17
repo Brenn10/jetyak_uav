@@ -82,7 +82,7 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/takeoff_height", takeoff_.height, 0);
   ros::param::param<double>("uav_behaviors/takeoff_threshold", takeoff_.threshold, 0);
 
-  tagPose_.pose.orientation = tf::createQuaternionFromRPY(0,0,0);
+  tagPose_.pose.orientation = {0,0,0,1};
 
   xpid_ = new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
   ypid_ = new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);
