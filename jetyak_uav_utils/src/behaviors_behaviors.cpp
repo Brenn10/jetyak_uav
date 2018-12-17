@@ -92,7 +92,7 @@ void behaviors::followBehavior() {
 
       if(follow_.lostTagCounter>3) { //if time has been same for over 3 tick
 
-        //ROS_WARN("Tag Lost");
+        ROS_WARN("Tag Lost");
       	sensor_msgs::Joy cmd;
       	cmd.axes.push_back(0);
       	cmd.axes.push_back(0);
@@ -219,7 +219,7 @@ void behaviors::returnBehavior() {
   }
 
   else if(return_.stage==return_.UP) {
-    //ROS_WARN("Going UP");
+    ROS_WARN("Going UP");
     /*if altitude is >gotoHeight
         set stage to Over
       else
@@ -231,7 +231,7 @@ void behaviors::returnBehavior() {
     }
     else {
       double z_correction=return_.gotoHeight-(uavGPS_.altitude-boatGPS_.altitude);
-      //ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude-boatGPS_.altitude);
+      ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude-boatGPS_.altitude);
       sensor_msgs::Joy cmd;
       cmd.axes.push_back(0);
       cmd.axes.push_back(0);
@@ -242,7 +242,7 @@ void behaviors::returnBehavior() {
     }
   }
   else if(return_.stage==return_.OVER) {
-    //ROS_WARN("Going OVER");
+    ROS_WARN("Going OVER");
     /*
       saturate x and y with directions
       z_cmd = gotoHeight-altitude
