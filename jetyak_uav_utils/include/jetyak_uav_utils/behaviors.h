@@ -82,7 +82,7 @@ private:
   sensor_msgs::Imu uavImu_, boatImu_;
   geometry_msgs::PoseStamped tagPose_;
 
-  bsc_common::pose4d_t simpleTag_;
+  bsc_common::pose4d_t simpleTag_={0,0,0,0,0};
 
   /*********************************************
   * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
