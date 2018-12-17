@@ -77,23 +77,21 @@ void behaviors::followBehavior() {
     if(follow_.lastSpotted!=simpleTag_.t) { //if time changed
       follow_.lastSpotted=simpleTag_.t;
       follow_.lostTagCounter=0;
+
+      // line up with pad
+      xpid_->update(follow_.follow_pose.x-simpleTag_.x,simpleTag_.t);
+      ypid_->update(follow_.follow_pose.y-simpleTag_.y,simpleTag_.t);
+      zpid_->update(follow_.follow_pose.z-simpleTag_.z,simpleTag_.t);
+      wpid_->update(follow_.follow_pose.w-simpleTag_.w,simpleTag_.t);
+
+
+
     }
     else { //if time is same
       follow_.lostTagCounter++;
 
-      if(follow_.lostTagCounter>3 and follow_.lostTagCounter<=20) { //if time has been same for over 3 tick
-        //ROS_WARN("No tag update: %i" , follow_.lostTagCounter);
-        sensor_msgs::Joy cmd;
-        cmd.axes.push_back(0);
-        cmd.axes.push_back(0);
-        cmd.axes.push_back(0);
-        //cmd.axes.push_back(simpleTag_.y>0 ? 1 : -1); //rotate CCW if lost on left, CW if right
-        cmd.axes.push_back(0);
+      if(follow_.lostTagCounter>3) { //if time has been same for over 3 tick
 
-        cmd.axes.push_back(bodyVelCmdFlag_);
-        cmdPub_.publish(cmd);
-        return;
-      } else if (follow_.lostTagCounter>20){ // if time has been same for over 10 tick
         //ROS_WARN("Tag Lost");
       	sensor_msgs::Joy cmd;
       	cmd.axes.push_back(0);
@@ -105,12 +103,6 @@ void behaviors::followBehavior() {
         return;
       }
     }
-
-    // line up with pad
-    xpid_->update(follow_.follow_pose.x-simpleTag_.x,simpleTag_.t);
-    ypid_->update(follow_.follow_pose.y-simpleTag_.y,simpleTag_.t);
-    zpid_->update(follow_.follow_pose.z-simpleTag_.z,simpleTag_.t);
-    wpid_->update(follow_.follow_pose.w-simpleTag_.w,simpleTag_.t);
 
 
     /*ROS_INFO("sig x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
@@ -126,7 +118,6 @@ void behaviors::followBehavior() {
     cmd.axes.push_back(-wpid_->get_signal());
     cmd.axes.push_back(bodyVelCmdFlag_);
     cmdPub_.publish(cmd);
-
 
   }
 }
