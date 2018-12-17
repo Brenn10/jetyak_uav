@@ -89,7 +89,7 @@ private:
   **********************************************/
   struct {
     double boatz;
-    double fly_to;
+    double height;
     double threshold;
   } takeoff_;
 

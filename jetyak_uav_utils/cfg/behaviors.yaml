@@ -1,7 +1,7 @@
 #
 # takeoff
 #
-takeoff_flyto: 1
+takeoff_height: 1
 takeoff_threshold: .25
 
 
