@@ -23,7 +23,9 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	rcStickThresh = 0.0;
 	autopilotOn = false;
 	bypassPilot = false;
-	isM100 = false; //versionCheckM100();
+	//isM100 = false; //rsionCheckM100();
+	ros::param::param<bool>("isM100", isM100, false);
+
 
 	// Initialize RC
 	setupRCCallback();
@@ -172,7 +174,7 @@ void n3_pilot::adaptiveCliping()
 	}
 	else {
 		hVelcmdMax = hVelcmdMaxGround;
-		vVelcmdMax = vVelcmdMaxGround;	
+		vVelcmdMax = vVelcmdMaxGround;
 	}
 
 	// Horizontal Logic
