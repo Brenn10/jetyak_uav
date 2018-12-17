@@ -1,4 +1,11 @@
 #
+# takeoff
+#
+takeoff_flyto: 1
+takeoff_threshold: .25
+
+
+#
 # Follow Parameters
 #
 follow_x: 3
@@ -34,7 +41,7 @@ land_y_kp: .3
 land_y_kd: .2
 land_y_ki: 0
 
-land_z: 1.30
+land_z: 0
 land_z_kp: .2
 land_z_kd: 0
 land_z_ki: 0

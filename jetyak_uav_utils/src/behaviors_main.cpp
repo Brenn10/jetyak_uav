@@ -78,6 +78,9 @@ behaviors::behaviors(ros::NodeHandle& nh)
   ros::param::param<double>("uav_behaviors/return_tagTime", return_.tagTime, 1);
   return_.settleRadiusSquared = settleRadius*settleRadius;
 
+  //takeoff
+  ros::param::param<double>("uav_behaviors/takeoff_flyto", takeoff_.flyto, 0);
+  ros::param::param<double>("uav_behaviors/takeoff_threshold", takeoff_.threshold, 0);
 
   xpid_ = new bsc_common::PID(follow_.kp.x ,follow_.ki.x,follow_.kd.x);
   ypid_ = new bsc_common::PID(follow_.kp.y ,follow_.ki.y,follow_.kd.y);

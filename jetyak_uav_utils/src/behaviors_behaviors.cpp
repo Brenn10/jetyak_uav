@@ -34,16 +34,16 @@ void behaviors::takeoffBehavior() {
     }
   }
   else {
-    if(takeoff_.boatz-simpleTag_.z>takeoff_.threshold) {
+    if(takeoff_.boatz-simpleTag_.z>takeoff_.fly_to-takeoff_.threshold) {
       ROS_WARN("Switching to Following");
       behaviorChanged_=true;
       this->currentMode_=Mode::FOLLOW;
     }
     else {
       xpid_->update(land_.land_pose.x-simpleTag_.x,simpleTag_.t);
-      ypid_->update(0-simpleTag_.y,simpleTag_.t);
+      ypid_->update(land_.land_pose.y-simpleTag_.y,simpleTag_.t);
       zpid_->update((takeoff_.boatz-takeoff_.fly_to)-simpleTag_.z,simpleTag_.t);
-      wpid_->update(0-simpleTag_.w,simpleTag_.t);
+      wpid_->update(land_.land_pose.w-simpleTag_.w,simpleTag_.t);
 
 
       sensor_msgs::Joy cmd;
