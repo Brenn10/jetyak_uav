@@ -16,8 +16,16 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
 	// Set up basic services
+	//service clients
+  armServ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
+  taskServ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
+
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
+
+	//set up service servers
+	armServServer = nh.advertiseService("arm_control",&n3_pilot::armServCallback,this);
+	taskServServer = nh.advertiseService("task_control",&n3_pilot::taskServCallback,this);
 
 	// Set default values
 	setClippingThresholds();
@@ -100,6 +108,40 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 
 			bypassPilot = true;
 		}
+	}
+}
+
+bool n3_pilot::armServCallback(dji_sdk::DroneArmControl::Request &req,
+										 dji_sdk::DroneArmControl::Response &res)
+{
+	if(autopilotOn)
+	{
+		dji_sdk::DroneArmControl srv;
+    srv.request.arm=req.arm;
+    armServ.call(srv);
+		res.result=srv.response.result;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+bool n3_pilot::taskServCallback(dji_sdk::DroneTaskControl::Request &req,
+										 dji_sdk::DroneTaskControl::Response &res)
+{
+	if(autopilotOn)
+	{
+		dji_sdk::DroneTaskControl srv;
+    srv.request.task=req.task;
+    taskServ.call(srv);
+		res.result=srv.response.result;
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -206,7 +248,7 @@ sensor_msgs::Joy n3_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 	if(((int)msg.axes[4] & DJISDK::VERTICAL_THRUST) ==
 		DJISDK::VERTICAL_THRUST)
 		cmdBuffer.axes[3] = clip(msg.axes[3], 0, vThrustcmdMax);
-	else if (((int)msg.axes[4] & DJISDK::VERTICAL_POSITION) == 
+	else if (((int)msg.axes[4] & DJISDK::VERTICAL_POSITION) ==
 		DJISDK::VERTICAL_POSITION)
 		cmdBuffer.axes[3] = clip(msg.axes[3], vPoscmdMin, vPoscmdMax);
 	else

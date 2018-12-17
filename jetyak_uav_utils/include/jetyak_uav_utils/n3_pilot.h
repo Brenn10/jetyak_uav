@@ -11,6 +11,8 @@
 #include "dji_sdk/dji_sdk.h"
 #include "dji_sdk/SDKControlAuthority.h"
 #include "dji_sdk/QueryDroneVersion.h"
+#include <dji_sdk/DroneArmControl.h>
+#include <dji_sdk/DroneTaskControl.h>
 
 class n3_pilot
 {
@@ -30,10 +32,18 @@ protected:
 	// ROS Services
 	ros::ServiceClient sdkCtrlAuthorityServ;
 	ros::ServiceClient droneVersionServ;
+	ros::ServiceClient armServ, taskServ;
+	ros::ServiceServer armServServer, taskServServer;
 
 	// Callback functions
 	void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
 	void rcCallback(const sensor_msgs::Joy::ConstPtr& msg);
+
+	// Service Servers
+	bool armServCallback(dji_sdk::DroneArmControl::Request &req,
+											 dji_sdk::DroneArmControl::Response &res);
+	bool taskServCallback(dji_sdk::DroneTaskControl::Request &req,
+ 											 dji_sdk::DroneTaskControl::Response &res);
 
 	// Functions
 	void setupRCCallback();
