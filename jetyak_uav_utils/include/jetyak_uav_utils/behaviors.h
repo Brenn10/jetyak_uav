@@ -80,7 +80,7 @@ private:
   sensor_msgs::NavSatFix uavGPS_,boatGPS_;
   geometry_msgs::QuaternionStamped uavAttitude_;
   sensor_msgs::Imu uavImu_, boatImu_;
-  geometry_msgs::PoseStamped tagPose_;
+  geometry_msgs::PoseStamped tagPose_ = geometry_msgs::PoseStamped();
 
   bsc_common::pose4d_t simpleTag_={0,0,0,0,0};
 
