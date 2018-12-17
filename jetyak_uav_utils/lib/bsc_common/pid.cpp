@@ -27,8 +27,10 @@ void PID::update(double error,double utime)
 
   // Proportional
   signal_=error*kp_;
-
-  if(last_time_!=0) //if not first time
+  if(utime==0) {
+    std::cout << "Time is 0, error " << error << std::endl;
+  }
+  else if(last_time_!=0) //if not first time
   {
     if(last_time_==utime) {
       signal_+=integral_*ki_+last_d_;
