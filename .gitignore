@@ -37,3 +37,6 @@
 # Local files
 *.ignore
 *.bag
+
+# links
+*.link

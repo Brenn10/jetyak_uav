@@ -11,10 +11,10 @@ void behaviors::takeoffBehavior() {
   */
   if(!propellorsRunning) {
     takeoff_.boatz=simpleTag_.z;
-    dji_sdk::DroneArmControl srv;
-    srv.request.arm=1;
-    armSrv_.call(srv);
-    if(srv.response.result) {
+    jetyak_uav_utils::PropEnable srv;
+    srv.request.enable = true;
+    propSrv_.call(srv);
+    if(srv.response.success) {
       ROS_INFO("Propellors running");
       //behaviorChanged_=true;
       //currentMode_=Mode::FOLLOW;
@@ -51,7 +51,7 @@ void behaviors::takeoffBehavior() {
       cmd.axes.push_back(-ypid_->get_signal());
       cmd.axes.push_back(-zpid_->get_signal());
       cmd.axes.push_back(-wpid_->get_signal());
-      cmd.axes.push_back(bodyVelCmdFlag_);
+      cmd.axes.push_back(0b10);
       cmdPub_.publish(cmd);
     }
   }
@@ -98,7 +98,7 @@ void behaviors::followBehavior() {
       	cmd.axes.push_back(0);
       	cmd.axes.push_back(0);
       	cmd.axes.push_back(0);
-      	cmd.axes.push_back(bodyVelCmdFlag_);
+      	cmd.axes.push_back(0b10);
       	cmdPub_.publish(cmd);
         return;
       }
@@ -116,7 +116,7 @@ void behaviors::followBehavior() {
     cmd.axes.push_back(-ypid_->get_signal());
     cmd.axes.push_back(-zpid_->get_signal());
     cmd.axes.push_back(-wpid_->get_signal());
-    cmd.axes.push_back(bodyVelCmdFlag_);
+    cmd.axes.push_back(0b10);
     cmdPub_.publish(cmd);
 
   }
@@ -193,7 +193,7 @@ void behaviors::returnBehavior() {
       cmd.axes.push_back(-ypid_->get_signal());
       cmd.axes.push_back(-zpid_->get_signal());
       cmd.axes.push_back(-wpid_->get_signal());
-      cmd.axes.push_back(bodyVelCmdFlag_);
+      cmd.axes.push_back(0b10);
       cmdPub_.publish(cmd);
     }
   }
@@ -237,7 +237,7 @@ void behaviors::returnBehavior() {
       cmd.axes.push_back(0);
       cmd.axes.push_back(z_correction);
       cmd.axes.push_back(heading);
-      cmd.axes.push_back(worldPosCmdFlag_);
+      cmd.axes.push_back(0b01);
       cmdPub_.publish(cmd);
     }
   }
@@ -265,7 +265,7 @@ void behaviors::returnBehavior() {
       cmd.axes.push_back(north);
       cmd.axes.push_back(z_correction);
       cmd.axes.push_back(heading);
-      cmd.axes.push_back(worldPosCmdFlag_);
+      cmd.axes.push_back(0b01);
       cmdPub_.publish(cmd);
     }
   }
@@ -285,7 +285,7 @@ void behaviors::returnBehavior() {
     cmd.axes.push_back(north);
     cmd.axes.push_back(z_correction);
     cmd.axes.push_back(-heading);
-    cmd.axes.push_back(worldPosCmdFlag_);
+    cmd.axes.push_back(0b01);
     cmdPub_.publish(cmd);
   }
   else {
@@ -317,10 +317,9 @@ void behaviors::landBehavior() {
         pow(land_.land_pose.x-simpleTag_.x,2)+
         pow(land_.land_pose.y-simpleTag_.y,2)<pow(.1,2))
       {
-        dji_sdk::DroneTaskControl srv;
-        srv.request.task=6;
-        taskSrv_.call(srv);
-        if(srv.response.result)
+        std_srvs::Trigger srv;
+        landSrv_.call(srv);
+        if(srv.response.success)
         {
           currentMode_=Mode::RIDE;
           return;
@@ -340,7 +339,7 @@ void behaviors::landBehavior() {
         cmd.axes.push_back(0);
         cmd.axes.push_back(.5); //If tag lost, fly up a bit
         cmd.axes.push_back(0);
-        cmd.axes.push_back(bodyVelCmdFlag_);
+        cmd.axes.push_back(0b10);
         cmdPub_.publish(cmd);
         return;
       } else if (follow_.lostTagCounter>20){ // if time has been same for over 10 tick
@@ -350,7 +349,7 @@ void behaviors::landBehavior() {
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
         cmd.axes.push_back(0);
-        cmd.axes.push_back(bodyVelCmdFlag_);
+        cmd.axes.push_back(0b10);
         cmdPub_.publish(cmd);
         return;
       }
@@ -379,7 +378,7 @@ void behaviors::landBehavior() {
     cmd.axes.push_back(-ypid_->get_signal());
     cmd.axes.push_back(-zpid_->get_signal());
     cmd.axes.push_back(-wpid_->get_signal());
-    cmd.axes.push_back(bodyVelCmdFlag_);
+    cmd.axes.push_back(0b10);
     cmdPub_.publish(cmd);
 
 
@@ -388,11 +387,10 @@ void behaviors::landBehavior() {
 
 void behaviors::rideBehavior() {
   if(propellorsRunning) {
-    dji_sdk::DroneTaskControl srv;
-    srv.request.task=6;
-    taskSrv_.call(srv);
-    propellorsRunning=srv.response.result;
-    if(srv.response.result) {
+    std_srvs::Trigger srv;
+    landSrv_.call(srv);
+    propellorsRunning=srv.response.success;
+    if(srv.response.success) {
       ROS_WARN("Arms deactivated");
     } else {
       ROS_WARN("Failed to deactivate arms");
@@ -407,6 +405,6 @@ void behaviors::hoverBehavior() {
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
   cmd.axes.push_back(0);
-  cmd.axes.push_back(worldPosCmdFlag_);
+  cmd.axes.push_back(0b01);
   cmdPub_.publish(cmd);
 };

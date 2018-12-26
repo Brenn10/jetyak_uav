@@ -33,6 +33,7 @@ add_service_files(DIRECTORY srv
   GetMode.srv
   SetMode.srv
   SetBoatNS.srv
+  PropEnable.srv
 )
 
 generate_messages(
@@ -60,29 +61,29 @@ include_directories(
 )
 
 ## Add executables
-add_executable(n3_pilot_node
-                src/n3_pilot.cpp
-                )
+add_executable(dji_pilot_node
+  src/dji_pilot.cpp
+)
 
 add_executable(gimbal_tag_node
-                src/gimbal_tag.cpp
-                )
+  src/gimbal_tag.cpp
+)
 
 add_executable(behaviors_node
-                src/behaviors_behaviors.cpp
-                src/behaviors_callbacks.cpp
-                src/behaviors_main.cpp
-                lib/bsc_common/pid.cpp
-                lib/bsc_common/util.cpp
-                )
+  src/behaviors_behaviors.cpp
+  src/behaviors_callbacks.cpp
+  src/behaviors_main.cpp
+  lib/bsc_common/pid.cpp
+  lib/bsc_common/util.cpp
+)
 
 #add dependencies
-add_dependencies(n3_pilot_node ${catkin_EXPORTED_TARGETS} )
+add_dependencies(dji_pilot_node ${catkin_EXPORTED_TARGETS} )
 add_dependencies(gimbal_tag_node ${catkin_EXPORTED_TARGETS} )
 add_dependencies(behaviors_node ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp) #${PROJECT_NAME}_gencfg )
 
 ## Link executables
-target_link_libraries(n3_pilot_node
+target_link_libraries(dji_pilot_node
   ${catkin_LIBRARIES}
   ${DJIOSDK_LIBRARIES}
 )

@@ -17,12 +17,15 @@ behaviors::behaviors(ros::NodeHandle& nh_param)
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd",1);
 
   //service clients
-  armSrv_ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
-  taskSrv_ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
+  propSrv_ = nh.serviceClient<jetyak_uav_utils::PropEnable>("prop_enable");
+  takeoffSrv_ = nh.serviceClient<std_srvs::Trigger>("takeoff");
+  landSrv_ = nh.serviceClient<std_srvs::Trigger>("land");
+
 
   // Service servers
   setModeService_ = nh.advertiseService("setMode",&behaviors::setModeCallback,this);
   getModeService_ = nh.advertiseService("getMode",&behaviors::getModeCallback,this);
+  setBoatNSService_ = nh.advertiseService("setBoatNS",&behaviors::setBoatNSCallback,this);
 
 
   /****************************************

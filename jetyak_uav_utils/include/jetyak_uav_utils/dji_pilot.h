@@ -1,5 +1,5 @@
-#ifndef N3_PILOT_H
-#define N3_PILOT_H
+#ifndef DJI_PILOT_H
+#define DJI_PILOT_H
 
 #include <string>
 
@@ -14,16 +14,20 @@
 #include <dji_sdk/DroneArmControl.h>
 #include <dji_sdk/DroneTaskControl.h>
 
-class n3_pilot
+#include "jetyak_uav_utils/PropEnable.h"
+#include "std_srvs/Trigger.h"
+
+
+class dji_pilot
 {
 public:
-	n3_pilot(ros::NodeHandle& nh);
-	~n3_pilot();
+	dji_pilot(ros::NodeHandle& nh);
+	~dji_pilot();
 
 	void publishCommand();
 protected:
 	// ROS Subscribers
-	ros::Subscriber joySub;
+	ros::Subscriber extCmdSub;
 	ros::Subscriber djiRCSub;
 
 	// ROS Publishers
@@ -33,18 +37,19 @@ protected:
 	ros::ServiceClient sdkCtrlAuthorityServ;
 	ros::ServiceClient droneVersionServ;
 	ros::ServiceClient armServ, taskServ;
-	ros::ServiceServer armServServer, taskServServer;
+	ros::ServiceServer propServServer, takeoffServServer,landServServer;
 
 	// Callback functions
-	void joyCallback(const sensor_msgs::Joy::ConstPtr& msg);
+	void extCallback(const sensor_msgs::Joy::ConstPtr& msg);
 	void rcCallback(const sensor_msgs::Joy::ConstPtr& msg);
 
 	// Service Servers
-	bool armServCallback(dji_sdk::DroneArmControl::Request &req,
-											 dji_sdk::DroneArmControl::Response &res);
-	bool taskServCallback(dji_sdk::DroneTaskControl::Request &req,
- 											 dji_sdk::DroneTaskControl::Response &res);
-
+	bool propServCallback(jetyak_uav_utils::PropEnable::Request &req,
+						  jetyak_uav_utils::PropEnable::Response &res);
+	bool landServCallback(std_srvs::Trigger::Request &req,
+ 						  std_srvs::Trigger::Response &res);
+	bool takeoffServCallback(std_srvs::Trigger::Request &req,
+ 							 std_srvs::Trigger::Response &res);
 	// Functions
 	void setupRCCallback();
 	bool requestControl(int requestFlag);
@@ -53,7 +58,7 @@ protected:
 	bool versionCheckM100();
 
 	// Data
-	sensor_msgs::Joy joyCommand, rcCommand;
+	sensor_msgs::Joy extCommand, rcCommand;
 	bool autopilotOn;
 	bool bypassPilot;
 	uint8_t commandFlag;
@@ -65,6 +70,8 @@ protected:
 	double rcStickThresh;
 
 	bool isM100;
+private:
+	char buildFlag(bool body, bool pos);
 };
 
 #endif

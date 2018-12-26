@@ -10,8 +10,6 @@
 #define JETYAK_UAV_UTILS_BEHAVIORS_H_
 
 #include "ros/ros.h"
-#include "dji_sdk/dji_sdk.h"
-
 
 //C includes
 #include <cstdlib>
@@ -23,8 +21,11 @@
 #include "jetyak_uav_utils/SetMode.h"
 #include "jetyak_uav_utils/GetMode.h"
 #include "jetyak_uav_utils/SetBoatNS.h"
+#include "jetyak_uav_utils/PropEnable.h"
+
 
 //ROS Core includes
+#include <std_srvs/Trigger.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <geometry_msgs/QuaternionStamped.h>
@@ -33,8 +34,6 @@
 
 //ROS Packages includes
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
-#include <dji_sdk/DroneArmControl.h>
-#include <dji_sdk/DroneTaskControl.h>
 
 //Custom Lib includes
 #include "../lib/bsc_common/include/pid.h"
@@ -50,7 +49,7 @@ private:
   *********************************************/
   ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
   ros::Publisher cmdPub_;
-  ros::ServiceClient armSrv_,taskSrv_;
+  ros::ServiceClient propSrv_,takeoffSrv_,landSrv_;
   ros::ServiceServer setModeService_,getModeService_,setBoatNSService_;
   ros::NodeHandle nh;
   /**********************
@@ -61,19 +60,7 @@ private:
   Mode currentMode_;
   bool propellorsRunning=false;
 
-  char bodyVelCmdFlag_ = (
-    DJISDK::VERTICAL_VELOCITY   |
-    DJISDK::HORIZONTAL_VELOCITY |
-    DJISDK::YAW_RATE            |
-    DJISDK::HORIZONTAL_BODY     |
-    DJISDK::STABLE_DISABLE);
-
-  char worldPosCmdFlag_ = (
-    DJISDK::VERTICAL_VELOCITY   |
-    DJISDK::HORIZONTAL_POSITION |
-    DJISDK::YAW_ANGLE           |
-    DJISDK::HORIZONTAL_GROUND   |
-    DJISDK::STABLE_ENABLE);
+  
 
   /************************************
   * STATE VARIABLES

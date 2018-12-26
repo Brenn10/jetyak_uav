@@ -1,31 +1,32 @@
-#include "jetyak_uav_utils/n3_pilot.h"
+#include "jetyak_uav_utils/dji_pilot.h"
 
 #include <cmath>
 
 #define C_PI (double)3.141592653589793
 #define clip(X, LOW, HIGH) (((X) > (HIGH)) ? (HIGH) : ((X) < (LOW)) ? (LOW) : (X))
 
-n3_pilot::n3_pilot(ros::NodeHandle& nh)
+dji_pilot::dji_pilot(ros::NodeHandle& nh)
 {
 	// Subscribe to joy topic
-	joySub = nh.subscribe("behavior_cmd", 10, &n3_pilot::joyCallback, this);
+	extCmdSub = nh.subscribe("behavior_cmd", 10, &dji_pilot::extCallback, this);
 
-	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &n3_pilot::rcCallback, this);
+	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &dji_pilot::rcCallback, this);
 
 	// Set up command publisher
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
 	// Set up basic services
 	//service clients
-  armServ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
-  taskServ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
+	armServ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
+	taskServ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
 
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority> ("/dji_sdk/sdk_control_authority");
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	//set up service servers
-	armServServer = nh.advertiseService("arm_control",&n3_pilot::armServCallback,this);
-	taskServServer = nh.advertiseService("task_control",&n3_pilot::taskServCallback,this);
+	propServServer = nh.advertiseService("prop_enable",&dji_pilot::propServCallback,this);
+	takeoffServServer = nh.advertiseService("takeoff",&dji_pilot::takeoffServCallback,this);
+	landServServer = nh.advertiseService("land",&dji_pilot::landServCallback,this);
 
 	// Set default values
 	setClippingThresholds();
@@ -40,9 +41,9 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 	setupRCCallback();
 
 	// Initialize joy command
-	joyCommand.axes.clear();
+	extCommand.axes.clear();
 	for (int i = 0; i < 5; ++i)
-		joyCommand.axes.push_back(0);
+		extCommand.axes.push_back(0);
 
 	// Initialize default command flag
 	commandFlag = (
@@ -53,7 +54,7 @@ n3_pilot::n3_pilot(ros::NodeHandle& nh)
 		DJISDK::STABLE_ENABLE);
 }
 
-n3_pilot::~n3_pilot()
+dji_pilot::~dji_pilot()
 {
 	if (autopilotOn)
 	{
@@ -64,27 +65,36 @@ n3_pilot::~n3_pilot()
 }
 
 // Callbacks //
-
-void n3_pilot::joyCallback(const sensor_msgs::Joy::ConstPtr& msg)
+/** extCallback
+ * @param msg Joy message containing rpty commands in the axes[0:3] and \
+ * axes[4] encoding bools for body frame (0b10) and position cmd (0b01)
+ */
+void dji_pilot::extCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
-	// Pass the joystick message to the command
-	joyCommand.axes.clear();
+	sensor_msgs::Joy* output;
+	for(int i =0; i < 4; i++) 
+		output->axes.push_back(msg->axes[i]);
 
+	output->axes[4]=buildFlag((int)(msg->axes[4])&0b10,(int)(msg->axes[4])&0b1);
+
+	// Pass the joystick message to the command
+	extCommand.axes.clear();
+	
 	// Clip commands according to flag
-	joyCommand = adaptiveClipping(*msg);
+	extCommand = adaptiveClipping(*output);
 }
 
-void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
+void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 {
-	// Switch autopilot on/off
-	// P mode && Autopilot switch on && Autopilot flag not set
+	// Switch autodji_pilot on/off
+	// P mode && Autodji_pilot switch on && Autodji_pilot flag not set
 	if (msg->axes[4] == modeFlag && msg->axes[5] == pilotFlag && !autopilotOn)
 	{
 		if(requestControl(1))
 			autopilotOn = true;
 	}
-	// P mode && Autopilot switch off && Autopilot flag set
-	// Not P mode && Autopilot flag set
+	// P mode && Autodji_pilot switch off && Autodji_pilot flag set
+	// Not P mode && Autodji_pilot flag set
 	else if ((msg->axes[4] == modeFlag && msg->axes[5] != pilotFlag && autopilotOn) ||
 		(msg->axes[4] != modeFlag && autopilotOn))
 	{
@@ -92,7 +102,7 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 			autopilotOn = false;
 	}
 
-	// If it is on P mode and the autopilot is on check if the RC is being used
+	// If it is on P mode and the autodji_pilot is on check if the RC is being used
 	if (msg->axes[4] == modeFlag && autopilotOn)
 	{
 		if(std::abs(msg->axes[0]) > rcStickThresh || std::abs(msg->axes[1]) > rcStickThresh ||
@@ -111,15 +121,15 @@ void n3_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr& msg)
 	}
 }
 
-bool n3_pilot::armServCallback(dji_sdk::DroneArmControl::Request &req,
-										 dji_sdk::DroneArmControl::Response &res)
+bool dji_pilot::propServCallback(jetyak_uav_utils::PropEnable::Request &req,
+								 jetyak_uav_utils::PropEnable::Response &res)
 {
 	if(autopilotOn)
 	{
 		dji_sdk::DroneArmControl srv;
-    srv.request.arm=req.arm;
-    armServ.call(srv);
-		res.result=srv.response.result;
+    	srv.request.arm=req.enable;
+    	armServ.call(srv);
+		res.success=srv.response.result;
 		return true;
 	}
 	else
@@ -128,15 +138,15 @@ bool n3_pilot::armServCallback(dji_sdk::DroneArmControl::Request &req,
 	}
 
 }
-bool n3_pilot::taskServCallback(dji_sdk::DroneTaskControl::Request &req,
-										 dji_sdk::DroneTaskControl::Response &res)
+bool dji_pilot::landServCallback(std_srvs::Trigger::Request &req,
+ 					  std_srvs::Trigger::Response &res)
 {
 	if(autopilotOn)
 	{
 		dji_sdk::DroneTaskControl srv;
-    srv.request.task=req.task;
-    taskServ.call(srv);
-		res.result=srv.response.result;
+    	srv.request.task=6; //landing
+    	taskServ.call(srv);
+		res.success=srv.response.result;
 		return true;
 	}
 	else
@@ -144,10 +154,25 @@ bool n3_pilot::taskServCallback(dji_sdk::DroneTaskControl::Request &req,
 		return false;
 	}
 }
-
+bool dji_pilot::takeoffServCallback(std_srvs::Trigger::Request &req,
+ 					  std_srvs::Trigger::Response &res)
+{
+	if(autopilotOn)
+	{
+		dji_sdk::DroneTaskControl srv;
+    	srv.request.task=4; //takeoff
+    	taskServ.call(srv);
+		res.success=srv.response.result;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
 // Private //
 
-void n3_pilot::setupRCCallback()
+void dji_pilot::setupRCCallback()
 {
 	if (isM100) {
 		modeFlag = 8000;
@@ -159,7 +184,7 @@ void n3_pilot::setupRCCallback()
 	}
 }
 
-bool n3_pilot::requestControl(int requestFlag)
+bool dji_pilot::requestControl(int requestFlag)
 {
 	// Create control request and transmit it to vehicle
 	dji_sdk::SDKControlAuthority ctrlAuthority;
@@ -182,7 +207,7 @@ bool n3_pilot::requestControl(int requestFlag)
 	return true;
 }
 
-void n3_pilot::setClippingThresholds()
+void dji_pilot::setClippingThresholds()
 {
 	// Horizontal
 	hVelcmdMaxBody    = 1.0;           // m/sec
@@ -202,7 +227,7 @@ void n3_pilot::setClippingThresholds()
 	yAngleMax         = C_PI;          // rad
 }
 
-sensor_msgs::Joy n3_pilot::adaptiveClipping(sensor_msgs::Joy msg)
+sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 {
 	// Create command buffer
 	sensor_msgs::Joy cmdBuffer;
@@ -263,7 +288,7 @@ sensor_msgs::Joy n3_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 	return cmdBuffer;
 }
 
-bool n3_pilot::versionCheckM100()
+bool dji_pilot::versionCheckM100()
 {
 	dji_sdk::QueryDroneVersion query;
 	droneVersionServ.call(query);
@@ -274,18 +299,49 @@ bool n3_pilot::versionCheckM100()
 	return false;
 }
 
-void n3_pilot::publishCommand()
+void dji_pilot::publishCommand()
 {
 	if(autopilotOn)
 	{
 		if(bypassPilot)
 			controlPub.publish(rcCommand);
 		else
-			controlPub.publish(joyCommand);
+			controlPub.publish(extCommand);
 
 		// Reset bypass flag
 		bypassPilot = false;
 	}
+}
+
+char dji_pilot::buildFlag(bool body, bool pos)
+{
+	char base=0;
+
+	if(pos)
+	{
+		base |= DJISDK::HORIZONTAL_POSITION |
+		        DJISDK::VERTICAL_POSITION   |
+			    DJISDK::YAW_ANGLE           ;
+	}
+	else
+	{
+		base |= DJISDK::HORIZONTAL_VELOCITY |
+				DJISDK::VERTICAL_VELOCITY   |
+                DJISDK::YAW_RATE            ;
+	}
+
+	if(body)
+	{
+		base |= DJISDK::HORIZONTAL_BODY		|
+                DJISDK::STABLE_DISABLE		;
+	}
+	else
+	{
+		base |= DJISDK::HORIZONTAL_GROUND	|
+                DJISDK::STABLE_ENABLE		;
+	}
+
+	return base;
 }
 
 ////////////////////////////////////////////////////////////
@@ -294,10 +350,10 @@ void n3_pilot::publishCommand()
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "n3_pilot_node");
+  ros::init(argc, argv, "dji_pilot_node");
   ros::NodeHandle nh;
 
-  n3_pilot joyPilot(nh);
+  dji_pilot joydji_pilot(nh);
 
   ros::Rate rate(10);
 
@@ -305,7 +361,7 @@ int main(int argc, char** argv)
   {
   	ros::spinOnce();
 
-  	joyPilot.publishCommand();
+  	joydji_pilot.publishCommand();
 
   	rate.sleep();
   }
