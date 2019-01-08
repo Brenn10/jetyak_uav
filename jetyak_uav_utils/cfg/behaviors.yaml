@@ -31,6 +31,8 @@ follow_w_ki: 0
 #
 # Land Parameters
 #
+
+#These parameters specify the center of the landing area
 land_x: 2
 land_x_kp: .5
 land_x_kd: .2
@@ -51,6 +53,17 @@ land_w_kp: .1
 land_w_kd: 0
 land_w_ki: 0
 
+# The following parameters form a cylinder of height (land_height+land_height_threshold)
+# and radius (land_radius) which the UAV may land if located in. The drone will hover
+# (land_height) above the pad prior to landing
+
+# This specifies the height above the tag which the drone will attempt to fly
+land_height: .1
+# This specifies the max height over the pad which it may set down
+land_height_threshold: .05
+# this is the radius around the center of the pad for the drone to set down
+land_radius: .1
+
 #
 # Return Parameters
 #
@@ -59,3 +72,4 @@ return_finalHeight: 3
 return_downRadius: 1
 return_settleRadius: .5
 return_tagTime: 1
+return_tagLossThresh: 1

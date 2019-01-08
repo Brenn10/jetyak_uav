@@ -1,0 +1,6 @@
+float64 height_goal
+float64 height_min
+float64 radius
+---
+
+bool success

@@ -30,10 +30,14 @@ find_package(DJIOSDK REQUIRED)
 #)
 add_service_files(DIRECTORY srv
   FILES
+  FourAxes.srv
   GetMode.srv
   SetMode.srv
   SetBoatNS.srv
-  PropEnable.srv
+  Boolean.srv
+  TakeoffParams.srv
+  LandParams.srv
+  ReturnParams.srv
 )
 
 generate_messages(
@@ -70,6 +74,7 @@ add_executable(gimbal_tag_node
 )
 
 add_executable(behaviors_node
+  src/behaviors_services.cpp
   src/behaviors_behaviors.cpp
   src/behaviors_callbacks.cpp
   src/behaviors_main.cpp
