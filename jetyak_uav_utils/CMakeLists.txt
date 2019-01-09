@@ -77,6 +77,7 @@ add_executable(behaviors_node
   src/behaviors_services.cpp
   src/behaviors_behaviors.cpp
   src/behaviors_callbacks.cpp
+	src/behaviors_common.cpp
   src/behaviors_main.cpp
   lib/bsc_common/pid.cpp
   lib/bsc_common/util.cpp

@@ -1,21 +1,25 @@
 #ifndef DJI_PILOT_H
 #define DJI_PILOT_H
 
+// System includes
 #include <string>
 
+// ROS
+#include <ros/ros.h>
+
 // ROS includes
-#include "ros/ros.h"
-#include "sensor_msgs/Joy.h"
+#include <sensor_msgs/Joy.h>
+#include <std_srvs/Trigger.h>
 
 // DJI SDK includes
-#include "dji_sdk/QueryDroneVersion.h"
-#include "dji_sdk/SDKControlAuthority.h"
-#include "dji_sdk/dji_sdk.h"
 #include <dji_sdk/DroneArmControl.h>
 #include <dji_sdk/DroneTaskControl.h>
+#include <dji_sdk/QueryDroneVersion.h>
+#include <dji_sdk/SDKControlAuthority.h>
+#include <dji_sdk/dji_sdk.h>
 
 #include "jetyak_uav_utils/Boolean.h"
-#include "std_srvs/Trigger.h"
+#include "jetyak_uav_utils/jetyak_uav.h"
 
 class dji_pilot {
 public:
@@ -72,7 +76,7 @@ protected:
   bool isM100;
 
 private:
-  char buildFlag(bool body, bool pos);
+  char buildFlag(JETYAK_UAV::Flag flag);
 };
 
 #endif

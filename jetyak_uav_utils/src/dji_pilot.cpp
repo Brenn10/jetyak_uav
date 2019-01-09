@@ -76,8 +76,7 @@ void dji_pilot::extCallback(const sensor_msgs::Joy::ConstPtr &msg) {
   for (int i = 0; i < 4; i++)
     output->axes.push_back(msg->axes[i]);
 
-  output->axes[4] =
-      buildFlag((int)(msg->axes[4]) & 0b10, (int)(msg->axes[4]) & 0b1);
+  output->axes[4] = buildFlag((JETYAK_UAV::Flag)msg->axes[4]);
 
   // Pass the joystick message to the command
   extCommand.axes.clear();
@@ -286,10 +285,10 @@ void dji_pilot::publishCommand() {
   }
 }
 
-char dji_pilot::buildFlag(bool body, bool pos) {
+char dji_pilot::buildFlag(JETYAK_UAV::Flag flag) {
   char base = 0;
 
-  if (pos) {
+  if (flag & JETYAK_UAV::POSITION_CMD == JETYAK_UAV::POSITION_CMD) {
     base |= DJISDK::HORIZONTAL_POSITION | DJISDK::VERTICAL_POSITION |
             DJISDK::YAW_ANGLE;
   } else {
@@ -297,7 +296,7 @@ char dji_pilot::buildFlag(bool body, bool pos) {
             DJISDK::YAW_RATE;
   }
 
-  if (body) {
+  if (flag & JETYAK_UAV::BODY_FRAME == JETYAK_UAV::BODY_FRAME) {
     base |= DJISDK::HORIZONTAL_BODY | DJISDK::STABLE_DISABLE;
   } else {
     base |= DJISDK::HORIZONTAL_GROUND | DJISDK::STABLE_ENABLE;

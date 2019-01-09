@@ -1,37 +1,39 @@
 #include "jetyak_uav_utils/behaviors.h"
 
-bool behaviors::setModeCallback(jetyak_uav_utils::SetMode::Request &req,
+bool Behaviors::setModeCallback(jetyak_uav_utils::SetMode::Request &req,
                                 jetyak_uav_utils::SetMode::Response &res) {
 
-  currentMode_ = (Mode)req.mode;
+  currentMode_ = (JETYAK_UAV::Mode)req.mode;
   behaviorChanged_ = true;
   res.success = true;
-  ROS_WARN("Mode changed to %s", nameFromMode[(int)currentMode_].c_str());
+  ROS_WARN("Mode changed to %s",
+           JETYAK_UAV::nameFromMode[(int)currentMode_].c_str());
   return true;
 }
 
-bool behaviors::getModeCallback(jetyak_uav_utils::GetMode::Request &req,
+bool Behaviors::getModeCallback(jetyak_uav_utils::GetMode::Request &req,
                                 jetyak_uav_utils::GetMode::Response &res) {
   res.mode = (char)currentMode_;
   return true;
 }
 
-bool behaviors::setBoatNSCallback(jetyak_uav_utils::SetBoatNS::Request &req,
+bool Behaviors::setBoatNSCallback(jetyak_uav_utils::SetBoatNS::Request &req,
                                   jetyak_uav_utils::SetBoatNS::Response &res) {
   std::string ns = req.ns;
   boatGPSSub_ = nh.subscribe(ns + "/global_posiiton/global", 1,
-                             &behaviors::boatGPSCallback, this);
+                             &Behaviors::boatGPSCallback, this);
   boatIMUSub_ =
-      nh.subscribe(ns + "/imu/data", 1, &behaviors::boatIMUCallback, this);
+      nh.subscribe(ns + "/imu/data", 1, &Behaviors::boatIMUCallback, this);
   return true;
 }
 
-bool behaviors::setFollowPIDCallback(
+bool Behaviors::setFollowPIDCallback(
     jetyak_uav_utils::FourAxes::Request &req,
     jetyak_uav_utils::FourAxes::Response &res) {
   // If following, taking off, or returning, change active controller
-  if (currentMode_ == Mode::FOLLOW or currentMode_ == Mode::TAKEOFF or
-      currentMode_ == Mode::RETURN) {
+  if (currentMode_ == JETYAK_UAV::FOLLOW or
+      currentMode_ == JETYAK_UAV::TAKEOFF or
+      currentMode_ == JETYAK_UAV::RETURN) {
     xpid_->updateParams(req.x[0], req.x[1], req.x[2]);
     ypid_->updateParams(req.y[0], req.y[1], req.y[2]);
     zpid_->updateParams(req.z[0], req.z[1], req.z[2]);
@@ -63,10 +65,10 @@ bool behaviors::setFollowPIDCallback(
   return true;
 }
 
-bool behaviors::setLandPIDCallback(jetyak_uav_utils::FourAxes::Request &req,
+bool Behaviors::setLandPIDCallback(jetyak_uav_utils::FourAxes::Request &req,
                                    jetyak_uav_utils::FourAxes::Response &res) {
   // If landing, change active controller
-  if (currentMode_ == Mode::LAND) {
+  if (currentMode_ == JETYAK_UAV::LAND) {
     xpid_->updateParams(req.x[0], req.x[1], req.x[2]);
     ypid_->updateParams(req.y[0], req.y[1], req.y[2]);
     zpid_->updateParams(req.z[0], req.z[1], req.z[2]);
@@ -98,7 +100,7 @@ bool behaviors::setLandPIDCallback(jetyak_uav_utils::FourAxes::Request &req,
   return true;
 }
 
-bool behaviors::setFollowPositionCallback(
+bool Behaviors::setFollowPositionCallback(
     jetyak_uav_utils::FourAxes::Request &req,
     jetyak_uav_utils::FourAxes::Response &res) {
   follow_.follow_pose.x = req.x[0];
@@ -110,7 +112,7 @@ bool behaviors::setFollowPositionCallback(
   return true;
 }
 
-bool behaviors::setLandPositionCallback(
+bool Behaviors::setLandPositionCallback(
     jetyak_uav_utils::FourAxes::Request &req,
     jetyak_uav_utils::FourAxes::Response &res) {
   land_.land_pose.x = req.x[0];
@@ -122,7 +124,7 @@ bool behaviors::setLandPositionCallback(
   return true;
 }
 
-bool behaviors::setTakeoffParamsCallback(
+bool Behaviors::setTakeoffParamsCallback(
     jetyak_uav_utils::TakeoffParams::Request &req,
     jetyak_uav_utils::TakeoffParams::Response &res) {
   takeoff_.height = req.height;
@@ -132,7 +134,7 @@ bool behaviors::setTakeoffParamsCallback(
   return true;
 }
 
-bool behaviors::setLandParamsCallback(
+bool Behaviors::setLandParamsCallback(
     jetyak_uav_utils::LandParams::Request &req,
     jetyak_uav_utils::LandParams::Response &res) {
   land_.height_goal = req.height_goal;
@@ -143,7 +145,7 @@ bool behaviors::setLandParamsCallback(
   return true;
 }
 
-bool behaviors::setReturnParamsCallback(
+bool Behaviors::setReturnParamsCallback(
     jetyak_uav_utils::ReturnParams::Request &req,
     jetyak_uav_utils::ReturnParams::Response &res) {
   return_.gotoHeight = req.gotoHeight;

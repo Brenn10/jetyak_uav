@@ -1,12 +1,12 @@
 #include "jetyak_uav_utils/behaviors.h"
 
-void behaviors::tagPoseCallback(
+void Behaviors::tagPoseCallback(
     const geometry_msgs::PoseStamped::ConstPtr &msg) {
   tagPose_.pose = msg->pose;
   tagPose_.header = msg->header;
 }
 
-void behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
+void Behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
   if (msg->status.status >= 0) {
     uavGPS_.header = msg->header;
     uavGPS_.status = msg->status;
@@ -20,7 +20,7 @@ void behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
   }
 }
 
-void behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
+void Behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
   if (msg->status.status >= 0) {
     boatGPS_.header = msg->header;
     boatGPS_.status = msg->status;
@@ -34,13 +34,13 @@ void behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
   }
 }
 
-void behaviors::uavAttitudeCallback(
+void Behaviors::uavAttitudeCallback(
     const geometry_msgs::QuaternionStamped::ConstPtr &msg) {
   uavAttitude_.header = msg->header;
   uavAttitude_.quaternion = msg->quaternion;
 }
 
-void behaviors::uavImuCallback(const sensor_msgs::Imu::ConstPtr &msg) {
+void Behaviors::uavImuCallback(const sensor_msgs::Imu::ConstPtr &msg) {
   uavImu_.header = msg->header;
   uavImu_.orientation = msg->orientation;
   uavImu_.orientation_covariance = msg->orientation_covariance;
@@ -50,7 +50,7 @@ void behaviors::uavImuCallback(const sensor_msgs::Imu::ConstPtr &msg) {
   uavImu_.linear_acceleration_covariance = msg->linear_acceleration_covariance;
 }
 
-void behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr &msg) {
+void Behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr &msg) {
   boatImu_.header = msg->header;
   boatImu_.orientation = msg->orientation;
   boatImu_.orientation_covariance = msg->orientation_covariance;

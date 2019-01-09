@@ -1,18 +1,18 @@
 #include "jetyak_uav_utils/behaviors.h"
 
-behaviors::behaviors(ros::NodeHandle &nh_param) {
+Behaviors::Behaviors(ros::NodeHandle &nh_param) {
   nh = nh_param;
   // initialize mode
-  currentMode_ = Mode::HOVER;
+  currentMode_ = JETYAK_UAV::HOVER;
 
   // subscribers
-  tagPoseSub_ = nh.subscribe("/tag_pose", 1, &behaviors::tagPoseCallback, this);
+  tagPoseSub_ = nh.subscribe("/tag_pose", 1, &Behaviors::tagPoseCallback, this);
   uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position", 1,
-                            &behaviors::uavGPSCallback, this);
-  boatGPSSub_ = nh.subscribe("boat_gps", 1, &behaviors::boatGPSCallback, this);
+                            &Behaviors::uavGPSCallback, this);
+  boatGPSSub_ = nh.subscribe("boat_gps", 1, &Behaviors::boatGPSCallback, this);
   uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1,
-                            &behaviors::uavAttitudeCallback, this);
-  boatIMUSub_ = nh.subscribe("boat_imu", 1, &behaviors::boatIMUCallback, this);
+                            &Behaviors::uavAttitudeCallback, this);
+  boatIMUSub_ = nh.subscribe("boat_imu", 1, &Behaviors::boatIMUCallback, this);
 
   // Publishers
   cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd", 1);
@@ -24,91 +24,90 @@ behaviors::behaviors(ros::NodeHandle &nh_param) {
 
   // Service servers
   setModeService_ =
-      nh.advertiseService("setMode", &behaviors::setModeCallback, this);
+      nh.advertiseService("setMode", &Behaviors::setModeCallback, this);
   getModeService_ =
-      nh.advertiseService("getMode", &behaviors::getModeCallback, this);
+      nh.advertiseService("getMode", &Behaviors::getModeCallback, this);
   setBoatNSService_ =
-      nh.advertiseService("setBoatNS", &behaviors::setBoatNSCallback, this);
+      nh.advertiseService("setBoatNS", &Behaviors::setBoatNSCallback, this);
   setFollowPIDService_ = nh.advertiseService(
-      "setFollowPID", &behaviors::setFollowPIDCallback, this);
+      "setFollowPID", &Behaviors::setFollowPIDCallback, this);
   setLandPIDService_ =
-      nh.advertiseService("setLandPID", &behaviors::setLandPIDCallback, this);
+      nh.advertiseService("setLandPID", &Behaviors::setLandPIDCallback, this);
   setFollowPosition_ = nh.advertiseService(
-      "setFollowPosition", &behaviors::setFollowPositionCallback, this);
+      "setFollowPosition", &Behaviors::setFollowPositionCallback, this);
   setLandPosition_ = nh.advertiseService(
-      "setLandPosition", &behaviors::setLandPositionCallback, this);
+      "setLandPosition", &Behaviors::setLandPositionCallback, this);
   setTakeoffParams_ = nh.advertiseService(
-      "setTakeoffParams", &behaviors::setTakeoffParamsCallback, this);
+      "setTakeoffParams", &Behaviors::setTakeoffParamsCallback, this);
   setReturnParams_ = nh.advertiseService(
-      "setReturnParams", &behaviors::setReturnParamsCallback, this);
+      "setReturnParams", &Behaviors::setReturnParamsCallback, this);
   setLandParams_ = nh.advertiseService("setLandParams",
-                                       &behaviors::setLandParamsCallback, this);
+                                       &Behaviors::setLandParamsCallback, this);
   ;
 
   /****************************************
    * ASSIGNING ROS PARAMETERS TO THE NODE
    ***************************************/
   // land pid
-  ros::param::param<double>("uav_behaviors/land_x_kp", land_.kp.x, 0);
-  ros::param::param<double>("uav_behaviors/land_y_kp", land_.kp.y, 0);
-  ros::param::param<double>("uav_behaviors/land_z_kp", land_.kp.z, 0);
-  ros::param::param<double>("uav_behaviors/land_w_kp", land_.kp.w, 0);
+  ros::param::param<double>("behaviors/land_x_kp", land_.kp.x, 0);
+  ros::param::param<double>("behaviors/land_y_kp", land_.kp.y, 0);
+  ros::param::param<double>("behaviors/land_z_kp", land_.kp.z, 0);
+  ros::param::param<double>("behaviors/land_w_kp", land_.kp.w, 0);
 
-  ros::param::param<double>("uav_behaviors/land_x_kd", land_.kd.x, 0);
-  ros::param::param<double>("uav_behaviors/land_y_kd", land_.kd.y, 0);
-  ros::param::param<double>("uav_behaviors/land_z_kd", land_.kd.z, 0);
-  ros::param::param<double>("uav_behaviors/land_w_kd", land_.kd.w, 0);
+  ros::param::param<double>("behaviors/land_x_kd", land_.kd.x, 0);
+  ros::param::param<double>("behaviors/land_y_kd", land_.kd.y, 0);
+  ros::param::param<double>("behaviors/land_z_kd", land_.kd.z, 0);
+  ros::param::param<double>("behaviors/land_w_kd", land_.kd.w, 0);
 
-  ros::param::param<double>("uav_behaviors/land_x_ki", land_.ki.x, 0);
-  ros::param::param<double>("uav_behaviors/land_y_ki", land_.ki.y, 0);
-  ros::param::param<double>("uav_behaviors/land_z_ki", land_.ki.z, 0);
-  ros::param::param<double>("uav_behaviors/land_w_ki", land_.ki.w, 0);
+  ros::param::param<double>("behaviors/land_x_ki", land_.ki.x, 0);
+  ros::param::param<double>("behaviors/land_y_ki", land_.ki.y, 0);
+  ros::param::param<double>("behaviors/land_z_ki", land_.ki.z, 0);
+  ros::param::param<double>("behaviors/land_w_ki", land_.ki.w, 0);
 
-  ros::param::param<double>("uav_behaviors/land_x", land_.land_pose.x, 0);
-  ros::param::param<double>("uav_behaviors/land_y", land_.land_pose.y, 0);
-  ros::param::param<double>("uav_behaviors/land_z", land_.land_pose.z, 0);
-  ros::param::param<double>("uav_behaviors/land_w", land_.land_pose.w, 0);
+  ros::param::param<double>("behaviors/land_x", land_.land_pose.x, 0);
+  ros::param::param<double>("behaviors/land_y", land_.land_pose.y, 0);
+  ros::param::param<double>("behaviors/land_z", land_.land_pose.z, 0);
+  ros::param::param<double>("behaviors/land_w", land_.land_pose.w, 0);
 
   // follow
-  ros::param::param<double>("uav_behaviors/follow_x_kp", follow_.kp.x, 0);
-  ros::param::param<double>("uav_behaviors/follow_y_kp", follow_.kp.y, 0);
-  ros::param::param<double>("uav_behaviors/follow_z_kp", follow_.kp.z, 0);
-  ros::param::param<double>("uav_behaviors/follow_w_kp", follow_.kp.w, 0);
+  ros::param::param<double>("behaviors/follow_x_kp", follow_.kp.x, 0);
+  ros::param::param<double>("behaviors/follow_y_kp", follow_.kp.y, 0);
+  ros::param::param<double>("behaviors/follow_z_kp", follow_.kp.z, 0);
+  ros::param::param<double>("behaviors/follow_w_kp", follow_.kp.w, 0);
 
-  ros::param::param<double>("uav_behaviors/follow_x_kd", follow_.kd.x, 0);
-  ros::param::param<double>("uav_behaviors/follow_y_kd", follow_.kd.y, 0);
-  ros::param::param<double>("uav_behaviors/follow_z_kd", follow_.kd.z, 0);
-  ros::param::param<double>("uav_behaviors/follow_w_kd", follow_.kd.w, 0);
+  ros::param::param<double>("behaviors/follow_x_kd", follow_.kd.x, 0);
+  ros::param::param<double>("behaviors/follow_y_kd", follow_.kd.y, 0);
+  ros::param::param<double>("behaviors/follow_z_kd", follow_.kd.z, 0);
+  ros::param::param<double>("behaviors/follow_w_kd", follow_.kd.w, 0);
 
-  ros::param::param<double>("uav_behaviors/follow_x_ki", follow_.ki.x, 0);
-  ros::param::param<double>("uav_behaviors/follow_y_ki", follow_.ki.y, 0);
-  ros::param::param<double>("uav_behaviors/follow_z_ki", follow_.ki.z, 0);
-  ros::param::param<double>("uav_behaviors/follow_w_ki", follow_.ki.w, 0);
+  ros::param::param<double>("behaviors/follow_x_ki", follow_.ki.x, 0);
+  ros::param::param<double>("behaviors/follow_y_ki", follow_.ki.y, 0);
+  ros::param::param<double>("behaviors/follow_z_ki", follow_.ki.z, 0);
+  ros::param::param<double>("behaviors/follow_w_ki", follow_.ki.w, 0);
 
-  ros::param::param<double>("uav_behaviors/follow_x", follow_.follow_pose.x, 0);
-  ros::param::param<double>("uav_behaviors/follow_y", follow_.follow_pose.y, 0);
-  ros::param::param<double>("uav_behaviors/follow_z", follow_.follow_pose.z, 0);
-  ros::param::param<double>("uav_behaviors/follow_w", follow_.follow_pose.w, 0);
+  ros::param::param<double>("behaviors/follow_x", follow_.follow_pose.x, 0);
+  ros::param::param<double>("behaviors/follow_y", follow_.follow_pose.y, 0);
+  ros::param::param<double>("behaviors/follow_z", follow_.follow_pose.z, 0);
+  ros::param::param<double>("behaviors/follow_w", follow_.follow_pose.w, 0);
 
   // Return
   double settleRadius;
-  ros::param::param<double>("uav_behaviors/return_gotoHeight",
-                            return_.gotoHeight, 5);
-  ros::param::param<double>("uav_behaviors/return_finalHeight",
-                            return_.finalHeight, 3);
-  ros::param::param<double>("uav_behaviors/return_downRadius",
-                            return_.downRadius, 1);
-  ros::param::param<double>("uav_behaviors/return_settleRadius", settleRadius,
-                            .5);
-  ros::param::param<double>("uav_behaviors/return_tagTime", return_.tagTime, 1);
-  ros::param::param<double>("uav_behaviors/return_tagLossThresh",
+  ros::param::param<double>("behaviors/return_gotoHeight", return_.gotoHeight,
+                            5);
+  ros::param::param<double>("behaviors/return_finalHeight", return_.finalHeight,
+                            3);
+  ros::param::param<double>("behaviors/return_downRadius", return_.downRadius,
+                            1);
+  ros::param::param<double>("behaviors/return_settleRadius", settleRadius, .5);
+  ros::param::param<double>("behaviors/return_tagTime", return_.tagTime, 1);
+  ros::param::param<double>("behaviors/return_tagLossThresh",
                             return_.tagLossThresh, 5);
   return_.settleRadiusSquared = settleRadius * settleRadius;
 
   // takeoff
-  ros::param::param<double>("uav_behaviors/takeoff_height", takeoff_.height, 0);
-  ros::param::param<double>("uav_behaviors/takeoff_threshold",
-                            takeoff_.threshold, 0);
+  ros::param::param<double>("behaviors/takeoff_height", takeoff_.height, 0);
+  ros::param::param<double>("behaviors/takeoff_threshold", takeoff_.threshold,
+                            0);
 
   // initialize the tag
   tagPose_.pose.orientation.x = 0;
@@ -123,9 +122,9 @@ behaviors::behaviors(ros::NodeHandle &nh_param) {
   wpid_ = new bsc_common::PID(follow_.kp.w, follow_.ki.w, follow_.kd.w);
 }
 
-behaviors::~behaviors() {}
+Behaviors::~Behaviors() {}
 
-void behaviors::doBehaviorAction() {
+void Behaviors::doBehaviorAction() {
 
   simpleTag_.x = tagPose_.pose.position.x;
   simpleTag_.y = tagPose_.pose.position.y;
@@ -148,41 +147,41 @@ void behaviors::doBehaviorAction() {
   //   simpleTag_.header.stamp = uavGPS_.header.stamp;
 
   switch (currentMode_) {
-  case Mode::TAKEOFF: {
+  case JETYAK_UAV::TAKEOFF: {
     takeoffBehavior();
     break;
   }
-  case Mode::FOLLOW: {
+  case JETYAK_UAV::FOLLOW: {
     followBehavior();
     break;
   }
-  case Mode::LEAVE: {
+  case JETYAK_UAV::LEAVE: {
     // Do nothing, an external node is currently communicating with the pilot
     break;
   }
-  case Mode::RETURN: {
+  case JETYAK_UAV::RETURN: {
     returnBehavior();
     break;
   }
-  case Mode::LAND: {
+  case JETYAK_UAV::LAND: {
     landBehavior();
     break;
   }
-  case Mode::RIDE: {
+  case JETYAK_UAV::RIDE: {
     rideBehavior();
     break;
   }
-  case Mode::HOVER: {
+  case JETYAK_UAV::HOVER: {
     hoverBehavior();
     break;
   }
   default: {
     if (propellorsRunning) {
       ROS_ERROR("Mode out of bounds: %i. Now hovering.", (char)currentMode_);
-      this->currentMode_ = Mode::HOVER;
+      this->currentMode_ = JETYAK_UAV::HOVER;
     } else {
       ROS_ERROR("Mode out of bounds: %i. Now riding.", (char)currentMode_);
-      this->currentMode_ = Mode::RIDE;
+      this->currentMode_ = JETYAK_UAV::RIDE;
     }
     break;
   }
@@ -190,15 +189,15 @@ void behaviors::doBehaviorAction() {
 }
 
 int main(int argc, char **argv) {
-  ros::init(argc, argv, "uav_behaviors");
+  ros::init(argc, argv, "behaviors");
   ros::NodeHandle nh;
-  behaviors uav_behaviors(nh);
+  Behaviors behaviors_o(nh);
   ros::Rate rate(10);
 
   while (ros::ok()) {
     ros::spinOnce();
 
-    uav_behaviors.doBehaviorAction();
+    behaviors_o.doBehaviorAction();
 
     rate.sleep();
   }

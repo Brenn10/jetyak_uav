@@ -9,15 +9,24 @@
 #ifndef JETYAK_UAV_UTILS_BEHAVIORS_H_
 #define JETYAK_UAV_UTILS_BEHAVIORS_H_
 
-#include "ros/ros.h"
-
 // C includes
 #include <cmath>
 #include <cstdlib>
 #include <vector>
 
+// ROS
+#include <ros/ros.h>
+
+// ROS Core includes
+#include <ar_track_alvar_msgs/AlvarMarkers.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/QuaternionStamped.h>
+#include <sensor_msgs/Imu.h>
+#include <sensor_msgs/Joy.h>
+#include <sensor_msgs/NavSatFix.h>
+#include <std_srvs/Trigger.h>
+
 // Jetyak UAV Includes
-#include "Mode.h"
 #include "jetyak_uav_utils/Boolean.h"
 #include "jetyak_uav_utils/FourAxes.h"
 #include "jetyak_uav_utils/GetMode.h"
@@ -26,24 +35,14 @@
 #include "jetyak_uav_utils/SetBoatNS.h"
 #include "jetyak_uav_utils/SetMode.h"
 #include "jetyak_uav_utils/TakeoffParams.h"
+#include "jetyak_uav_utils/jetyak_uav.h"
 
-// ROS Core includes
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/QuaternionStamped.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/Joy.h>
-#include <sensor_msgs/NavSatFix.h>
-#include <std_srvs/Trigger.h>
-
-// ROS Packages includes
-#include <ar_track_alvar_msgs/AlvarMarkers.h>
-
-// Custom Lib includes
+// Lib includes
 #include "../lib/bsc_common/include/pid.h"
 #include "../lib/bsc_common/include/pose4d.h"
 #include "../lib/bsc_common/include/util.h"
 
-class behaviors {
+class Behaviors {
 private:
   /*********************************************
    * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
@@ -55,12 +54,13 @@ private:
       setFollowPIDService_, setLandPIDService_, setFollowPosition_,
       setLandPosition_, setTakeoffParams_, setReturnParams_, setLandParams_;
   ros::NodeHandle nh;
+
   /**********************
    * INSTANCE VARIABLES
    **********************/
   bsc_common::PID *xpid_, *ypid_, *zpid_, *wpid_; // pid controllers
   bool behaviorChanged_ = false;
-  Mode currentMode_;
+  JETYAK_UAV::Mode currentMode_;
   bool propellorsRunning = false;
 
   /************************************
@@ -287,6 +287,25 @@ private:
    */
   void hoverBehavior();
 
+  /*****************
+   * Common Methods
+   *****************/
+
+  /** resetPID
+   * Reset all PID controllers
+   */
+  void resetPID();
+
+  /** setPID
+   * Set constants for the controllers
+   *
+   * @param kp bsc_common::pose4d_t containing P constants
+   * @param ki bsc_common::pose4d_t containing I constants
+   * @param kd bsc_common::pose4d_t containing D constants
+   */
+  void setPID(bsc_common::pose4d_t &kp, bsc_common::pose4d_t &ki,
+              bsc_common::pose4d_t &kd);
+
 public:
   /** Constructor
    * Start up the Controller Node
@@ -294,9 +313,9 @@ public:
    *
    * @param nh node handler
    */
-  behaviors(ros::NodeHandle &nh);
+  Behaviors(ros::NodeHandle &nh);
 
-  ~behaviors();
+  ~Behaviors();
 
   /** doBehaviorAction
    * calls the behavior designated by the mode service
