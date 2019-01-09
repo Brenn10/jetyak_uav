@@ -18,7 +18,7 @@
 #include <dji_sdk/SDKControlAuthority.h>
 #include <dji_sdk/dji_sdk.h>
 
-#include "jetyak_uav_utils/Boolean.h"
+#include "jetyak_uav_utils/SetBoolean.h"
 #include "jetyak_uav_utils/jetyak_uav.h"
 
 class dji_pilot {
@@ -47,8 +47,8 @@ protected:
   void rcCallback(const sensor_msgs::Joy::ConstPtr &msg);
 
   // Service Servers
-  bool propServCallback(jetyak_uav_utils::Boolean::Request &req,
-                        jetyak_uav_utils::Boolean::Response &res);
+  bool propServCallback(jetyak_uav_utils::SetBoolean::Request &req,
+                        jetyak_uav_utils::SetBoolean::Response &res);
   bool landServCallback(std_srvs::Trigger::Request &req,
                         std_srvs::Trigger::Response &res);
   bool takeoffServCallback(std_srvs::Trigger::Request &req,

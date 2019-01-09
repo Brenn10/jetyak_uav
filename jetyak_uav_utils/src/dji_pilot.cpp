@@ -121,11 +121,11 @@ void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr &msg) {
   }
 }
 
-bool dji_pilot::propServCallback(jetyak_uav_utils::Boolean::Request &req,
-                                 jetyak_uav_utils::Boolean::Response &res) {
+bool dji_pilot::propServCallback(jetyak_uav_utils::SetBoolean::Request &req,
+                                 jetyak_uav_utils::SetBoolean::Response &res) {
   if (autopilotOn) {
     dji_sdk::DroneArmControl srv;
-    srv.request.arm = req.enable;
+    srv.request.arm = req.data;
     armServ.call(srv);
     res.success = srv.response.result;
     return true;
@@ -315,7 +315,7 @@ int main(int argc, char **argv) {
 
   dji_pilot joydji_pilot(nh);
 
-  ros::Rate rate(10);
+  ros::Rate rate(30);
 
   while (ros::ok()) {
     ros::spinOnce();

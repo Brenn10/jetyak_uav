@@ -1,5 +1,4 @@
-float64 height_goal
-float64 height_min
+float64 threshold
 float64 radius
 ---
 

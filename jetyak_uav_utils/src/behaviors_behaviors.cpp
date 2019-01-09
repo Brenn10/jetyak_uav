@@ -1,5 +1,14 @@
 #include "jetyak_uav_utils/behaviors.h"
-
+/** @file behaviors_behaviors.cpp
+ *
+ * Implements behaviors:
+ * 	takeoffBehavior
+ * 	followBehavior
+ * 	returnBehavior
+ * 	landBehavior
+ * 	rideBehavior
+ * 	hoverBehavior
+ */
 void Behaviors::takeoffBehavior() {
   /*
   Get altitude/tagpose
@@ -11,8 +20,8 @@ void Behaviors::takeoffBehavior() {
   */
   if (!propellorsRunning) {
     takeoff_.boatz = simpleTag_.z;
-    jetyak_uav_utils::Boolean srv;
-    srv.request.enable = true;
+    jetyak_uav_utils::SetBoolean srv;
+    srv.request.data = true;
     propSrv_.call(srv);
     if (srv.response.success) {
       ROS_INFO("Propellors running");
@@ -158,8 +167,8 @@ void Behaviors::returnBehavior() {
     */
     return_.stage = return_.SETTLE;
     if ((pow(follow_.follow_pose.x - simpleTag_.x, 2) +
-         pow(follow_.follow_pose.x - simpleTag_.y, 2) +
-         pow(follow_.follow_pose.w - simpleTag_.w, 2)) <
+         pow(follow_.follow_pose.y - simpleTag_.y, 2) +
+         pow(follow_.follow_pose.z - simpleTag_.z, 2)) <
         return_.settleRadiusSquared) {
       ROS_WARN("Settled, now following");
       currentMode_ = JETYAK_UAV::FOLLOW;
@@ -285,10 +294,10 @@ void Behaviors::landBehavior() {
     if (follow_.lastSpotted != simpleTag_.t) { // if time changed
 
       // If pose is within a cylinder of radius .1 and height .1
-      if ((land_.land_pose.z - simpleTag_.z) < .2 and
+      if (land_.land_pose.z - simpleTag_.z < land_.threshold and
           pow(land_.land_pose.x - simpleTag_.x, 2) +
                   pow(land_.land_pose.y - simpleTag_.y, 2) <
-              pow(.1, 2)) {
+              land_.radiusSqr) {
         std_srvs::Trigger srv;
         landSrv_.call(srv);
         if (srv.response.success) {

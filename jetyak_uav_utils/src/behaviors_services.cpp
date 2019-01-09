@@ -1,29 +1,50 @@
 #include "jetyak_uav_utils/behaviors.h"
+/** @file behaviors_services.cpp
+ * Implements service callbacks:
+ * 	setModeCallback
+ * 	getModeCallback
+ * 	setBoatNSCallback
+ * 	setFollowPIDCallback
+ * 	setLandPIDCallback
+ * 	setFollowPositionCallback
+ * 	setLandPositionCallback
+ * 	setTakeoffParamsCallback
+ * 	setLandParamsCallback
+ * 	setReturnParamsCallback
+ */
+bool Behaviors::setModeCallback(jetyak_uav_utils::SetString::Request &req,
+                                jetyak_uav_utils::SetString::Response &res) {
+  for (int i = 0; i < (sizeof(JETYAK_UAV::nameFromMode) /
+                       sizeof(*JETYAK_UAV::nameFromMode));
+       ++i) {
+    if (bsc_common::util::insensitiveEqual(req.data,
+                                           JETYAK_UAV::nameFromMode[i])) {
+      currentMode_ = (JETYAK_UAV::Mode)i;
+      behaviorChanged_ = true;
+      res.success = true;
+      ROS_WARN("Mode changed to %s", req.data.c_str());
+      return true;
+    }
+  }
+  ROS_WARN("Invalid mode: %s", req.data.c_str());
+  return false;
+}
 
-bool Behaviors::setModeCallback(jetyak_uav_utils::SetMode::Request &req,
-                                jetyak_uav_utils::SetMode::Response &res) {
-
-  currentMode_ = (JETYAK_UAV::Mode)req.mode;
-  behaviorChanged_ = true;
-  res.success = true;
-  ROS_WARN("Mode changed to %s",
-           JETYAK_UAV::nameFromMode[(int)currentMode_].c_str());
+bool Behaviors::getModeCallback(jetyak_uav_utils::GetString::Request &req,
+                                jetyak_uav_utils::GetString::Response &res) {
+  res.data = JETYAK_UAV::nameFromMode[(int)currentMode_];
   return true;
 }
 
-bool Behaviors::getModeCallback(jetyak_uav_utils::GetMode::Request &req,
-                                jetyak_uav_utils::GetMode::Response &res) {
-  res.mode = (char)currentMode_;
-  return true;
-}
-
-bool Behaviors::setBoatNSCallback(jetyak_uav_utils::SetBoatNS::Request &req,
-                                  jetyak_uav_utils::SetBoatNS::Response &res) {
-  std::string ns = req.ns;
+bool Behaviors::setBoatNSCallback(jetyak_uav_utils::SetString::Request &req,
+                                  jetyak_uav_utils::SetString::Response &res) {
+  std::string ns = req.data;
   boatGPSSub_ = nh.subscribe(ns + "/global_posiiton/global", 1,
                              &Behaviors::boatGPSCallback, this);
   boatIMUSub_ =
       nh.subscribe(ns + "/imu/data", 1, &Behaviors::boatIMUCallback, this);
+
+  res.success = true;
   return true;
 }
 
@@ -137,9 +158,8 @@ bool Behaviors::setTakeoffParamsCallback(
 bool Behaviors::setLandParamsCallback(
     jetyak_uav_utils::LandParams::Request &req,
     jetyak_uav_utils::LandParams::Response &res) {
-  land_.height_goal = req.height_goal;
-  land_.height_min = req.height_min;
-  land_.radius = req.radius;
+  land_.threshold = req.threshold;
+  land_.radiusSqr = req.radius * req.radius;
 
   res.success = true;
   return true;

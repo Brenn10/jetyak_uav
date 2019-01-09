@@ -41,4 +41,8 @@
 # links
 *.link
 
+# Hidden files
 .*
+
+# Json
+*.json

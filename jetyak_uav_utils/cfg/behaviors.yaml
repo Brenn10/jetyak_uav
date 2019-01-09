@@ -43,7 +43,7 @@ land_y_kp: .5
 land_y_kd: .2
 land_y_ki: 0
 
-land_z: -.05
+land_z: -.05 # this should be .1-.2m over the tag to allow the uav to maneuver
 land_z_kp: .2
 land_z_kd: 0
 land_z_ki: 0
@@ -57,10 +57,8 @@ land_w_ki: 0
 # and radius (land_radius) which the UAV may land if located in. The drone will hover
 # (land_height) above the pad prior to landing
 
-# This specifies the height above the tag which the drone will attempt to fly
-land_height: .1
-# This specifies the max height over the pad which it may set down
-land_height_threshold: .05
+# This specifies the max threshold around the height it may set down
+land_height_threshold: .1
 # this is the radius around the center of the pad for the drone to set down
 land_radius: .1
 

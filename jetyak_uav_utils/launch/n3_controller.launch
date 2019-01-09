@@ -1,7 +1,7 @@
 <launch>
   <group ns="jetyak_uav_utils">
     <node name="controller" pkg="jetyak_uav_utils" type="dji_pilot_node" output="screen" >
-  		<param name="isM100" type="bool" value="true" />
+  		<param name="isM100" type="bool" value="false" />
   	</node>
     <node name="behaviors" pkg="jetyak_uav_utils" type="behaviors_node" output="screen">
       <rosparam command="load" file="$(find jetyak_uav_utils)/cfg/behaviors.yaml" />

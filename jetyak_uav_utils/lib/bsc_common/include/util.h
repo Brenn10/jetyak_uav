@@ -83,6 +83,19 @@ public:
    * Ported from a javascript implementation by Brent Hamby on StackOverflow
    */
   static double latlondist(double lat1, double lon1, double lat2, double lon2);
+
+  /** insensitiveEqual
+   * Compares two strings without case sensitivity.
+   * by: Varun
+   * from:
+   * https://thispointer.com/c-case-insensitive-string-comparison-using-stl-c11-boost-library/
+   *
+   * @param str1 string 1
+   * @param str2 string 2
+   *
+   * @return true if strings are equal without regard to case
+   */
+  static bool insensitiveEqual(std::string &str1, std::string &str2);
 };
 
 } // namespace bsc_common

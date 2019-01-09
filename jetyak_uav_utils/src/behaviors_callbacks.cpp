@@ -1,5 +1,14 @@
 #include "jetyak_uav_utils/behaviors.h"
-
+/** @file behaviors_callbacks.cpp
+ *
+ * Implements subscriber callbacks:
+ * 	tagPoseCallback
+ * 	uavGPSCallback
+ * 	boatGPSCallback
+ * 	uavAttitudeCallback
+ * 	uavImuCallback
+ * 	boatIMUCallback
+ */
 void Behaviors::tagPoseCallback(
     const geometry_msgs::PoseStamped::ConstPtr &msg) {
   tagPose_.pose = msg->pose;

@@ -31,10 +31,9 @@ find_package(DJIOSDK REQUIRED)
 add_service_files(DIRECTORY srv
   FILES
   FourAxes.srv
-  GetMode.srv
-  SetMode.srv
-  SetBoatNS.srv
-  Boolean.srv
+	GetString.srv
+  SetString.srv
+  SetBoolean.srv
   TakeoffParams.srv
   LandParams.srv
   ReturnParams.srv
