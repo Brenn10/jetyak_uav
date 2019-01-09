@@ -1,7 +1,8 @@
 #ifndef JETYAK_UAV_UTILS_POSE4D_H_
 #define JETYAK_UAV_UTILS_POSE4D_H_
 
-namespace bsc_common {
+namespace bsc_common
+{
 /* A custom encoding for a pose in a 4d space
  * x is x direction
  * y is y direction
@@ -9,8 +10,9 @@ namespace bsc_common {
  * w is yaw
  * t is timestamp in seconds
  */
-struct pose4d_t {
-  double t, x, y, z, w;
+struct pose4d_t
+{
+	double t, x, y, z, w;
 };
-} // namespace bsc_common
+}	// namespace bsc_common
 #endif
