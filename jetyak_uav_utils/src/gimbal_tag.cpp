@@ -135,7 +135,7 @@ int main(int argc, char **argv)
 
 	gimbal_tag tagTracker(nh);
 
-	ros::Rate rate(10);
+	ros::Rate rate(30);
 
 	while (ros::ok())
 	{
