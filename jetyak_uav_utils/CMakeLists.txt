@@ -31,7 +31,7 @@ find_package(DJIOSDK REQUIRED)
 add_service_files(DIRECTORY srv
   FILES
   FourAxes.srv
-	GetString.srv
+  GetString.srv
   SetString.srv
   SetBoolean.srv
   TakeoffParams.srv
