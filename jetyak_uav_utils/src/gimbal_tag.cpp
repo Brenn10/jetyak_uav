@@ -5,7 +5,7 @@
 gimbal_tag::gimbal_tag(ros::NodeHandle &nh)
 {
 	// Subscribe to topics
-	tagPoseSub = nh.subscribe("/ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
+	tagPoseSub = nh.subscribe("ar_pose_marker", 10, &gimbal_tag::tagCallback, this);
 	gimbalAngleSub = nh.subscribe("/dji_sdk/gimbal_angle", 10, &gimbal_tag::gimbalCallback, this);
 	vehicleAttiSub = nh.subscribe("/dji_sdk/attitude", 10, &gimbal_tag::attitudeCallback, this);
 
@@ -16,7 +16,7 @@ gimbal_tag::gimbal_tag(ros::NodeHandle &nh)
 	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	tagFound = false;
-	// isM100 = false; //versionCheckM100();
+	// isM100 = false;
 	ros::param::param<bool>("isM100", isM100, false);
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
@@ -24,17 +24,6 @@ gimbal_tag::gimbal_tag(ros::NodeHandle &nh)
 	qConstant.normalize();
 	qCamera2Gimbal = tf::Quaternion(0.5, 0.5, 0.5, 0.5);
 	qTagFix = tf::Quaternion(0.5, -0.5, -0.5, -0.5);
-}
-
-bool gimbal_tag::versionCheckM100()
-{
-	dji_sdk::QueryDroneVersion query;
-	droneVersionServ.call(query);
-
-	if (query.response.version == DJISDK::DroneFirmwareVersion::M100_31)
-		return true;
-
-	return false;
 }
 
 void gimbal_tag::changeTagAxes(tf::Quaternion &qTagBody)

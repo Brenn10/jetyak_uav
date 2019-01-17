@@ -51,12 +51,12 @@ protected:
 	bool propServCallback(jetyak_uav_utils::SetBoolean::Request &req, jetyak_uav_utils::SetBoolean::Response &res);
 	bool landServCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 	bool takeoffServCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
+	
 	// Functions
 	void setupRCCallback();
 	bool requestControl(int requestFlag);
 	void setClippingThresholds();
 	sensor_msgs::Joy adaptiveClipping(sensor_msgs::Joy msg);
-	bool versionCheckM100();
 
 	// Data
 	sensor_msgs::Joy extCommand, rcCommand;
@@ -73,7 +73,7 @@ protected:
 	bool isM100;
 
 private:
-	char buildFlag(JETYAK_UAV::Flag flag);
+	uint8_t buildFlag(JETYAK_UAV::Flag flag);
 };
 
 #endif
