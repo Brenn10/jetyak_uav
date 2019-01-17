@@ -5,7 +5,7 @@
 
 namespace JETYAK_UAV
 {
-enum Flag : char
+enum Flag : uint8_t
 {	// Flag constants. Use these flags internally
 	BODY_FRAME = 0b10,
 	WORLD_FRAME = 0b00,

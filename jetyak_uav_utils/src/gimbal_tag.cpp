@@ -12,12 +12,9 @@ gimbal_tag::gimbal_tag(ros::NodeHandle &nh)
 	// Set up publisher
 	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
 
-	// Set up service
-	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
-
 	tagFound = false;
-	// isM100 = false;
-	ros::param::param<bool>("isM100", isM100, false);
+	
+	ros::param::param<bool>("~isM100", isM100, false);
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
 	qConstant = tf::Quaternion(0.7071, 0.7071, 0.0, 0.0);
