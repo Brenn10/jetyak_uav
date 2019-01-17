@@ -89,6 +89,7 @@ private:
 		bsc_common::pose4d_t land_pose;	// landing goal
 		double lastSpotted;
 		int lostTagCounter;
+		double height_goal;
 		double threshold;
 		double radiusSqr;
 	} land_;

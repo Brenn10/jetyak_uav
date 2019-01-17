@@ -38,7 +38,6 @@ private:
 
 	// Functions
 	void changeTagAxes(tf::Quaternion &tagBody);
-	bool versionCheckM100();
 
 	// Callbacks
 	void tagCallback(const ar_track_alvar_msgs::AlvarMarkers &msg);
