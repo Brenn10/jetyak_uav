@@ -21,7 +21,7 @@ Behaviors::Behaviors(ros::NodeHandle &nh_param)
 	downloadParams();
 
 	// initialize the tag
-	tagPose_.pose.orientation.x = 0;
+	tagP_.pose.orientation.x = 0;
 	tagPose_.pose.orientation.y = 0;
 	tagPose_.pose.orientation.z = 0;
 	tagPose_.pose.orientation.w = 1;

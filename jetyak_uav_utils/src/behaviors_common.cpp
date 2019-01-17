@@ -67,7 +67,6 @@ void Behaviors::downloadParams(std::string ns_param)
 	ros::param::param<double>(ns + "land_w", land_.land_pose.w, 0);
 
 	double radius;
-	ros::param::param<double>(ns + "land_height", land_.height_goal, 0);
 	ros::param::param<double>(ns + "land_height_threshold", land_.threshold, 0);
 	ros::param::param<double>(ns + "land_radius", radius, 0);
 	land_.radiusSqr = radius * radius;
