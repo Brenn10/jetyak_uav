@@ -33,9 +33,6 @@ private:
 	// Publishers
 	ros::Publisher tagBodyPosePub;
 
-	// Services
-	ros::ServiceClient droneVersionServ;
-
 	// Functions
 	void changeTagAxes(tf::Quaternion &tagBody);
 

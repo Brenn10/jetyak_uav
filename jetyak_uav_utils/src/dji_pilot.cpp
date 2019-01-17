@@ -21,7 +21,6 @@ dji_pilot::dji_pilot(ros::NodeHandle &nh)
 	taskServ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
 
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority>("/dji_sdk/sdk_control_authority");
-	droneVersionServ = nh.serviceClient<dji_sdk::QueryDroneVersion>("/dji_sdk/query_drone_version");
 
 	// set up service servers
 	propServServer = nh.advertiseService("prop_enable", &dji_pilot::propServCallback, this);
@@ -34,10 +33,8 @@ dji_pilot::dji_pilot(ros::NodeHandle &nh)
 	autopilotOn = false;
 	bypassPilot = false;
 
-	// isM100 = false;
-	ros::param::param<bool>("isM100", isM100, false);
-
 	// Initialize RC
+	ros::param::param<bool>("~isM100", isM100, false);
 	setupRCCallback();
 
 	// Initialize joy command
@@ -71,15 +68,19 @@ dji_pilot::~dji_pilot()
  */
 void dji_pilot::extCallback(const sensor_msgs::Joy::ConstPtr &msg)
 {
-	// Pass the joystick message to the command
-	extCommand.axes.clear();
-	sensor_msgs::Joy *output = new sensor_msgs::Joy();
+	// Check if incoming message is full
+	if (msg->axes.size() == 5)
+	{
+		// Pass the joystick message to the command
+		extCommand.axes.clear();
+		sensor_msgs::Joy *output = new sensor_msgs::Joy();
 
-	for (int i = 0; i < 5; i++)
-		output->axes.push_back(msg->axes[i]);
+		for (int i = 0; i < 5; i++)
+			output->axes.push_back(msg->axes[i]);
 
-	// Clip commands according to flag
-	extCommand = adaptiveClipping(*output);
+		// Clip commands according to flag
+		extCommand = adaptiveClipping(*output);
+	}
 }
 
 void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr &msg)
@@ -132,9 +133,7 @@ bool dji_pilot::propServCallback(jetyak_uav_utils::SetBoolean::Request &req,
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 bool dji_pilot::landServCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)
@@ -148,9 +147,7 @@ bool dji_pilot::landServCallback(std_srvs::Trigger::Request &req, std_srvs::Trig
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 bool dji_pilot::takeoffServCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)
@@ -164,9 +161,7 @@ bool dji_pilot::takeoffServCallback(std_srvs::Trigger::Request &req, std_srvs::T
 		return true;
 	}
 	else
-	{
 		return false;
-	}
 }
 
 // Private //
@@ -237,6 +232,7 @@ sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 	// Create command buffer
 	sensor_msgs::Joy cmdBuffer;
 	cmdBuffer.axes.clear();
+
 	for (int i = 0; i < 4; ++i)
 		cmdBuffer.axes.push_back(0);
 	cmdBuffer.axes.push_back(flag);
@@ -311,23 +307,15 @@ uint8_t dji_pilot::buildFlag(JETYAK_UAV::Flag flag)
 {
 	uint8_t base = 0;
 
-	if (flag & JETYAK_UAV::POSITION_CMD == JETYAK_UAV::POSITION_CMD)
-	{
+	if ((flag & JETYAK_UAV::POSITION_CMD) == JETYAK_UAV::POSITION_CMD)
 		base |= DJISDK::HORIZONTAL_POSITION | DJISDK::VERTICAL_POSITION | DJISDK::YAW_ANGLE;
-	}
 	else
-	{
 		base |= DJISDK::HORIZONTAL_VELOCITY | DJISDK::VERTICAL_VELOCITY | DJISDK::YAW_RATE;
-	}
 
-	if (flag & JETYAK_UAV::BODY_FRAME == JETYAK_UAV::BODY_FRAME)
-	{
+	if ((flag & JETYAK_UAV::BODY_FRAME) == JETYAK_UAV::BODY_FRAME)
 		base |= DJISDK::HORIZONTAL_BODY | DJISDK::STABLE_DISABLE;
-	}
 	else
-	{
 		base |= DJISDK::HORIZONTAL_GROUND | DJISDK::STABLE_ENABLE;
-	}
 
 	return base;
 }

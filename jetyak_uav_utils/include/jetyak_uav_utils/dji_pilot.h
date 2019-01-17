@@ -39,7 +39,6 @@ protected:
 
 	// ROS Services
 	ros::ServiceClient sdkCtrlAuthorityServ;
-	ros::ServiceClient droneVersionServ;
 	ros::ServiceClient armServ, taskServ;
 	ros::ServiceServer propServServer, takeoffServServer, landServServer;
 
