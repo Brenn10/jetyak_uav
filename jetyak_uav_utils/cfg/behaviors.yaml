@@ -43,7 +43,7 @@ land_y_kp: .5
 land_y_kd: .2
 land_y_ki: 0
 
-land_z: -.05 # this should be .1-.2m over the tag to allow the uav to maneuver
+land_z: -0.05 # this should be .1-.2m over the tag to allow the uav to maneuver
 land_z_kp: .2
 land_z_kd: 0
 land_z_ki: 0
