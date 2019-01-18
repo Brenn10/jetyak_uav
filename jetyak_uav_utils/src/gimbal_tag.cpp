@@ -17,7 +17,7 @@ gimbal_tag::gimbal_tag(ros::NodeHandle &nh)
 	if (!ros::param::get("~isM100", isM100))
 	{
 		isM100 = true;
-		ROS_WARN("isM100 not available, defaulting to %i", isM100)
+		ROS_WARN("isM100 not available, defaulting to %i", isM100);
 	}
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation

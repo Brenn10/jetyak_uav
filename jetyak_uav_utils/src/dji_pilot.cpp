@@ -37,19 +37,18 @@ dji_pilot::dji_pilot(ros::NodeHandle &nh)
 	if (!ros::param::get("~isM100", isM100))
 	{
 		isM100 = true;
-		ROS_WARN("isM100 not available, defaulting to %i", isM100)
+		ROS_WARN("isM100 not available, defaulting to %i", isM100);
 	}
-}
-setupRCCallback();
+	setupRCCallback();
 
-// Initialize joy command
-extCommand.axes.clear();
-for (int i = 0; i < 5; ++i)
-	extCommand.axes.push_back(0);
+	// Initialize joy command
+	extCommand.axes.clear();
+	for (int i = 0; i < 5; ++i)
+		extCommand.axes.push_back(0);
 
-// Initialize default command flag
-commandFlag = (DJISDK::VERTICAL_VELOCITY | DJISDK::HORIZONTAL_VELOCITY | DJISDK::YAW_RATE | DJISDK::HORIZONTAL_BODY |
-							 DJISDK::STABLE_ENABLE);
+	// Initialize default command flag
+	commandFlag = (DJISDK::VERTICAL_VELOCITY | DJISDK::HORIZONTAL_VELOCITY | DJISDK::YAW_RATE | DJISDK::HORIZONTAL_BODY |
+								 DJISDK::STABLE_ENABLE);
 }
 
 dji_pilot::~dji_pilot()
