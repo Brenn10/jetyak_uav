@@ -34,21 +34,22 @@ dji_pilot::dji_pilot(ros::NodeHandle &nh)
 	bypassPilot = false;
 
 	// Initialize RC
-	ros::param::param<bool>("~isM100", isM100, false);
-	setupRCCallback();
+	if (!ros::param::get("~isM100", isM100))
+	{
+		isM100 = true;
+		ROS_WARN("isM100 not available, defaulting to %i", isM100)
+	}
+}
+setupRCCallback();
 
-	// Initialize joy command
-	extCommand.axes.clear();
-	for (int i = 0; i < 5; ++i)
-		extCommand.axes.push_back(0);
+// Initialize joy command
+extCommand.axes.clear();
+for (int i = 0; i < 5; ++i)
+	extCommand.axes.push_back(0);
 
-	// Initialize default command flag
-	commandFlag = (
-		DJISDK::VERTICAL_VELOCITY   |
-		DJISDK::HORIZONTAL_VELOCITY |
-		DJISDK::YAW_RATE            |
-		DJISDK::HORIZONTAL_BODY     |
-		DJISDK::STABLE_ENABLE);
+// Initialize default command flag
+commandFlag = (DJISDK::VERTICAL_VELOCITY | DJISDK::HORIZONTAL_VELOCITY | DJISDK::YAW_RATE | DJISDK::HORIZONTAL_BODY |
+							 DJISDK::STABLE_ENABLE);
 }
 
 dji_pilot::~dji_pilot()
@@ -208,21 +209,21 @@ bool dji_pilot::requestControl(int requestFlag)
 void dji_pilot::setClippingThresholds()
 {
 	// Horizontal
-	hVelcmdMaxBody = 1.0;				// m/sec
-	hVelcmdMaxGround = 5.0;				// m/sec
+	hVelcmdMaxBody = 1.0;							// m/sec
+	hVelcmdMaxGround = 5.0;						// m/sec
 	hARatecmdMax = 5.0 * C_PI / 6.0;	// rad/sec
-	hAnglecmdMax = 0.611;				// rad
+	hAnglecmdMax = 0.611;							// rad
 
 	// Vertical
-	vVelcmdMaxBody = 1.0;		 		// m/sec
-	vVelcmdMaxGround = 3.0;				// m/sec
-	vPoscmdMax = 30.0;					// m
-	vPoscmdMin = 0.0;					// m
-	vThrustcmdMax = 1.0;		 		// *100% of max thrust
+	vVelcmdMaxBody = 1.0;		 // m/sec
+	vVelcmdMaxGround = 3.0;	// m/sec
+	vPoscmdMax = 30.0;			 // m
+	vPoscmdMin = 0.0;				 // m
+	vThrustcmdMax = 1.0;		 // *100% of max thrust
 
 	// Yaw
-	yARateMax = 5.0 * C_PI / 6.0;		// rad/sec
-	yAngleMax = C_PI;					// rad
+	yARateMax = 5.0 * C_PI / 6.0;	// rad/sec
+	yAngleMax = C_PI;							 // rad
 }
 
 sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)

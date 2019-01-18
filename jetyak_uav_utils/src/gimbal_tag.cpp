@@ -13,8 +13,12 @@ gimbal_tag::gimbal_tag(ros::NodeHandle &nh)
 	tagBodyPosePub = nh.advertise<geometry_msgs::PoseStamped>("tag_pose", 10);
 
 	tagFound = false;
-	
-	ros::param::param<bool>("~isM100", isM100, false);
+
+	if (!ros::param::get("~isM100", isM100))
+	{
+		isM100 = true;
+		ROS_WARN("isM100 not available, defaulting to %i", isM100)
+	}
 
 	// Initialize the constant offset between Gimbal and Vehicle orientation
 	qConstant = tf::Quaternion(0.7071, 0.7071, 0.0, 0.0);

@@ -18,10 +18,10 @@ Behaviors::Behaviors(ros::NodeHandle &nh_param)
 	assignPublishers();
 	assignServiceClients();
 	assignServiceServers();
-	downloadParams();
+	downloadParams("~");
 
 	// initialize the tag
-	tagP_.pose.orientation.x = 0;
+	tagPose_.pose.orientation.x = 0;
 	tagPose_.pose.orientation.y = 0;
 	tagPose_.pose.orientation.z = 0;
 	tagPose_.pose.orientation.w = 1;

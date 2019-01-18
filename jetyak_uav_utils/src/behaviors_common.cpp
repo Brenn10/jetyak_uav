@@ -46,65 +46,107 @@ void Behaviors::downloadParams(std::string ns_param)
 		ns = ns_param + "/";
 
 	// land pid
-	ros::param::param<double>(ns + "land_x_kp", land_.kp.x, 0);
-	ros::param::param<double>(ns + "land_y_kp", land_.kp.y, 0);
-	ros::param::param<double>(ns + "land_z_kp", land_.kp.z, 0);
-	ros::param::param<double>(ns + "land_w_kp", land_.kp.w, 0);
+	if (!ros::param::get(ns + "land_x_kp", land_.kp.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x_kp");
+	if (!ros::param::get(ns + "land_y_kp", land_.kp.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y_kp");
+	if (!ros::param::get(ns + "land_z_kp", land_.kp.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z_kp");
+	if (!ros::param::get(ns + "land_w_kp", land_.kp.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_kp");
 
-	ros::param::param<double>(ns + "land_x_kd", land_.kd.x, 0);
-	ros::param::param<double>(ns + "land_y_kd", land_.kd.y, 0);
-	ros::param::param<double>(ns + "land_z_kd", land_.kd.z, 0);
-	ros::param::param<double>(ns + "land_w_kd", land_.kd.w, 0);
+	if (!ros::param::get(ns + "land_x_kd", land_.kd.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x_kd");
+	if (!ros::param::get(ns + "land_y_kd", land_.kd.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y_kd");
+	if (!ros::param::get(ns + "land_z_kd", land_.kd.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z_kd");
+	if (!ros::param::get(ns + "land_w_kd", land_.kd.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_kd");
 
-	ros::param::param<double>(ns + "land_x_ki", land_.ki.x, 0);
-	ros::param::param<double>(ns + "land_y_ki", land_.ki.y, 0);
-	ros::param::param<double>(ns + "land_z_ki", land_.ki.z, 0);
-	ros::param::param<double>(ns + "land_w_ki", land_.ki.w, 0);
+	if (!ros::param::get(ns + "land_x_ki", land_.ki.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x_ki");
+	if (!ros::param::get(ns + "land_y_ki", land_.ki.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y_ki");
+	if (!ros::param::get(ns + "land_z_ki", land_.ki.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z_ki");
+	if (!ros::param::get(ns + "land_w_ki", land_.ki.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_ki");
 
-	ros::param::param<double>(ns + "land_x", land_.land_pose.x, 0);
-	ros::param::param<double>(ns + "land_y", land_.land_pose.y, 0);
-	ros::param::param<double>(ns + "land_z", land_.land_pose.z, 0);
-	ros::param::param<double>(ns + "land_w", land_.land_pose.w, 0);
+	if (!ros::param::get(ns + "land_x", land_.land_pose.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x");
+	if (!ros::param::get(ns + "land_y", land_.land_pose.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y");
+	if (!ros::param::get(ns + "land_z", land_.land_pose.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z");
+	if (!ros::param::get(ns + "land_w", land_.land_pose.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w");
 
 	double radius;
-	ros::param::param<double>(ns + "land_height_threshold", land_.threshold, 0);
-	ros::param::param<double>(ns + "land_radius", radius, 0);
+	if (!ros::param::get(ns + "land_height_threshold", land_.threshold))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_height_threshold");
+	if (!ros::param::get(ns + "land_radius", radius))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_radius");
 	land_.radiusSqr = radius * radius;
 
 	// follow
-	ros::param::param<double>(ns + "follow_x_kp", follow_.kp.x, 0);
-	ros::param::param<double>(ns + "follow_y_kp", follow_.kp.y, 0);
-	ros::param::param<double>(ns + "follow_z_kp", follow_.kp.z, 0);
-	ros::param::param<double>(ns + "follow_w_kp", follow_.kp.w, 0);
+	if (!ros::param::get(ns + "follow_x_kp", follow_.kp.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x_kp");
+	if (!ros::param::get(ns + "follow_y_kp", follow_.kp.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y_kp");
+	if (!ros::param::get(ns + "follow_z_kp", follow_.kp.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z_kp");
+	if (!ros::param::get(ns + "follow_w_kp", follow_.kp.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_kp");
 
-	ros::param::param<double>(ns + "follow_x_kd", follow_.kd.x, 0);
-	ros::param::param<double>(ns + "follow_y_kd", follow_.kd.y, 0);
-	ros::param::param<double>(ns + "follow_z_kd", follow_.kd.z, 0);
-	ros::param::param<double>(ns + "follow_w_kd", follow_.kd.w, 0);
+	if (!ros::param::get(ns + "follow_x_kd", follow_.kd.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x_kd");
+	if (!ros::param::get(ns + "follow_y_kd", follow_.kd.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y_kd");
+	if (!ros::param::get(ns + "follow_z_kd", follow_.kd.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z_kd");
+	if (!ros::param::get(ns + "follow_w_kd", follow_.kd.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_kd");
 
-	ros::param::param<double>(ns + "follow_x_ki", follow_.ki.x, 0);
-	ros::param::param<double>(ns + "follow_y_ki", follow_.ki.y, 0);
-	ros::param::param<double>(ns + "follow_z_ki", follow_.ki.z, 0);
-	ros::param::param<double>(ns + "follow_w_ki", follow_.ki.w, 0);
+	if (!ros::param::get(ns + "follow_x_ki", follow_.ki.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x_ki");
+	if (!ros::param::get(ns + "follow_y_ki", follow_.ki.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y_ki");
+	if (!ros::param::get(ns + "follow_z_ki", follow_.ki.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z_ki");
+	if (!ros::param::get(ns + "follow_w_ki", follow_.ki.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_ki");
 
-	ros::param::param<double>(ns + "follow_x", follow_.follow_pose.x, 0);
-	ros::param::param<double>(ns + "follow_y", follow_.follow_pose.y, 0);
-	ros::param::param<double>(ns + "follow_z", follow_.follow_pose.z, 0);
-	ros::param::param<double>(ns + "follow_w", follow_.follow_pose.w, 0);
+	if (!ros::param::get(ns + "follow_x", follow_.follow_pose.x))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x");
+	if (!ros::param::get(ns + "follow_y", follow_.follow_pose.y))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y");
+	if (!ros::param::get(ns + "follow_z", follow_.follow_pose.z))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z");
+	if (!ros::param::get(ns + "follow_w", follow_.follow_pose.w))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w");
 
 	// Return
 	double settleRadius;
-	ros::param::param<double>(ns + "return_gotoHeight", return_.gotoHeight, 5);
-	ros::param::param<double>(ns + "return_finalHeight", return_.finalHeight, 3);
-	ros::param::param<double>(ns + "return_downRadius", return_.downRadius, 1);
-	ros::param::param<double>(ns + "return_settleRadius", settleRadius, .5);
-	ros::param::param<double>(ns + "return_tagTime", return_.tagTime, 1);
-	ros::param::param<double>(ns + "return_tagLossThresh", return_.tagLossThresh, 5);
+	if (!ros::param::get(ns + "return_gotoHeight", return_.gotoHeight))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_gotoHeight");
+	if (!ros::param::get(ns + "return_finalHeight", return_.finalHeight))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_finalHeight");
+	if (!ros::param::get(ns + "return_downRadius", return_.downRadius))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_downRadius");
+	if (!ros::param::get(ns + "return_settleRadius", settleRadius))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_settleRadius");
+	if (!ros::param::get(ns + "return_tagTime", return_.tagTime))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_tagTime");
+	if (!ros::param::get(ns + "return_tagLossThresh", return_.tagLossThresh))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_tagLossThresh");
 	return_.settleRadiusSquared = settleRadius * settleRadius;
 
 	// takeoff
-	ros::param::param<double>(ns + "takeoff_height", takeoff_.height, 0);
-	ros::param::param<double>(ns + "takeoff_threshold", takeoff_.threshold, 0);
+	if (!ros::param::get(ns + "takeoff_height", takeoff_.height))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "takeoff_height");
+	if (!ros::param::get(ns + "takeoff_threshold", takeoff_.threshold))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "takeoff_threshold");
 }
 
 void Behaviors::uploadParams(std::string ns_param)
