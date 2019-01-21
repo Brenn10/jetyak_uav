@@ -1,10 +1,14 @@
 <launch>
 	<!-- Start the DJI SDK -->
-	<include file="$(find dji_sdk)/launch/sdk.launch"/>
+	<include file="$(find dji_sdk)/launch/sdkN3.launch"/>
 
-	<!-- Start the camera and gimbal controller -->
-	<include file="$(find dji_camera)/launch/bundle2TrackAndPoseN3.launch"/>
+	<group ns="jetyak_uav_vision">
+		<!-- Start the camera and gimbal controller -->
+		<include file="$(find dji_camera)/launch/bundle2TrackAndPose.launch"/>
 
-	<!-- Start the tag positioning -->
-	<node pkg="jetyak_uav_utils" type="gimbal_tag_node" name="gimbal_tag_node" output="screen" />
+		<!-- Start the tag positioning -->
+		<node pkg="jetyak_uav_utils" type="gimbal_tag_node" name="gimbal_tag_node" output="screen" >
+			<param name="isM100" type="bool" value="false" />
+		</node>
+	</group>
 </launch>
