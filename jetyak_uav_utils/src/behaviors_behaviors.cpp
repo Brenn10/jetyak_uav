@@ -60,7 +60,7 @@ void Behaviors::takeoffBehavior()
 			cmd.axes.push_back(-ypid_->get_signal());
 			cmd.axes.push_back(-zpid_->get_signal());
 			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+			cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
 			cmdPub_.publish(cmd);
 		}
 	}
@@ -103,7 +103,7 @@ void Behaviors::followBehavior()
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
-				cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
 				cmdPub_.publish(cmd);
 				return;
 			}
@@ -428,6 +428,6 @@ void Behaviors::hoverBehavior()
 	cmd.axes.push_back(0);
 	cmd.axes.push_back(0);
 	cmd.axes.push_back(0);
-	cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::POSITION_CMD);
+	cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
 	cmdPub_.publish(cmd);
 };
