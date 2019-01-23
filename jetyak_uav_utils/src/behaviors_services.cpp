@@ -121,10 +121,10 @@ bool Behaviors::setLandPIDCallback(jetyak_uav_utils::FourAxes::Request &req, jet
 bool Behaviors::setFollowPositionCallback(jetyak_uav_utils::FourAxes::Request &req,
 																					jetyak_uav_utils::FourAxes::Response &res)
 {
-	follow_.follow_pose.x = req.x[0];
-	follow_.follow_pose.y = req.y[0];
-	follow_.follow_pose.z = req.z[0];
-	follow_.follow_pose.w = req.w[0];
+	follow_.goal_pose.x = req.x[0];
+	follow_.goal_pose.y = req.y[0];
+	follow_.goal_pose.z = req.z[0];
+	follow_.goal_pose.w = req.w[0];
 
 	res.success = true;
 	return true;
@@ -133,10 +133,10 @@ bool Behaviors::setFollowPositionCallback(jetyak_uav_utils::FourAxes::Request &r
 bool Behaviors::setLandPositionCallback(jetyak_uav_utils::FourAxes::Request &req,
 																				jetyak_uav_utils::FourAxes::Response &res)
 {
-	land_.land_pose.x = req.x[0];
-	land_.land_pose.y = req.y[0];
-	land_.land_pose.z = req.z[0];
-	land_.land_pose.w = req.w[0];
+	land_.goal_pose.x = req.x[0];
+	land_.goal_pose.y = req.y[0];
+	land_.goal_pose.z = req.z[0];
+	land_.goal_pose.w = req.w[0];
 
 	res.success = true;
 	return true;

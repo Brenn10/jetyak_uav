@@ -86,21 +86,23 @@ private:
 	struct
 	{
 		bsc_common::pose4d_t kp, kd, ki;
-		bsc_common::pose4d_t land_pose;	// landing goal
+		bsc_common::pose4d_t goal_pose;	// landing goal
 		double lastSpotted;
 		int lostTagCounter;
 		double height_goal;
 		double threshold;
 		double radiusSqr;
+		double deadzone_radius;
 	} land_;
 
 	// follow specific constants
 	struct
 	{
 		bsc_common::pose4d_t kp, kd, ki;
-		bsc_common::pose4d_t follow_pose;	// follow goal
+		bsc_common::pose4d_t goal_pose;	// follow goal
 		double lastSpotted;
 		int lostTagCounter;
+		double deadzone_radius;
 	} follow_;
 
 	// follow specific constants

@@ -28,6 +28,8 @@ follow_w_kp: 0
 follow_w_kd: 0
 follow_w_ki: 0
 
+follow_deadzone_radius: .1
+
 #
 # Land Parameters
 #
@@ -52,6 +54,8 @@ land_w: 0
 land_w_kp: .1
 land_w_kd: 0
 land_w_ki: 0
+
+land_deadzone_radius: .1
 
 # The following parameters form a cylinder of height (land_height+land_height_threshold)
 # and radius (land_radius) which the UAV may land if located in. The drone will hover
