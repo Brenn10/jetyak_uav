@@ -243,7 +243,7 @@ void Behaviors::assignServiceServers()
 
 void Behaviors::assignSubscribers()
 {
-	tagPoseSub_ = nh.subscribe("/tag_pose", 1, &Behaviors::tagPoseCallback, this);
+	tagPoseSub_ = nh.subscribe("/jetyak_uav_vision/filtered_tag", 1, &Behaviors::tagPoseCallback, this);
 	uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position", 1, &Behaviors::uavGPSCallback, this);
 	boatGPSSub_ = nh.subscribe("boat_gps", 1, &Behaviors::boatGPSCallback, this);
 	uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1, &Behaviors::uavAttitudeCallback, this);

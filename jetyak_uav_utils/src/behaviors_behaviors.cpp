@@ -417,6 +417,6 @@ void Behaviors::hoverBehavior()
 	cmd.axes.push_back(0);
 	cmd.axes.push_back(0);
 	cmd.axes.push_back(0);
-	cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::POSITION_CMD);
+	cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
 	cmdPub_.publish(cmd);
 };
