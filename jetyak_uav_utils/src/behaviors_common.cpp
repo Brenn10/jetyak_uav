@@ -73,13 +73,13 @@ void Behaviors::downloadParams(std::string ns_param)
 	if (!ros::param::get(ns + "land_w_ki", land_.ki.w))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_ki");
 
-	if (!ros::param::get(ns + "land_x", land_.land_pose.x))
+	if (!ros::param::get(ns + "land_x", land_.goal_pose.x))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x");
-	if (!ros::param::get(ns + "land_y", land_.land_pose.y))
+	if (!ros::param::get(ns + "land_y", land_.goal_pose.y))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y");
-	if (!ros::param::get(ns + "land_z", land_.land_pose.z))
+	if (!ros::param::get(ns + "land_z", land_.goal_pose.z))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z");
-	if (!ros::param::get(ns + "land_w", land_.land_pose.w))
+	if (!ros::param::get(ns + "land_w", land_.goal_pose.w))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w");
 
 	double radius;
@@ -88,6 +88,8 @@ void Behaviors::downloadParams(std::string ns_param)
 	if (!ros::param::get(ns + "land_radius", radius))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_radius");
 	land_.radiusSqr = radius * radius;
+	if (!ros::param::get(ns + "land_deadzone_radius", land_.deadzone_radius))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_deadzone_radius");
 
 	// follow
 	if (!ros::param::get(ns + "follow_x_kp", follow_.kp.x))
@@ -117,14 +119,16 @@ void Behaviors::downloadParams(std::string ns_param)
 	if (!ros::param::get(ns + "follow_w_ki", follow_.ki.w))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_ki");
 
-	if (!ros::param::get(ns + "follow_x", follow_.follow_pose.x))
+	if (!ros::param::get(ns + "follow_x", follow_.goal_pose.x))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x");
-	if (!ros::param::get(ns + "follow_y", follow_.follow_pose.y))
+	if (!ros::param::get(ns + "follow_y", follow_.goal_pose.y))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y");
-	if (!ros::param::get(ns + "follow_z", follow_.follow_pose.z))
+	if (!ros::param::get(ns + "follow_z", follow_.goal_pose.z))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z");
-	if (!ros::param::get(ns + "follow_w", follow_.follow_pose.w))
+	if (!ros::param::get(ns + "follow_w", follow_.goal_pose.w))
 		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w");
+	if (!ros::param::get(ns + "follow_deadzone_radius", follow_.deadzone_radius))
+		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_deadzone_radius");
 
 	// Return
 	double settleRadius;
@@ -174,10 +178,10 @@ void Behaviors::uploadParams(std::string ns_param)
 	ros::param::set(ns + "land_z_ki", land_.ki.z);
 	ros::param::set(ns + "land_w_ki", land_.ki.w);
 
-	ros::param::set(ns + "land_x", land_.land_pose.x);
-	ros::param::set(ns + "land_y", land_.land_pose.y);
-	ros::param::set(ns + "land_z", land_.land_pose.z);
-	ros::param::set(ns + "land_w", land_.land_pose.w);
+	ros::param::set(ns + "land_x", land_.goal_pose.x);
+	ros::param::set(ns + "land_y", land_.goal_pose.y);
+	ros::param::set(ns + "land_z", land_.goal_pose.z);
+	ros::param::set(ns + "land_w", land_.goal_pose.w);
 
 	// follow
 	ros::param::set(ns + "follow_x_kp", follow_.kp.x);
@@ -195,10 +199,10 @@ void Behaviors::uploadParams(std::string ns_param)
 	ros::param::set(ns + "follow_z_ki", follow_.ki.z);
 	ros::param::set(ns + "follow_w_ki", follow_.ki.w);
 
-	ros::param::set(ns + "follow_x", follow_.follow_pose.x);
-	ros::param::set(ns + "follow_y", follow_.follow_pose.y);
-	ros::param::set(ns + "follow_z", follow_.follow_pose.z);
-	ros::param::set(ns + "follow_w", follow_.follow_pose.w);
+	ros::param::set(ns + "follow_x", follow_.goal_pose.x);
+	ros::param::set(ns + "follow_y", follow_.goal_pose.y);
+	ros::param::set(ns + "follow_z", follow_.goal_pose.z);
+	ros::param::set(ns + "follow_w", follow_.goal_pose.w);
 
 	// Return
 	double settleRadius;
