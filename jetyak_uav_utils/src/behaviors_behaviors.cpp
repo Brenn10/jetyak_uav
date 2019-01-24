@@ -9,6 +9,7 @@
  * 	rideBehavior
  * 	hoverBehavior
  */
+
 void Behaviors::takeoffBehavior()
 {
 	/*

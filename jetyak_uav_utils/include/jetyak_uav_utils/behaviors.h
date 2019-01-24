@@ -320,6 +320,15 @@ private:
 	 */
 	void uploadParams(std::string ns = "");
 
+	/** scaleConstant
+	 * Scales the constant by some function with relation to the error
+	 *
+	 * @param C constant to scale
+	 * @param e error as function input
+	 *
+	 * @return the scaled constant
+	 */
+	double scaleConstant(double C, double x);
 	/***********************
 	 * Constructor Methods
 	 **********************/

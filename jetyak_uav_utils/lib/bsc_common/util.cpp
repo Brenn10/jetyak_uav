@@ -101,4 +101,10 @@ bool util::insensitiveEqual(std::string &str1, std::string &str2)
 						return (c1 == c2 || std::toupper(c1) == std::toupper(c2));
 					}));
 }
+
+// x/(1+|x|)
+double util::fastSigmoid(double x)
+{
+	return x / (1 + abs(x));
+}
 }	// namespace bsc_common

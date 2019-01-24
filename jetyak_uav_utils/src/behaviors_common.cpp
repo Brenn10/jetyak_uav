@@ -253,3 +253,12 @@ void Behaviors::assignSubscribers()
 	uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1, &Behaviors::uavAttitudeCallback, this);
 	boatIMUSub_ = nh.subscribe("boat_imu", 1, &Behaviors::boatIMUCallback, this);
 }
+
+double Behaviors::scaleConstant(double C, double e)
+{
+	/*
+	 * double THRESHOLD = .1;
+	 * return error < THRESHOLD : 0 ? c;											 // piecewise
+	 */
+	return abs(bsc_common::util::fastSigmoid(e)) * C;	// scale with fast sigmoid
+}

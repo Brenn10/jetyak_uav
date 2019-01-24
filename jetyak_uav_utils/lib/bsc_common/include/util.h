@@ -94,6 +94,15 @@ public:
 	 * @return true if strings are equal without regard to case
 	 */
 	static bool insensitiveEqual(std::string &str1, std::string &str2);
+
+	/** fastSigmoid
+	 * A fast approximation to the sigmoid function
+	 *
+	 * @param x input to the sigmoid function
+	 *
+	 * @return result of the sigmoid function
+	 */
+	static double fastSigmoid(double x);
 };
 
 }	// namespace bsc_common
