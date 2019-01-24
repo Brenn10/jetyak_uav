@@ -90,6 +90,29 @@ void Behaviors::followBehavior()
 			ypid_->update(follow_.goal_pose.y - simpleTag_.y, simpleTag_.t);
 			zpid_->update(follow_.goal_pose.z - simpleTag_.z, simpleTag_.t);
 			wpid_->update(follow_.goal_pose.w - simpleTag_.w, simpleTag_.t);
+
+// If inside the deadzone, do not correct x,y
+			if (pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2) <
+					pow(follow_.deadzone_radius,2))
+			{
+				sensor_msgs::Joy cmd;
+				cmd.axes.push_back(0);
+				cmd.axes.push_back(0);
+				cmd.axes.push_back(-zpid_->get_signal());
+				cmd.axes.push_back(-wpid_->get_signal());
+				cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+				cmdPub_.publish(cmd);
+			}
+			else	// if outside deadzone, correct x,y
+			{
+				sensor_msgs::Joy cmd;
+				cmd.axes.push_back(-xpid_->get_signal());
+				cmd.axes.push_back(-ypid_->get_signal());
+				cmd.axes.push_back(-zpid_->get_signal());
+				cmd.axes.push_back(-wpid_->get_signal());
+				cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+				cmdPub_.publish(cmd);
+			}
 		}
 		else
 		{	// if time is same
@@ -108,29 +131,6 @@ void Behaviors::followBehavior()
 				cmdPub_.publish(cmd);
 				return;
 			}
-		}
-
-		// If inside the deadzone, do not correct x,y
-		if (std::pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2) <
-				follow_.deadzone_radius)
-		{
-			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(0);
-			cmd.axes.push_back(0);
-			cmd.axes.push_back(-zpid_->get_signal());
-			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
-			cmdPub_.publish(cmd);
-		}
-		else	// if outside deadzone, correct x,y
-		{
-			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(-xpid_->get_signal());
-			cmd.axes.push_back(-ypid_->get_signal());
-			cmd.axes.push_back(-zpid_->get_signal());
-			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
-			cmdPub_.publish(cmd);
 		}
 	}
 }
@@ -380,8 +380,8 @@ void Behaviors::landBehavior()
 		zpid_->update(land_.goal_pose.z - simpleTag_.z, simpleTag_.t);
 		wpid_->update(land_.goal_pose.w - simpleTag_.w, simpleTag_.t);
 
-		if (std::pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) <
-				land_.deadzone_radius)
+		if (pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) <
+				pow(land_.deadzone_radius,2))
 		{
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(0);
