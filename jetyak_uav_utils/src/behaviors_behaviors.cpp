@@ -23,9 +23,9 @@ void Behaviors::takeoffBehavior()
 	if (!propellorsRunning)
 	{
 		takeoff_.boatz = simpleTag_.z;
-		jetyak_uav_utils::SetBoolean srv;
-		srv.request.data = true;
-		propSrv_.call(srv);
+		std_srvs::Trigger srv;
+
+		takeoffSrv_.call(srv);
 		if (srv.response.success)
 		{
 			ROS_INFO("Propellors running");
@@ -91,28 +91,13 @@ void Behaviors::followBehavior()
 			zpid_->update(follow_.goal_pose.z - simpleTag_.z, simpleTag_.t);
 			wpid_->update(follow_.goal_pose.w - simpleTag_.w, simpleTag_.t);
 
-// If inside the deadzone, do not correct x,y
-			if (pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2) <
-					pow(follow_.deadzone_radius,2))
-			{
-				sensor_msgs::Joy cmd;
-				cmd.axes.push_back(0);
-				cmd.axes.push_back(0);
-				cmd.axes.push_back(-zpid_->get_signal());
-				cmd.axes.push_back(-wpid_->get_signal());
-				cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
-				cmdPub_.publish(cmd);
-			}
-			else	// if outside deadzone, correct x,y
-			{
-				sensor_msgs::Joy cmd;
-				cmd.axes.push_back(-xpid_->get_signal());
-				cmd.axes.push_back(-ypid_->get_signal());
-				cmd.axes.push_back(-zpid_->get_signal());
-				cmd.axes.push_back(-wpid_->get_signal());
-				cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
-				cmdPub_.publish(cmd);
-			}
+			sensor_msgs::Joy cmd;
+			cmd.axes.push_back(-xpid_->get_signal());
+			cmd.axes.push_back(-ypid_->get_signal());
+			cmd.axes.push_back(-zpid_->get_signal());
+			cmd.axes.push_back(-wpid_->get_signal());
+			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+			cmdPub_.publish(cmd);
 		}
 		else
 		{	// if time is same

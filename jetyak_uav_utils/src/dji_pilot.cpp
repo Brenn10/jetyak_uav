@@ -215,7 +215,7 @@ void dji_pilot::setClippingThresholds()
 
 	// Vertical
 	vVelcmdMaxBody = 1.0;		 // m/sec
-	vVelcmdMaxGround = 3.0;	// m/sec
+	vVelcmdMaxGround = 1.0;	// m/sec
 	vPoscmdMax = 30.0;			 // m
 	vPoscmdMin = 0.0;				 // m
 	vThrustcmdMax = 1.0;		 // *100% of max thrust
