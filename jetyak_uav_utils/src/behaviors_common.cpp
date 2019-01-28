@@ -38,119 +38,92 @@ void Behaviors::setPID(bsc_common::pose4d_t &kp, bsc_common::pose4d_t &ki, bsc_c
 
 void Behaviors::downloadParams(std::string ns_param)
 {
+	/** getP
+	 * Gathers the parameter and executes a ROS_WARN if unable to gather
+	 *
+	 * @param ns namespace of the parameter
+	 * @param name name of the parameter
+	 *
+	 * @return None
+	 */
+	auto getP = [](std::string ns, std::string name, double &param) {
+		if (!ros::param::get(ns + name, param))
+			ROS_WARN("FAILED: %s", name.c_str());
+	};
+
+	// clean up the namespace variable if needed
 	std::string ns;
-	// If it ends in / or is only a ~, it is good to use
-	if (ns_param.length() == 0 or ns_param.back() == '/' or ns_param.compare("~") == 0)
-		ns = ns_param;
-	else	// if it needs a / seperator, add it
+	if (ns_param.length() == 0 or (ns_param.back() != '/' and ns_param.compare("~") != 0))
 		ns = ns_param + "/";
 
-	// land pid
-	if (!ros::param::get(ns + "land_x_kp", land_.kp.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x_kp");
-	if (!ros::param::get(ns + "land_y_kp", land_.kp.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y_kp");
-	if (!ros::param::get(ns + "land_z_kp", land_.kp.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z_kp");
-	if (!ros::param::get(ns + "land_w_kp", land_.kp.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_kp");
+	/**********************
+	 * LANDING PARAMETERS *
+	 *********************/
+	getP(ns, "land_x_kp", land_.kp.x);
+	getP(ns, "land_y_kp", land_.kp.y);
+	getP(ns, "land_z_kp", land_.kp.z);
+	getP(ns, "land_w_kp", land_.kp.w);
 
-	if (!ros::param::get(ns + "land_x_kd", land_.kd.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x_kd");
-	if (!ros::param::get(ns + "land_y_kd", land_.kd.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y_kd");
-	if (!ros::param::get(ns + "land_z_kd", land_.kd.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z_kd");
-	if (!ros::param::get(ns + "land_w_kd", land_.kd.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_kd");
+	getP(ns, "land_x_kd", land_.kd.x);
+	getP(ns, "land_y_kd", land_.kd.y);
+	getP(ns, "land_z_kd", land_.kd.z);
+	getP(ns, "land_w_kd", land_.kd.w);
 
-	if (!ros::param::get(ns + "land_x_ki", land_.ki.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x_ki");
-	if (!ros::param::get(ns + "land_y_ki", land_.ki.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y_ki");
-	if (!ros::param::get(ns + "land_z_ki", land_.ki.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z_ki");
-	if (!ros::param::get(ns + "land_w_ki", land_.ki.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w_ki");
+	getP(ns, "land_x_ki", land_.ki.x);
+	getP(ns, "land_y_ki", land_.ki.y);
+	getP(ns, "land_z_ki", land_.ki.z);
+	getP(ns, "land_w_ki", land_.ki.w);
 
-	if (!ros::param::get(ns + "land_x", land_.goal_pose.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_x");
-	if (!ros::param::get(ns + "land_y", land_.goal_pose.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_y");
-	if (!ros::param::get(ns + "land_z", land_.goal_pose.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_z");
-	if (!ros::param::get(ns + "land_w", land_.goal_pose.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_w");
+	getP(ns, "land_x", land_.goal_pose.x);
+	getP(ns, "land_y", land_.goal_pose.y);
+	getP(ns, "land_z", land_.goal_pose.z);
+	getP(ns, "land_w", land_.goal_pose.w);
 
 	double radius;
-	if (!ros::param::get(ns + "land_height_threshold", land_.threshold))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_height_threshold");
-	if (!ros::param::get(ns + "land_radius", radius))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_radius");
+	getP(ns, "land_height_threshold", land_.threshold);
+	getP(ns, "land_radius", radius);
 	land_.radiusSqr = radius * radius;
-	if (!ros::param::get(ns + "land_deadzone_radius", land_.deadzone_radius))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "land_deadzone_radius");
 
-	// follow
-	if (!ros::param::get(ns + "follow_x_kp", follow_.kp.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x_kp");
-	if (!ros::param::get(ns + "follow_y_kp", follow_.kp.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y_kp");
-	if (!ros::param::get(ns + "follow_z_kp", follow_.kp.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z_kp");
-	if (!ros::param::get(ns + "follow_w_kp", follow_.kp.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_kp");
+	/**********************
+	 * TAKEOFF PARAMETERS *
+	 *********************/
+	getP(ns, "takeoff_height", takeoff_.height);
+	getP(ns, "takeoff_threshold", takeoff_.threshold);
 
-	if (!ros::param::get(ns + "follow_x_kd", follow_.kd.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x_kd");
-	if (!ros::param::get(ns + "follow_y_kd", follow_.kd.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y_kd");
-	if (!ros::param::get(ns + "follow_z_kd", follow_.kd.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z_kd");
-	if (!ros::param::get(ns + "follow_w_kd", follow_.kd.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_kd");
+	/*********************
+	 * FOLLOW PARAMETERS *
+	 ********************/
+	getP(ns, "follow_x_kp", follow_.kp.x);
+	getP(ns, "follow_y_kp", follow_.kp.y);
+	getP(ns, "follow_z_kp", follow_.kp.z);
+	getP(ns, "follow_w_kp", follow_.kp.w);
 
-	if (!ros::param::get(ns + "follow_x_ki", follow_.ki.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x_ki");
-	if (!ros::param::get(ns + "follow_y_ki", follow_.ki.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y_ki");
-	if (!ros::param::get(ns + "follow_z_ki", follow_.ki.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z_ki");
-	if (!ros::param::get(ns + "follow_w_ki", follow_.ki.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w_ki");
+	getP(ns, "follow_x_kd", follow_.kd.x);
+	getP(ns, "follow_y_kd", follow_.kd.y);
+	getP(ns, "follow_z_kd", follow_.kd.z);
+	getP(ns, "follow_w_kd", follow_.kd.w);
 
-	if (!ros::param::get(ns + "follow_x", follow_.goal_pose.x))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_x");
-	if (!ros::param::get(ns + "follow_y", follow_.goal_pose.y))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_y");
-	if (!ros::param::get(ns + "follow_z", follow_.goal_pose.z))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_z");
-	if (!ros::param::get(ns + "follow_w", follow_.goal_pose.w))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_w");
-	if (!ros::param::get(ns + "follow_deadzone_radius", follow_.deadzone_radius))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "follow_deadzone_radius");
+	getP(ns, "follow_x_ki", follow_.ki.x);
+	getP(ns, "follow_y_ki", follow_.ki.y);
+	getP(ns, "follow_z_ki", follow_.ki.z);
+	getP(ns, "follow_w_ki", follow_.ki.w);
 
-	// Return
+	getP(ns, "follow_x", follow_.goal_pose.x);
+	getP(ns, "follow_y", follow_.goal_pose.y);
+	getP(ns, "follow_z", follow_.goal_pose.z);
+	getP(ns, "follow_w", follow_.goal_pose.w);
+
+	/**********************
+	 * LANDING PARAMETERS *
+	 *********************/
 	double settleRadius;
-	if (!ros::param::get(ns + "return_gotoHeight", return_.gotoHeight))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_gotoHeight");
-	if (!ros::param::get(ns + "return_finalHeight", return_.finalHeight))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_finalHeight");
-	if (!ros::param::get(ns + "return_downRadius", return_.downRadius))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_downRadius");
-	if (!ros::param::get(ns + "return_settleRadius", settleRadius))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_settleRadius");
-	if (!ros::param::get(ns + "return_tagTime", return_.tagTime))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_tagTime");
-	if (!ros::param::get(ns + "return_tagLossThresh", return_.tagLossThresh))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "return_tagLossThresh");
+	getP(ns, "return_gotoHeight", return_.gotoHeight);
+	getP(ns, "return_finalHeight", return_.finalHeight);
+	getP(ns, "return_downRadius", return_.downRadius);
+	getP(ns, "return_settleRadius", settleRadius);
+	getP(ns, "return_tagTime", return_.tagTime);
+	getP(ns, "return_tagLossThresh", return_.tagLossThresh);
 	return_.settleRadiusSquared = settleRadius * settleRadius;
-
-	// takeoff
-	if (!ros::param::get(ns + "takeoff_height", takeoff_.height))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "takeoff_height");
-	if (!ros::param::get(ns + "takeoff_threshold", takeoff_.threshold))
-		ROS_WARN("FAILED TO LOAD PARAMETER: %s", "takeoff_threshold");
 }
 
 void Behaviors::uploadParams(std::string ns_param)
@@ -162,7 +135,9 @@ void Behaviors::uploadParams(std::string ns_param)
 	else	// if it needs a / seperator, add it
 		ns = ns_param + "/";
 
-	// land pid
+	/**********************
+	 * LANDING PARAMETERS *
+	 *********************/
 	ros::param::set(ns + "land_x_kp", land_.kp.x);
 	ros::param::set(ns + "land_y_kp", land_.kp.y);
 	ros::param::set(ns + "land_z_kp", land_.kp.z);
@@ -183,7 +158,15 @@ void Behaviors::uploadParams(std::string ns_param)
 	ros::param::set(ns + "land_z", land_.goal_pose.z);
 	ros::param::set(ns + "land_w", land_.goal_pose.w);
 
-	// follow
+	/**********************
+	 * TAKEOFF PARAMETERS *
+	 *********************/
+	ros::param::set(ns + "takeoff_height", takeoff_.height);
+	ros::param::set(ns + "takeoff_threshold", takeoff_.threshold);
+
+	/**********************
+	 * FOLLOW PARAMETERS *
+	 *********************/
 	ros::param::set(ns + "follow_x_kp", follow_.kp.x);
 	ros::param::set(ns + "follow_y_kp", follow_.kp.y);
 	ros::param::set(ns + "follow_z_kp", follow_.kp.z);
@@ -204,7 +187,9 @@ void Behaviors::uploadParams(std::string ns_param)
 	ros::param::set(ns + "follow_z", follow_.goal_pose.z);
 	ros::param::set(ns + "follow_w", follow_.goal_pose.w);
 
-	// Return
+	/**********************
+	 * RETURN PARAMETERS *
+	 *********************/
 	double settleRadius;
 	ros::param::set(ns + "return_gotoHeight", return_.gotoHeight);
 	ros::param::set(ns + "return_finalHeight", return_.finalHeight);
@@ -213,10 +198,6 @@ void Behaviors::uploadParams(std::string ns_param)
 	ros::param::set(ns + "return_tagTime", return_.tagTime);
 	ros::param::set(ns + "return_tagLossThresh", return_.tagLossThresh);
 	return_.settleRadiusSquared = settleRadius * settleRadius;
-
-	// takeoff
-	ros::param::set(ns + "takeoff_height", takeoff_.height);
-	ros::param::set(ns + "takeoff_threshold", takeoff_.threshold);
 }
 
 void Behaviors::assignPublishers()
