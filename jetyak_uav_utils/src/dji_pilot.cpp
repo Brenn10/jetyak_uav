@@ -7,38 +7,34 @@
 
 dji_pilot::dji_pilot(ros::NodeHandle &nh)
 {
-	// Subscribe to joy topic
-	extCmdSub = nh.subscribe("behavior_cmd", 10, &dji_pilot::extCallback, this);
+	// Load autopilot parameters
+	loadPilotParameters();
+	if (isM100)
+		ROS_INFO("Platform set to M100");
 
+	// Set up subscriptions
+	extCmdSub = nh.subscribe("behavior_cmd", 10, &dji_pilot::extCallback, this);
 	djiRCSub = nh.subscribe("/dji_sdk/rc", 10, &dji_pilot::rcCallback, this);
 
-	// Set up command publisher
+	// Set up publisher
 	controlPub = nh.advertise<sensor_msgs::Joy>("/dji_sdk/flight_control_setpoint_generic", 10);
 
-	// Set up basic services
-	// service clients
+	// Set up services
 	armServ = nh.serviceClient<dji_sdk::DroneArmControl>("/dji_sdk/drone_arm_control");
 	taskServ = nh.serviceClient<dji_sdk::DroneTaskControl>("/dji_sdk/drone_task_control");
-
 	sdkCtrlAuthorityServ = nh.serviceClient<dji_sdk::SDKControlAuthority>("/dji_sdk/sdk_control_authority");
 
-	// set up service servers
+	// Set up service servers
 	propServServer = nh.advertiseService("prop_enable", &dji_pilot::propServCallback, this);
 	takeoffServServer = nh.advertiseService("takeoff", &dji_pilot::takeoffServCallback, this);
 	landServServer = nh.advertiseService("land", &dji_pilot::landServCallback, this);
 
 	// Set default values
-	setClippingThresholds();
 	rcStickThresh = 0.0;
 	autopilotOn = false;
 	bypassPilot = false;
 
 	// Initialize RC
-	if (!ros::param::get("~isM100", isM100))
-	{
-		isM100 = true;
-		ROS_WARN("isM100 not available, defaulting to %i", isM100);
-	}
 	setupRCCallback();
 
 	// Initialize joy command
@@ -47,8 +43,12 @@ dji_pilot::dji_pilot(ros::NodeHandle &nh)
 		extCommand.axes.push_back(0);
 
 	// Initialize default command flag
-	commandFlag = (DJISDK::VERTICAL_VELOCITY | DJISDK::HORIZONTAL_VELOCITY | DJISDK::YAW_RATE | DJISDK::HORIZONTAL_BODY |
-								 DJISDK::STABLE_ENABLE);
+	commandFlag = (
+		DJISDK::VERTICAL_VELOCITY |
+		DJISDK::HORIZONTAL_VELOCITY |
+		DJISDK::YAW_RATE |
+		DJISDK::HORIZONTAL_BODY |
+		DJISDK::STABLE_ENABLE);
 }
 
 dji_pilot::~dji_pilot()
@@ -59,6 +59,31 @@ dji_pilot::~dji_pilot()
 		if (requestControl(0))
 			ROS_INFO("Control released back to RC");
 	}
+}
+
+void dji_pilot::loadPilotParameters()
+{
+	ros::NodeHandle nh_private("~");
+
+	// Platform
+	nh_private.param("isM100", isM100, true);
+
+	// Horizontal velocity thresholds
+	nh_private.param("hVelocityMaxBody", hVelocityMaxBody, 1.0);
+	nh_private.param("hVelocityMaxGround", hVelocityMaxGround, 5.0);
+	nh_private.param("hAngleRateCmdMax", hAngleRateCmdMax, 5.0 * C_PI / 6.0);
+	nh_private.param("hAngleCmdMax", hAngleCmdMax, 0.611);
+
+	// Vertical velocity/position thresholds
+	nh_private.param("vVelocityMaxBody", vVelocityMaxBody, 1.0);
+	nh_private.param("vVelocityMaxGround", vVelocityMaxGround, 3.0);
+	nh_private.param("vPosCmdMax", vPosCmdMax, 30.0);
+	nh_private.param("vPosCmdMin", vPosCmdMin, 0.0);
+	nh_private.param("vThrustCmdMax", vThrustCmdMax, 1.0);
+
+	// Yaw thresholds
+	nh_private.param("yAngleRateMax", yAngleRateMax, 5.0 * C_PI / 6.0);
+	nh_private.param("yAngleMax", yAngleMax, C_PI);
 }
 
 // Callbacks //
@@ -81,6 +106,8 @@ void dji_pilot::extCallback(const sensor_msgs::Joy::ConstPtr &msg)
 		// Clip commands according to flag
 		extCommand = adaptiveClipping(*output);
 	}
+	else
+		ROS_WARN("Command received has not the expected format");
 }
 
 void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr &msg)
@@ -121,8 +148,7 @@ void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr &msg)
 	}
 }
 
-bool dji_pilot::propServCallback(jetyak_uav_utils::SetBoolean::Request &req,
-																 jetyak_uav_utils::SetBoolean::Response &res)
+bool dji_pilot::propServCallback(jetyak_uav_utils::SetBoolean::Request &req, jetyak_uav_utils::SetBoolean::Response &res)
 {
 	if (autopilotOn)
 	{
@@ -165,7 +191,6 @@ bool dji_pilot::takeoffServCallback(std_srvs::Trigger::Request &req, std_srvs::T
 }
 
 // Private //
-
 void dji_pilot::setupRCCallback()
 {
 	if (isM100)
@@ -205,26 +230,6 @@ bool dji_pilot::requestControl(int requestFlag)
 	return true;
 }
 
-void dji_pilot::setClippingThresholds()
-{
-	// Horizontal
-	hVelcmdMaxBody = 1.0;							// m/sec
-	hVelcmdMaxGround = 5.0;						// m/sec
-	hARatecmdMax = 5.0 * C_PI / 6.0;	// rad/sec
-	hAnglecmdMax = 0.611;							// rad
-
-	// Vertical
-	vVelcmdMaxBody = 1.0;		 // m/sec
-	vVelcmdMaxGround = 1.0;	// m/sec
-	vPoscmdMax = 30.0;			 // m
-	vPoscmdMin = 0.0;				 // m
-	vThrustcmdMax = 1.0;		 // *100% of max thrust
-
-	// Yaw
-	yARateMax = 5.0 * C_PI / 6.0;	// rad/sec
-	yAngleMax = C_PI;							 // rad
-}
-
 sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 {
 	uint8_t flag = buildFlag((JETYAK_UAV::Flag)msg.axes[4]);
@@ -241,20 +246,20 @@ sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 	double hVelcmdMax, vVelcmdMax;
 	if ((flag & DJISDK::HORIZONTAL_BODY) == DJISDK::HORIZONTAL_BODY)
 	{
-		hVelcmdMax = hVelcmdMaxBody;
-		vVelcmdMax = vVelcmdMaxBody;
+		hVelcmdMax = hVelocityMaxBody;
+		vVelcmdMax = vVelocityMaxBody;
 	}
 	else
 	{
-		hVelcmdMax = hVelcmdMaxGround;
-		vVelcmdMax = vVelcmdMaxGround;
+		hVelcmdMax = hVelocityMaxGround;
+		vVelcmdMax = vVelocityMaxGround;
 	}
 
 	// Horizontal Logic
 	if ((flag & DJISDK::HORIZONTAL_ANGULAR_RATE) == DJISDK::HORIZONTAL_ANGULAR_RATE)
 	{
-		cmdBuffer.axes[0] = clip(msg.axes[0], -hARatecmdMax, hARatecmdMax);
-		cmdBuffer.axes[1] = clip(msg.axes[1], -hARatecmdMax, hARatecmdMax);
+		cmdBuffer.axes[0] = clip(msg.axes[0], -hAngleRateCmdMax, hAngleRateCmdMax);
+		cmdBuffer.axes[1] = clip(msg.axes[1], -hAngleRateCmdMax, hAngleRateCmdMax);
 	}
 	else if ((flag & DJISDK::HORIZONTAL_POSITION) == DJISDK::HORIZONTAL_POSITION)
 	{
@@ -268,23 +273,23 @@ sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 	}
 	else
 	{
-		cmdBuffer.axes[0] = clip(msg.axes[0], -hAnglecmdMax, hAnglecmdMax);
-		cmdBuffer.axes[1] = clip(msg.axes[1], -hAnglecmdMax, hAnglecmdMax);
+		cmdBuffer.axes[0] = clip(msg.axes[0], -hAngleCmdMax, hAngleCmdMax);
+		cmdBuffer.axes[1] = clip(msg.axes[1], -hAngleCmdMax, hAngleCmdMax);
 	}
 
 	// Vertical Logic
 	if ((flag & DJISDK::VERTICAL_THRUST) == DJISDK::VERTICAL_THRUST)
-		cmdBuffer.axes[3] = clip(msg.axes[3], 0, vThrustcmdMax);
+		cmdBuffer.axes[3] = clip(msg.axes[3], 0, vThrustCmdMax);
 	else if ((flag & DJISDK::VERTICAL_POSITION) == DJISDK::VERTICAL_POSITION)
-		cmdBuffer.axes[3] = clip(msg.axes[3], vPoscmdMin, vPoscmdMax);
+		cmdBuffer.axes[3] = clip(msg.axes[3], vPosCmdMin, vPosCmdMax);
 	else
 		cmdBuffer.axes[3] = clip(msg.axes[3], -vVelcmdMax, vVelcmdMax);
 
 	// Yaw Logic
 	if ((flag & DJISDK::YAW_RATE) == DJISDK::YAW_RATE)
-		cmdBuffer.axes[2] = clip(msg.axes[2], -yARateMax, yARateMax);
+		cmdBuffer.axes[2] = clip(msg.axes[2], -yAngleRateMax, yAngleRateMax);
 	else
-		cmdBuffer.axes[2] = clip(msg.axes[2], -yAngleMax, yAngleMax);
+		cmdBuffer.axes[2] = clip(msg.axes[2], -yAngleRateMax, yAngleRateMax);
 
 	return cmdBuffer;
 }
