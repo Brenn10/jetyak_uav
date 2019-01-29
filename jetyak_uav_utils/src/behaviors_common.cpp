@@ -50,9 +50,9 @@ void Behaviors::downloadParams(std::string ns_param)
 		if (!ros::param::get(ns + name, param))
 			ROS_WARN("FAILED: %s", name.c_str());
 	};
-	
-	std::string ns=ns_param;	
-	
+
+	std::string ns = ns_param;
+
 	/**********************
 	 * LANDING PARAMETERS *
 	 *********************/
@@ -76,8 +76,10 @@ void Behaviors::downloadParams(std::string ns_param)
 	getP(ns, "land_z", land_.goal_pose.z);
 	getP(ns, "land_w", land_.goal_pose.w);
 
-	double radius;
+	double radius, velMag;
 	getP(ns, "land_height_threshold", land_.threshold);
+	getP(ns, "land_vel_mag", velMag);
+	land_.velMagSqr = velMag * velMag;
 	getP(ns, "land_radius", radius);
 	land_.radiusSqr = radius * radius;
 

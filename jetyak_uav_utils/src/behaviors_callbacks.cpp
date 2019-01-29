@@ -15,6 +15,14 @@ void Behaviors::tagPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 	tagPose_.header = msg->header;
 }
 
+void Behaviors::tagVelCallback(const geometry_msgs::Vector3Stamped::ConstPtr &msg)
+{
+	tagVel_.t = msg->header.stamp.toSec();
+	tagVel_.x = msg->vector.x;
+	tagVel_.y = msg->vector.y;
+	tagVel_.z = msg->vector.z;
+}
+
 void Behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
 {
 	if (msg->status.status >= 0)
@@ -35,7 +43,7 @@ void Behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
 
 void Behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
 {
-	ROS_WARN("LAT: %1.6f, LON: %1.6f, ALT: %1.2f",msg->latitude,msg->longitude,msg->altitude);
+	ROS_WARN("LAT: %1.6f, LON: %1.6f, ALT: %1.2f", msg->latitude, msg->longitude, msg->altitude);
 	if (msg->status.status >= 0)
 	{
 		boatGPS_.header = msg->header;

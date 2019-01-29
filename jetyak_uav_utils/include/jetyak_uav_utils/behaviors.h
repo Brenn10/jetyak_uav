@@ -21,6 +21,7 @@
 #include <ar_track_alvar_msgs/AlvarMarkers.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/QuaternionStamped.h>
+#include <geometry_msgs/Vector3Stamped.h>
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/NavSatFix.h>
@@ -47,9 +48,9 @@ private:
 	/*********************************************
 	 * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
 	 *********************************************/
-	ros::Subscriber tagPoseSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
+	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
 	ros::Publisher cmdPub_;
-	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_,lookdownSrv_;
+	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_;
 	ros::ServiceServer setModeService_, getModeService_, setBoatNSService_, setFollowPIDService_, setLandPIDService_,
 			setFollowPosition_, setLandPosition_, setTakeoffParams_, setReturnParams_, setLandParams_;
 	ros::NodeHandle nh;
@@ -71,6 +72,7 @@ private:
 	geometry_msgs::PoseStamped tagPose_ = geometry_msgs::PoseStamped();
 
 	bsc_common::pose4d_t simpleTag_ = { 0, 0, 0, 0, 0 };
+	bsc_common::vel3d_t tagVel_ = { 0, 0, 0, 0 };
 
 	/*********************************************
 	 * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
@@ -92,6 +94,7 @@ private:
 		double height_goal;
 		double threshold;
 		double radiusSqr;
+		double velMagSqr;
 		double deadzone_radius;
 	} land_;
 
@@ -214,12 +217,16 @@ private:
 	 *****************************/
 
 	/** tagPoseCallback
-	 * Changes the current mode
-	 * changes control_priority
 	 *
 	 * @param msg gets the pose of the tag relative to the UAV
 	 */
 	void tagPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg);
+
+	/** tagVelCallback
+	 *
+	 * @param msg gets the velocity of the tag relative to the UAV
+	 */
+	void tagVelCallback(const geometry_msgs::Vector3Stamped::ConstPtr &msg);
 
 	/** uavGPSCallback
 	 * Listens for updates from the UAVs GPS

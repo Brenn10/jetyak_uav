@@ -14,5 +14,9 @@ struct pose4d_t
 {
 	double t, x, y, z, w;
 };
+struct vel3d_t
+{
+	double t, x, y, z;
+};
 }	// namespace bsc_common
 #endif

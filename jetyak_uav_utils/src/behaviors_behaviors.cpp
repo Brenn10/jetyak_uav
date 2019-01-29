@@ -152,7 +152,6 @@ void Behaviors::returnBehavior()
 	for too long, return to gps following
 	*/
 
-	
 	double east = bsc_common::util::latlondist(0, boatGPS_.longitude, 0, uavGPS_.longitude);
 	double north = bsc_common::util::latlondist(boatGPS_.latitude, 0, uavGPS_.latitude, 0);
 
@@ -325,7 +324,8 @@ void Behaviors::landBehavior()
 
 			// If pose is within a cylinder of radius .1 and height .1
 			if (land_.goal_pose.z - simpleTag_.z < land_.threshold and
-					pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) < land_.radiusSqr)
+					(pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) < land_.radiusSqr) and
+					(pow(tagVel_.x, 2) + pow(tagVel_.y, 2) + pow(tagVel_.z, 2) < land_.velMagSqr))
 			{
 				std_srvs::Trigger srv;
 				landSrv_.call(srv);

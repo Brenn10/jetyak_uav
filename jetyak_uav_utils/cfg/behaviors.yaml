@@ -59,9 +59,11 @@ land_w_ki: 0
 # (land_height) above the pad prior to landing
 
 # This specifies the max threshold around the height it may set down
-land_height_threshold: .05
+land_height_threshold: .1
 # this is the radius around the center of the pad for the drone to set down
-land_radius: .05
+land_radius: .1
+#maximum velocity that the UAV may land with
+land_vel_mag: .1
 
 #
 # Return Parameters
