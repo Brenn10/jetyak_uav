@@ -54,7 +54,7 @@ protected:
 	// Functions
 	void setupRCCallback();
 	bool requestControl(int requestFlag);
-	void setClippingThresholds();
+	void loadPilotParameters();
 	sensor_msgs::Joy adaptiveClipping(sensor_msgs::Joy msg);
 
 	// Data
@@ -64,9 +64,9 @@ protected:
 	uint8_t commandFlag;
 
 	int modeFlag, pilotFlag;
-	double hVelcmdMaxBody, hVelcmdMaxGround, hARatecmdMax, hAnglecmdMax;
-	double vVelcmdMaxBody, vVelcmdMaxGround, vPoscmdMax, vPoscmdMin, vThrustcmdMax;
-	double yARateMax, yAngleMax;
+	double hVelocityMaxBody, hVelocityMaxGround, hAngleRateCmdMax, hAngleCmdMax;
+	double vVelocityMaxBody, vVelocityMaxGround, vPosCmdMax, vPosCmdMin, vThrustCmdMax;
+	double yAngleRateMax, yAngleMax;
 	double rcStickThresh;
 
 	bool isM100;
