@@ -103,7 +103,7 @@ void Behaviors::followBehavior()
 		{	// if time is same
 			follow_.lostTagCounter++;
 
-			if (follow_.lostTagCounter > 3)
+			if (follow_.lostTagCounter > 10)
 			{	// if time has been same for over 3 tick
 
 				ROS_WARN("Tag Lost");
@@ -366,7 +366,7 @@ void Behaviors::landBehavior()
 		wpid_->update(land_.goal_pose.w - simpleTag_.w, simpleTag_.t);
 
 		if (pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) <
-				pow(land_.deadzone_radius,2))
+				pow(land_.deadzone_radius, 2))
 		{
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(0);
