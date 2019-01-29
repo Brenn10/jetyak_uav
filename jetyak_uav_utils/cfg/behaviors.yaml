@@ -10,12 +10,12 @@ takeoff_threshold: .25
 #
 follow_x: 2.5
 follow_x_kp: .3
-follow_x_kd: .2
+follow_x_kd: 0
 follow_x_ki: 0
 
 follow_y: 0
 follow_y_kp: .3
-follow_y_kd: .2
+follow_y_kd: 0
 follow_y_ki: 0
 
 follow_z: -1

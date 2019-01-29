@@ -249,9 +249,9 @@ void Behaviors::assignSubscribers()
 {
 	tagPoseSub_ = nh.subscribe("/jetyak_uav_vision/filtered_tag", 1, &Behaviors::tagPoseCallback, this);
 	uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position", 1, &Behaviors::uavGPSCallback, this);
-	boatGPSSub_ = nh.subscribe("boat_gps", 1, &Behaviors::boatGPSCallback, this);
+	boatGPSSub_ = nh.subscribe("/jetyak2/global_position/global", 1, &Behaviors::boatGPSCallback, this);
 	uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1, &Behaviors::uavAttitudeCallback, this);
-	boatIMUSub_ = nh.subscribe("boat_imu", 1, &Behaviors::boatIMUCallback, this);
+	boatIMUSub_ = nh.subscribe("/jetyak2/imu/data", 1, &Behaviors::boatIMUCallback, this);
 }
 
 double Behaviors::scaleConstant(double C, double e)
