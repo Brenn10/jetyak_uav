@@ -36,11 +36,14 @@ Behaviors::~Behaviors()
 
 void Behaviors::doBehaviorAction()
 {
-	simpleTag_.x = tagPose_.pose.position.x;
-	simpleTag_.y = tagPose_.pose.position.y;
+	// simpleTag_.x = tagPose_.pose.position.x;
+	// simpleTag_.y = tagPose_.pose.position.y;
 	simpleTag_.z = tagPose_.pose.position.z;
 
 	simpleTag_.w = bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
+
+	bsc_common::util::rotate_vector(tagPose_.pose.position.x, tagPose_.pose.position.y, -simpleTag_.w, simpleTag_.x,
+																	simpleTag_.y);
 
 	simpleTag_.t = tagPose_.header.stamp.toSec();
 

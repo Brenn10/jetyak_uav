@@ -228,15 +228,16 @@ void Behaviors::returnBehavior()
 			else
 				command 0xy and the goal height-altitude
 		*/
-		if (uavGPS_.altitude - boatGPS_.altitude >= return_.gotoHeight)
+		if (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset >= return_.gotoHeight)
 		{
 			ROS_WARN("Changed OVER");
 			return_.stage = return_.OVER;
 		}
 		else
 		{
-			double z_correction = return_.gotoHeight - (uavGPS_.altitude - boatGPS_.altitude);
-			ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavGPS_.altitude - boatGPS_.altitude);
+			double z_correction = return_.gotoHeight - (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset);
+			ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight,
+							 uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset);
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(0);
 			cmd.axes.push_back(0);
@@ -265,7 +266,8 @@ void Behaviors::returnBehavior()
 		}
 		else
 		{
-			double z_correction = follow_.kp.z * (return_.gotoHeight + .1 - (uavGPS_.altitude - boatGPS_.altitude));
+			double z_correction =
+					follow_.kp.z * (return_.gotoHeight + .1 - (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset));
 
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(east);
@@ -287,7 +289,8 @@ void Behaviors::returnBehavior()
 			hopefully find one
 		*/
 		ROS_WARN("Going DOWN");
-		double z_correction = follow_.kp.z * (return_.finalHeight - (uavGPS_.altitude - boatGPS_.altitude));
+		double z_correction =
+				follow_.kp.z * (return_.finalHeight - (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset));
 
 		sensor_msgs::Joy cmd;
 		cmd.axes.push_back(east);
@@ -415,6 +418,8 @@ void Behaviors::rideBehavior()
 			ROS_WARN("Failed to deactivate arms");
 		}
 	}
+	return_.altitudeOffset =
+			uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset;	// update offset TODO: add filter or rolling avg
 }
 
 void Behaviors::hoverBehavior()

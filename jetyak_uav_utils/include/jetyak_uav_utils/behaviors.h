@@ -111,6 +111,7 @@ private:
 	// follow specific constants
 	struct
 	{
+		double altitudeOffset;	// ridingUavGps-boatGPS
 		double gotoHeight;
 		double finalHeight;
 		double downRadius;
