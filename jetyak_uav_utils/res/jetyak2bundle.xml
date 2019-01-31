@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<multimarker markers="4">
+    <marker index="0" status="1">
+        <corner x="-6.45" y="-6.45" z="0" />
+        <corner x="6.45" y="-6.45" z="0" />
+        <corner x="6.45" y="6.45" z="0" />
+        <corner x="-6.45" y="6.45" z="0" />
+    </marker>
+
+    <marker index="1" status="1">
+        <corner x="7.05" y="-6.45" z="0" />
+        <corner x="19.95" y="-6.45" z="0" />
+        <corner x="19.95" y="6.45" z="0" />
+        <corner x="7.05" y="6.45" z="0" />
+    </marker>
+
+    <marker index="3" status="1">
+        <corner x="10" y="-big" z="small" />
+        <corner x="10" y="-big" z="big" />
+        <corner x="10" y="-small" z="big" />
+        <corner x="10" y="-small" z="small" />
+    </marker>
+
+    <marker index="4" status="1">
+        <corner x="10" y="small" z="small" />
+        <corner x="10" y="small" z="big" />
+        <corner x="10" y="big" z="big" />
+        <corner x="10" y="big" z="small" />
+    </marker>
+</multimarker>
+
+<!-- 
+big markers - 45.5cm, gap - 2.95 
+small markers - 
+-->
+

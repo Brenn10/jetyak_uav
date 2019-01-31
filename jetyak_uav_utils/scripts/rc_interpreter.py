@@ -28,6 +28,9 @@ class RC_Interpreter():
 		rp.spin()
 
 	def joyCallback(self, msg):
+		if(len(msg.channels) <8):
+			rp.logwarn("Too few RC Channels: %i",len(msg.channels))
+			return 
 		part=int((float(msg.channels[7]-self.minD)/self.range)*self.parts)
 
 		if self.modeTable[part] != self.lastPublished and self.modeTable[part] !="":

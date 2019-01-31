@@ -36,28 +36,16 @@ Behaviors::~Behaviors()
 
 void Behaviors::doBehaviorAction()
 {
-	// simpleTag_.x = tagPose_.pose.position.x;
-	// simpleTag_.y = tagPose_.pose.position.y;
+	simpleTag_.x = tagPose_.pose.position.x;
+	simpleTag_.y = tagPose_.pose.position.y;
+
 	simpleTag_.z = tagPose_.pose.position.z;
 
 	simpleTag_.w = bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
 
-	bsc_common::util::rotate_vector(tagPose_.pose.position.x, tagPose_.pose.position.y, -simpleTag_.w, simpleTag_.x,
-																	simpleTag_.y);
+	//bsc_common::util::rotate_vector(tagPose_.pose.position.x, tagPose_.pose.position.y, -simpleTag_.w, simpleTag_.x,simpleTag_.y);
 
 	simpleTag_.t = tagPose_.header.stamp.toSec();
-
-	/*ROS_INFO("x: %1.2f, y:%1.2f, z: %1.2f, yaw: %1.3f",
-			simpleTag_.x,
-			simpleTag_.y,
-			simpleTag_.z,
-			simpleTag_.w);*/
-
-	// //Lets grab the most recent time stamp
-	// if(uavGPS_.header.stamp.toSec()>boatGPS_.header.stamp.toSec())
-	//   simpleTag_.header.stamp = uavGPS_.header.stamp;
-	// else
-	//   simpleTag_.header.stamp = uavGPS_.header.stamp;
 
 	switch (currentMode_)
 	{
