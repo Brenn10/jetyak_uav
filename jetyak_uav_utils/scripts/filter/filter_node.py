@@ -12,7 +12,10 @@ class FilterNode():
 
 	def __init__(self,):
 		rp.init_node("tag_pose_filter")
-		self.gravityConst = 9.831
+		self.gravityConst = 9.832
+		self.biasX = -0.149
+		self.biasY = 0.041
+
 		# Number of States
 		self.n = 9
 
@@ -82,7 +85,7 @@ class FilterNode():
 	def imu_callback(self, msg):
 		tg = DataPoint()
 		tg.setID('imuAcc')
-		tg.setZ(np.matrix([[msg.linear_acceleration.x], [msg.linear_acceleration.y], [msg.linear_acceleration.z - self.gravityConst]]))
+		tg.setZ(np.matrix([[msg.linear_acceleration.x - self.biasX], [msg.linear_acceleration.y - self.biasY], [msg.linear_acceleration.z - self.gravityConst]]))
 		tg.setTime(msg.header.stamp.to_sec())
 		self.fusionF.process(tg)
 
