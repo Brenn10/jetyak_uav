@@ -122,36 +122,6 @@ void Behaviors::followBehavior()
 
 void Behaviors::returnBehavior()
 {
-	/* Algorithm 2
-	if tag found in last X second
-		set stage to SETTLE
-		if yaw~0, x~2, y~0, z~(mast height+1)
-			enter follow modes
-		else
-			PID to the correct points
-
-	elif first time
-		Set stage to UP
-		init PID
-
-	elif stage == up
-		if altitude is >gotoHeight
-			set stage to Over
-		else
-			command 0xy and the goal height-altitude
-	elif stage==over
-		saturate x and y with directions
-		z_cmd = gotoHeight-altitude
-		if in sphere around goal
-			set stage to DOWN
-	elif stage==down
-		find proper pid constants to maintain location more or less
-		z=finalHeight-altitude
-		we wont change the mode here as it should search for the tags and hopefully
-	find one elif stage=settle Yaw or elevate or translate to recover tags If lost
-	for too long, return to gps following
-	*/
-
 	double east = bsc_common::util::latlondist(0, boatGPS_.longitude, 0, uavGPS_.longitude);
 	double north = bsc_common::util::latlondist(boatGPS_.latitude, 0, uavGPS_.latitude, 0);
 
@@ -166,13 +136,6 @@ void Behaviors::returnBehavior()
 	if (ros::Time::now().toSec() - tagPose_.header.stamp.toSec() < return_.tagTime)
 	{
 		ROS_WARN("Tag Spotted");
-		/*
-			set stage to SETTLE
-			if yaw~0, x~2, y~0, z~(mast height)
-				enter follow modes
-			else
-				PID to the correct points
-		*/
 		return_.stage = return_.SETTLE;
 		if ((pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2) +
 				 pow(follow_.goal_pose.z - simpleTag_.z, 2)) < return_.settleRadiusSquared)
@@ -222,22 +185,15 @@ void Behaviors::returnBehavior()
 
 	else if (return_.stage == return_.UP)
 	{
-		ROS_WARN("Going UP");
-		/*if altitude is >gotoHeight
-				set stage to Over
-			else
-				command 0xy and the goal height-altitude
-		*/
-		if (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset >= return_.gotoHeight)
+		if (uavHeight_ >= return_.gotoHeight)
 		{
 			ROS_WARN("Changed OVER");
 			return_.stage = return_.OVER;
 		}
 		else
 		{
-			double z_correction = return_.gotoHeight - (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset);
-			ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight,
-							 uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset);
+			double z_correction = return_.gotoHeight - uavHeight_;
+			ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavHeight_);
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(0);
 			cmd.axes.push_back(0);
@@ -251,7 +207,6 @@ void Behaviors::returnBehavior()
 	}
 	else if (return_.stage == return_.OVER)
 	{
-		ROS_WARN("Going OVER");
 		/*
 			saturate x and y with directions
 			z_cmd = gotoHeight-altitude
@@ -266,8 +221,7 @@ void Behaviors::returnBehavior()
 		}
 		else
 		{
-			double z_correction =
-					follow_.kp.z * (return_.gotoHeight + .1 - (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset));
+			double z_correction = follow_.kp.z * (return_.gotoHeight - uavHeight_);
 
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(east);
@@ -288,9 +242,9 @@ void Behaviors::returnBehavior()
 			we wont change the mode here as it should search for the tags and
 			hopefully find one
 		*/
-		ROS_WARN("Going DOWN");
-		double z_correction =
-				follow_.kp.z * (return_.finalHeight - (uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset));
+		double z_correction = follow_.kp.z * (return_.finalHeight - uavHeight_);
+
+		ROS_WARN("Goal: %1.3f, Current %1.3f", return_.finalHeight, uavHeight_);
 
 		sensor_msgs::Joy cmd;
 		cmd.axes.push_back(east);
@@ -326,9 +280,12 @@ void Behaviors::landBehavior()
 		{	// if time changed
 
 			// If pose is within a cylinder of radius .1 and height .1
-			if (land_.goal_pose.z - simpleTag_.z < land_.threshold and
-					(pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) < land_.radiusSqr) and
-					(pow(tagVel_.x, 2) + pow(tagVel_.y, 2) + pow(tagVel_.z, 2) < land_.velMagSqr))
+			bool inHeightThreshold = land_.goal_pose.z - simpleTag_.z < land_.heightThresh;
+			bool inRadiusThreshhold =
+					pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) < land_.radiusThreshSqr;
+			bool inVelThreshold = pow(tagVel_.x, 2) + pow(tagVel_.y, 2) + pow(tagVel_.z, 2) < land_.velThreshSqr;
+			bool inAngleThreshhold = abs(simpleTag_.w) < land_.angleThresh;
+			if (inHeightThreshold and inRadiusThreshhold and inVelThreshold and inAngleThreshhold)
 			{
 				std_srvs::Trigger srv;
 				landSrv_.call(srv);
@@ -378,27 +335,13 @@ void Behaviors::landBehavior()
 		zpid_->update(land_.goal_pose.z - simpleTag_.z, simpleTag_.t);
 		wpid_->update(land_.goal_pose.w - simpleTag_.w, simpleTag_.t);
 
-		if (pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) <
-				pow(land_.deadzone_radius, 2))
-		{
-			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(0);
-			cmd.axes.push_back(0);
-			cmd.axes.push_back(-zpid_->get_signal());
-			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
-			cmdPub_.publish(cmd);
-		}
-		else	// if outside deadzone, correct x,y
-		{
-			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(-xpid_->get_signal());
-			cmd.axes.push_back(-ypid_->get_signal());
-			cmd.axes.push_back(-zpid_->get_signal());
-			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
-			cmdPub_.publish(cmd);
-		}
+		sensor_msgs::Joy cmd;
+		cmd.axes.push_back(-xpid_->get_signal());
+		cmd.axes.push_back(-ypid_->get_signal());
+		cmd.axes.push_back(-zpid_->get_signal());
+		cmd.axes.push_back(-wpid_->get_signal());
+		cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+		cmdPub_.publish(cmd);
 	}
 };
 

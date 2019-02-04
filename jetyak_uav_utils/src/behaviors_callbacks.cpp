@@ -41,9 +41,14 @@ void Behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
 	}
 }
 
+void Behaviors::uavHeightCallback(const std_msgs::Float32::ConstPtr &msg)
+{
+	uavHeight_ = msg->data;
+}
+
 void Behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
 {
-	ROS_WARN("LAT: %1.6f, LON: %1.6f, ALT: %1.2f", msg->latitude, msg->longitude, msg->altitude);
+	// ROS_WARN("LAT: %1.6f, LON: %1.6f, ALT: %1.2f", msg->latitude, msg->longitude, msg->altitude);
 	if (msg->status.status >= 0)
 	{
 		boatGPS_.header = msg->header;
@@ -79,7 +84,7 @@ void Behaviors::uavImuCallback(const sensor_msgs::Imu::ConstPtr &msg)
 
 void Behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr &msg)
 {
-	ROS_WARN("IMU RECEIVED");
+	// ROS_WARN("IMU RECEIVED");
 	boatImu_.header = msg->header;
 	boatImu_.orientation = msg->orientation;
 	boatImu_.orientation_covariance = msg->orientation_covariance;

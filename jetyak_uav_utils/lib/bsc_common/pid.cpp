@@ -15,6 +15,7 @@ PID::PID(double kp, double ki, double kd, int integral_frame) : past_integral_co
 	signal_ = 0;
 	last_d_ = 0;
 	integral_frame_ = integral_frame;
+	use_int_frame_ = integral_frame >= 0;	// true if integral frame valid size
 }
 
 double PID::get_signal()
@@ -28,7 +29,7 @@ void PID::update(double error, double utime)
 	signal_ = error * kp_;
 	if (utime == 0)
 	{
-		std::cout << "PID NEVER RECEIVED TIMESTAMPED ERROR"<< std::endl;
+		std::cout << "PID NEVER RECEIVED TIMESTAMPED ERROR" << std::endl;
 	}
 	else if (last_time_ != 0)	// if not first time
 	{
@@ -54,15 +55,18 @@ void PID::update(double error, double utime)
 
 			signal_ += i + d;
 
-			// Add current integral contribution to the list
-			past_integral_contributions.push_back(error * dt);
-			// If we have too many elements
-			if (past_integral_contributions.size() > integral_frame_)
+			if (use_int_frame_)	// allows
 			{
-				// remove the oldest and subtract it's contribution to the rolling sum
-				integral_ -= past_integral_contributions.front();
-				// remove it
-				past_integral_contributions.pop_front();
+				// Add current integral contribution to the list
+				past_integral_contributions.push_back(error * dt);
+				// If we have too many elements
+				if (past_integral_contributions.size() > integral_frame_)
+				{
+					// remove the oldest and subtract it's contribution to the rolling sum
+					integral_ -= past_integral_contributions.front();
+					// remove it
+					past_integral_contributions.pop_front();
+				}
 			}
 		}
 	}

@@ -25,6 +25,7 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <std_msgs/Float32.h>
 #include <std_srvs/Trigger.h>
 
 // Jetyak UAV Includes
@@ -48,7 +49,7 @@ private:
 	/*********************************************
 	 * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
 	 *********************************************/
-	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_;
+	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_;
 	ros::Publisher cmdPub_;
 	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_;
 	ros::ServiceServer setModeService_, getModeService_, setBoatNSService_, setFollowPIDService_, setLandPIDService_,
@@ -70,6 +71,7 @@ private:
 	geometry_msgs::QuaternionStamped uavAttitude_;
 	sensor_msgs::Imu uavImu_, boatImu_;
 	geometry_msgs::PoseStamped tagPose_ = geometry_msgs::PoseStamped();
+	double uavHeight_ = 0;
 
 	bsc_common::pose4d_t simpleTag_ = { 0, 0, 0, 0, 0 };
 	bsc_common::vel3d_t tagVel_ = { 0, 0, 0, 0 };
@@ -91,11 +93,11 @@ private:
 		bsc_common::pose4d_t goal_pose;	// landing goal
 		double lastSpotted;
 		int lostTagCounter;
-		double height_goal;
-		double threshold;
-		double radiusSqr;
-		double velMagSqr;
-		double deadzone_radius;
+		double heightGoal;
+		double heightThresh;
+		double radiusThreshSqr;
+		double velThreshSqr;
+		double angleThresh;
 	} land_;
 
 	// follow specific constants
@@ -235,6 +237,13 @@ private:
 	 * @param msg gets the global position of the UAV
 	 */
 	void uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg);
+
+	/** uavHeightCallback
+	 * Listens for updates on the UAVs height
+	 *
+	 * @param msg gets the ground relative altitude of the UAV
+	 */
+	void uavHeightCallback(const std_msgs::Float32::ConstPtr &msg);
 
 	/** boatGPSCallback
 	 * Listens for updates from the boat's GPS

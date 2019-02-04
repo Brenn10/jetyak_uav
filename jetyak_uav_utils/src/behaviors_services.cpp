@@ -155,8 +155,10 @@ bool Behaviors::setTakeoffParamsCallback(jetyak_uav_utils::TakeoffParams::Reques
 bool Behaviors::setLandParamsCallback(jetyak_uav_utils::LandParams::Request &req,
 																			jetyak_uav_utils::LandParams::Response &res)
 {
-	land_.threshold = req.threshold;
-	land_.radiusSqr = req.radius * req.radius;
+	land_.heightThresh = req.heightThresh;
+	land_.radiusThreshSqr = req.radiusThresh * req.radiusThresh;
+	land_.angleThresh = req.angleThresh;
+	land_.velThreshSqr = req.velThresh * req.velThresh;
 
 	res.success = true;
 	return true;

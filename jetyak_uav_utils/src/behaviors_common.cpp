@@ -14,10 +14,10 @@
 
 void Behaviors::createPID(bsc_common::pose4d_t &kp, bsc_common::pose4d_t &ki, bsc_common::pose4d_t &kd)
 {
-	xpid_ = new bsc_common::PID(follow_.kp.x, follow_.ki.x, follow_.kd.x);
-	ypid_ = new bsc_common::PID(follow_.kp.y, follow_.ki.y, follow_.kd.y);
-	zpid_ = new bsc_common::PID(follow_.kp.z, follow_.ki.z, follow_.kd.z);
-	wpid_ = new bsc_common::PID(follow_.kp.w, follow_.ki.w, follow_.kd.w);
+	xpid_ = new bsc_common::PID(follow_.kp.x, follow_.ki.x, follow_.kd.x, 0);
+	ypid_ = new bsc_common::PID(follow_.kp.y, follow_.ki.y, follow_.kd.y, 0);
+	zpid_ = new bsc_common::PID(follow_.kp.z, follow_.ki.z, follow_.kd.z, 0);
+	wpid_ = new bsc_common::PID(follow_.kp.w, follow_.ki.w, follow_.kd.w, 0);
 }
 
 void Behaviors::resetPID()
@@ -77,11 +77,12 @@ void Behaviors::downloadParams(std::string ns_param)
 	getP(ns, "land_w", land_.goal_pose.w);
 
 	double radius, velMag;
-	getP(ns, "land_height_threshold", land_.threshold);
+	getP(ns, "land_height_threshold", land_.heightThresh);
 	getP(ns, "land_vel_mag", velMag);
-	land_.velMagSqr = velMag * velMag;
+	land_.velThreshSqr = velMag * velMag;
 	getP(ns, "land_radius", radius);
-	land_.radiusSqr = radius * radius;
+	land_.radiusThreshSqr = radius * radius;
+	getP(ns, "land_angle_thresh", land_.angleThresh);
 
 	/**********************
 	 * TAKEOFF PARAMETERS *
@@ -229,6 +230,7 @@ void Behaviors::assignServiceServers()
 void Behaviors::assignSubscribers()
 {
 	tagPoseSub_ = nh.subscribe("/jetyak_uav_vision/filtered_tag", 1, &Behaviors::tagPoseCallback, this);
+	uavHeightSub_ = nh.subscribe("/dji_sdk/height_above_takeoff", 1, &Behaviors::uavHeightCallback, this);
 	uavGPSSub_ = nh.subscribe("/dji_sdk/gps_position", 1, &Behaviors::uavGPSCallback, this);
 	boatGPSSub_ = nh.subscribe("/jetyak2/global_position/global", 1, &Behaviors::boatGPSCallback, this);
 	uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1, &Behaviors::uavAttitudeCallback, this);

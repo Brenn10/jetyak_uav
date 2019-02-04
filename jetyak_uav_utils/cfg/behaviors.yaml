@@ -54,16 +54,10 @@ land_w_kp: 0
 land_w_kd: 0
 land_w_ki: 0
 
-# The following parameters form a cylinder of height (land_height+land_height_threshold)
-# and radius (land_radius) which the UAV may land if located in. The drone will hover
-# (land_height) above the pad prior to landing
-
-# This specifies the max threshold around the height it may set down
 land_height_threshold: .1
-# this is the radius around the center of the pad for the drone to set down
-land_radius: .1
-#maximum velocity that the UAV may land with
 land_vel_mag: .1
+land_radius: .1
+land_angle_thresh: .13 # pi/24
 
 #
 # Return Parameters
