@@ -49,7 +49,7 @@ private:
 	/*********************************************
 	 * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
 	 *********************************************/
-	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_;
+	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_, extCmdSub_;
 	ros::Publisher cmdPub_;
 	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_;
 	ros::ServiceServer setModeService_, getModeService_, setBoatNSService_, setFollowPIDService_, setLandPIDService_,
@@ -113,6 +113,7 @@ private:
 	// follow specific constants
 	struct
 	{
+		bsc_common::pose4d_t kp, kd, ki;
 		double altitudeOffset;	// ridingUavGps-boatGPS
 		double gotoHeight;
 		double finalHeight;
@@ -129,6 +130,10 @@ private:
 		} stage;
 	} return_;
 
+	struct
+	{
+		sensor_msgs::Joy input;
+	} leave_;
 	/*********************
 	 * SERVICE CALLBACKS
 	 *********************/
@@ -273,6 +278,11 @@ private:
 	 */
 	void boatIMUCallback(const sensor_msgs::Imu::ConstPtr &msg);
 
+	/** listens for external commands
+	 * @param msg gets a command using the rpty flag setup
+	 */
+	void extCmdCallback(const sensor_msgs::Joy::ConstPtr &msg);
+
 	/******************************
 	 * BEHAVIOR METHODS
 	 ******************************/
@@ -280,11 +290,15 @@ private:
 	 * Take off and change to follow mode if successful
 	 */
 	void takeoffBehavior();
-
 	/** followBehavior
 	 * Follow the boat using tags (later fused sensors)
 	 */
 	void followBehavior();
+
+	/** leaveBehavior
+	 * Pass through commands from an external controller to dji_pilot
+	 */
+	void leaveBehavior();
 
 	/** returnBehavior
 	 * Safely return to the boat

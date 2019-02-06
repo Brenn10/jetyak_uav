@@ -235,6 +235,7 @@ void Behaviors::assignSubscribers()
 	boatGPSSub_ = nh.subscribe("/jetyak2/global_position/global", 1, &Behaviors::boatGPSCallback, this);
 	uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1, &Behaviors::uavAttitudeCallback, this);
 	boatIMUSub_ = nh.subscribe("/jetyak2/imu/data", 1, &Behaviors::boatIMUCallback, this);
+	extCmdSub_ = nh.subscribe("extCommand", 1, &Behaviors::extCmdCallback, this);
 }
 
 double Behaviors::scaleConstant(double C, double e)

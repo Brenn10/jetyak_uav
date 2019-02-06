@@ -119,6 +119,10 @@ void Behaviors::followBehavior()
 		}
 	}
 }
+void Behaviors::leaveBehavior()
+{
+	cmdPub_.publish(leave_.input);
+}
 
 void Behaviors::returnBehavior()
 {
@@ -169,10 +173,10 @@ void Behaviors::returnBehavior()
 	else if (behaviorChanged_)
 	{
 		/*
-			set stage to up
-			set behavior changed to false
-			init pid
-		*/
+		set stage to up
+		set behavior changed to false
+		init pid
+	*/
 		ROS_WARN("Behavior is now return");
 		resetPID();
 		setPID(follow_.kp, follow_.ki, follow_.kd);
@@ -208,11 +212,11 @@ void Behaviors::returnBehavior()
 	else if (return_.stage == return_.OVER)
 	{
 		/*
-			saturate x and y with directions
-			z_cmd = gotoHeight-altitude
-			if in sphere around goal
-				set stage to DOWN
-		*/
+		saturate x and y with directions
+		z_cmd = gotoHeight-altitude
+		if in sphere around goal
+			set stage to DOWN
+	*/
 		if (bsc_common::util::latlondist(uavGPS_.latitude, uavGPS_.longitude, boatGPS_.latitude, boatGPS_.longitude) <
 				return_.downRadius)
 		{
@@ -237,11 +241,11 @@ void Behaviors::returnBehavior()
 	else if (return_.stage = return_.DOWN)
 	{
 		/*
-			find proper pid constants to maintain location more or less
-			z=finalHeight-altitude
-			we wont change the mode here as it should search for the tags and
-			hopefully find one
-		*/
+		find proper pid constants to maintain location more or less
+		z=finalHeight-altitude
+		we wont change the mode here as it should search for the tags and
+		hopefully find one
+	*/
 		double z_correction = follow_.kp.z * (return_.finalHeight - uavHeight_);
 
 		ROS_WARN("Goal: %1.3f, Current %1.3f", return_.finalHeight, uavHeight_);
