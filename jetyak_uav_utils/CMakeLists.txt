@@ -24,10 +24,11 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(DJIOSDK REQUIRED)
 
 ## Custom message files to be created
-#add_message_files(DIRECTORY msg
-#  FILES
-#  ModeMsg.msg
-#)
+add_message_files(DIRECTORY msg
+  FILES
+  Waypoint.msg
+	WaypointArray.msg
+)
 add_service_files(DIRECTORY srv
   FILES
   FourAxes.srv
@@ -37,6 +38,7 @@ add_service_files(DIRECTORY srv
   TakeoffParams.srv
   LandParams.srv
   ReturnParams.srv
+	SetWaypoints.srv
 )
 
 generate_messages(

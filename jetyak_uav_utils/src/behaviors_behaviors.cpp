@@ -119,6 +119,7 @@ void Behaviors::followBehavior()
 		}
 	}
 }
+
 void Behaviors::leaveBehavior()
 {
 	cmdPub_.publish(leave_.input);
