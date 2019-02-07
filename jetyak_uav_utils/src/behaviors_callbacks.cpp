@@ -8,6 +8,7 @@
  * 	uavAttitudeCallback
  * 	uavImuCallback
  * 	boatIMUCallback
+ *  extCmdCallback
  */
 void Behaviors::tagPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
@@ -39,6 +40,11 @@ void Behaviors::uavGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
 	{
 		ROS_WARN("UAV GNSS fix failed. Status: %i", msg->status.status);
 	}
+}
+
+void Behaviors::uavHeightCallback(const std_msgs::Float32::ConstPtr &msg)
+{
+	uavHeight_ = msg->data;
 }
 
 void Behaviors::boatGPSCallback(const sensor_msgs::NavSatFix::ConstPtr &msg)
@@ -85,4 +91,9 @@ void Behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr &msg)
 	boatImu_.angular_velocity_covariance = msg->angular_velocity_covariance;
 	boatImu_.linear_acceleration = msg->linear_acceleration;
 	boatImu_.linear_acceleration_covariance = msg->linear_acceleration_covariance;
+}
+void Behaviors::extCmdCallback(const sensor_msgs::Joy::ConstPtr &msg)
+{
+	leave_.input.header = msg->header;
+	leave_.input.axes = msg->axes;
 }

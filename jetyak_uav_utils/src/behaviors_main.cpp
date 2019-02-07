@@ -20,6 +20,12 @@ Behaviors::Behaviors(ros::NodeHandle &nh_param)
 	assignServiceServers();
 	downloadParams("~");
 
+	leave_.input.axes.push_back(0);
+	leave_.input.axes.push_back(0);
+	leave_.input.axes.push_back(0);
+	leave_.input.axes.push_back(0);
+	leave_.input.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
+
 	// initialize the tag
 	tagPose_.pose.orientation.x = 0;
 	tagPose_.pose.orientation.y = 0;
@@ -61,7 +67,7 @@ void Behaviors::doBehaviorAction()
 		}
 		case JETYAK_UAV::LEAVE:
 		{
-			// Do nothing, an external node is currently communicating with the pilot
+			leaveBehavior();
 			break;
 		}
 		case JETYAK_UAV::RETURN:
