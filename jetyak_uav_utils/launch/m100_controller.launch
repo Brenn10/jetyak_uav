@@ -18,5 +18,5 @@
   </group>
 
 	<!-- Start capturing the flight data -->
-	<include file="$(find jetyak_uav_utils)/launch/flight_data.launch"/>
+	<!--include file="$(find jetyak_uav_utils)/launch/flight_data.launch"/-->
 </launch>

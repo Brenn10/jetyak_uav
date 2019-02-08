@@ -6,7 +6,7 @@ from tf.transformations import euler_from_quaternion
 from sensor_msgs.msg import Joy
 from sensor_msgs.msg import NavSatFix
 from geometry_msgs.msg import QuaternionStamped
-from math import atan2,cos,sin,pi
+from math import atan2,cos,sin,pi,sqrt
 
 def lat_lon_to_m(lat1,lon1,lat2,lon2):
 	R = 6378137
@@ -40,13 +40,14 @@ class WaypointFollow():
 		self.wps_service = rospy.Service("set_waypoints", SetWaypoints, self.wps_callback)
 
 	def att_callback(self, msg):
-		orientation_q = msg.pose.pose.orientation
-		orientation_list=[x for x in orientation_q]
+		q = msg.quaternion
+		orientation_list=[q.x,q.y,q.z,q.w]
 		self.yaw = euler_from_quaternion(orientation_list)[-1]
 
 	def gps_callback(self, msg):
 		self.lat = msg.latitude
 		self.lon = msg.longitude
+		self.do_controls()
 
 	def height_callback(self, msg):
 		self.height = msg.data
@@ -62,25 +63,37 @@ class WaypointFollow():
 		if len(self.wps) == 0:
 			return
 
-		if not in_waypoint:
-			in_waypoint = self.check_if_in_wp()
+		if not self.in_waypoint:
+			self.in_waypoint = self.check_if_in_wp()
 			
 		#If we are still in a waypoint
-		if in_waypoint:
+		if self.in_waypoint:
 			#If this is our first time noticing we are in a waypoint
 			if self.time_entered_wp == 0:
 				self.time_entered_wp = rospy.Time.now().to_sec()
+				print("Entered waypoint")
 			elif rospy.Time.now().to_sec() - self.time_entered_wp > self.wps[0].loiter_time:
-				self.wps.pop()
+				self.wps.pop(0)
 				self.time_entered_wp = 0
-				in_waypoint = False
+				self.in_waypoint = False
+				if(len(self.wps)==0):
+					print("Mission Complete")
+				else:
+					print("Moving to next objective")
+				return
 		
 		east = lat_lon_to_m(0, self.wps[0].lon, 0, self.lon)
+		if(self.wps[0].lon<self.lon):
+			east = -east
 		north = lat_lon_to_m(self.wps[0].lat, 0, self.lat, 0)
-		height_diff = self.wps[0].height - self.height
+		if(self.wps[0].lat<self.lat):
+			north = -north
+		#print("N: %1.5f, E: %1.5f"%(north,east))
+		height_diff = self.wps[0].alt
 
 		cmd = Joy()
 		cmd.axes = [east, north, height_diff, self.wps[0].heading, self.flag]
+		#cmd.axes=[east,0,height_diff,0,self.flag]
 		self.cmd_pub.publish(cmd)
 
 

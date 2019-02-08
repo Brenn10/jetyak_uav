@@ -279,17 +279,17 @@ sensor_msgs::Joy dji_pilot::adaptiveClipping(sensor_msgs::Joy msg)
 
 	// Vertical Logic
 	if ((flag & DJISDK::VERTICAL_THRUST) == DJISDK::VERTICAL_THRUST)
-		cmdBuffer.axes[3] = clip(msg.axes[3], 0, vThrustCmdMax);
+		cmdBuffer.axes[2] = clip(msg.axes[2], 0, vThrustCmdMax);
 	else if ((flag & DJISDK::VERTICAL_POSITION) == DJISDK::VERTICAL_POSITION)
-		cmdBuffer.axes[3] = clip(msg.axes[3], vPosCmdMin, vPosCmdMax);
+		cmdBuffer.axes[2] = clip(msg.axes[2], vPosCmdMin, vPosCmdMax);
 	else
-		cmdBuffer.axes[3] = clip(msg.axes[3], -vVelcmdMax, vVelcmdMax);
+		cmdBuffer.axes[2] = clip(msg.axes[2], -vVelcmdMax, vVelcmdMax);
 
 	// Yaw Logic
 	if ((flag & DJISDK::YAW_RATE) == DJISDK::YAW_RATE)
-		cmdBuffer.axes[2] = clip(msg.axes[2], -yAngleRateMax, yAngleRateMax);
+		cmdBuffer.axes[3] = clip(msg.axes[3], -yAngleRateMax, yAngleRateMax);
 	else
-		cmdBuffer.axes[2] = clip(msg.axes[2], -yAngleRateMax, yAngleRateMax);
+		cmdBuffer.axes[3] = clip(msg.axes[3], -yAngleRateMax, yAngleRateMax);
 
 	return cmdBuffer;
 }
