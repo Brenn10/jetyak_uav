@@ -42,7 +42,7 @@ class SpiralGenerator():
 			wp.alt = self.altitude
 			wp.lat = y + r[i] * sin(t[i])
 			wp.lon = x + r[i] * cos(t[i])
-			wp.radius = self.wp_radius
+			wp.radius = 5
 			wp.loiter_time = 0
 			waypoints.append(wp)
 		waypoints_srv = SetWaypoints()
@@ -50,11 +50,12 @@ class SpiralGenerator():
 		self.set_wps_service(waypoints_srv)
 		print("Spiral Pattern Sent")
 		
+		
 
 wp_radius = 1
 endradius = .0005
 turns = 5
-points = 100
+points = 1000
 altitude = 10
 
 spiraler = SpiralGenerator(wp_radius, endradius, turns, points, altitude)

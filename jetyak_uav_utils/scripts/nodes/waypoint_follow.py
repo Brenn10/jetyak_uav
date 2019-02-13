@@ -19,10 +19,12 @@ def lat_lon_to_m(lat1,lon1,lat2,lon2):
 	dLon = rLon2 - rLon1
 	a = pow(sin(dLat / 2), 2) + cos(rLat1) * cos(rLat2) * pow(sin(dLon / 2), 2)
 	return R * 2 * atan2(sqrt(a), sqrt(1 - a))
+def clip(val,low,high):
+	return min(high,max(val,low))
 
 class WaypointFollow():	
 	def __init__(self,):
-
+		self.hover_alt=10
 		self.flag = 0b01  # world frame and position commands
 		self.wps = []
 		self.yaw = 0
@@ -77,6 +79,10 @@ class WaypointFollow():
 				self.time_entered_wp = 0
 				self.in_waypoint = False
 				if(len(self.wps)==0):
+					cmd = Joy()
+					cmd.axes = [0,0, self.hover_alt, 0, self.flag]
+					#cmd.axes=[east,0,height_diff,0,self.flag]
+					self.cmd_pub.publish(cmd)
 					print("Mission Complete")
 				else:
 					print("Moving to next objective")
@@ -89,10 +95,10 @@ class WaypointFollow():
 		if(self.wps[0].lat<self.lat):
 			north = -north
 		#print("N: %1.5f, E: %1.5f"%(north,east))
-		height_diff = self.wps[0].alt
+		self.hover_alt = self.wps[0].alt
 
 		cmd = Joy()
-		cmd.axes = [east, north, height_diff, self.wps[0].heading, self.flag]
+		cmd.axes = [east, north, self.wps[0].alt, self.wps[0].heading, self.flag]
 		#cmd.axes=[east,0,height_diff,0,self.flag]
 		self.cmd_pub.publish(cmd)
 

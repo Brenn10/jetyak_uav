@@ -15,17 +15,18 @@
     </marker>
 
     <marker index="3" status="1">
-        <corner x="10" y="-big" z="small" />
-        <corner x="10" y="-big" z="big" />
-        <corner x="10" y="-small" z="big" />
-        <corner x="10" y="-small" z="small" />
+        <corner x="-44.5" y="-50" z="91" />
+        <corner x="-1.5" y="-50" z="91" />
+        <corner x="-1.5" y="-50" z="48" />
+        <corner x="-44.5" y="-50" z="48" />
     </marker>
 
     <marker index="4" status="1">
-        <corner x="10" y="small" z="small" />
-        <corner x="10" y="small" z="big" />
-        <corner x="10" y="big" z="big" />
-        <corner x="10" y="big" z="small" />
+
+        <corner x="1.5" y="-50" z="91" />
+        <corner x="44.5" y="-50" z="91" />
+        <corner x="44.5" y="-50" z="48" />
+        <corner x="1.5" y="-50" z="48" />
     </marker>
 </multimarker>
 

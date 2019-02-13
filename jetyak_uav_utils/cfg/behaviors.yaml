@@ -34,17 +34,17 @@ follow_w_ki: 0
 #
 
 #These parameters specify the center of the landing area
-land_x: 1.06
-land_x_kp: .3
-land_x_kd: .2
-land_x_ki: 0
+land_x: 1.35
+land_x_kp: .5
+land_x_kd: .35
+land_x_ki: .05
 
 land_y: 0
-land_y_kp: .3
-land_y_kd: .2
-land_y_ki: 0
+land_y_kp: .5
+land_y_kd: .35
+land_y_ki: .05
 
-land_z: .05 # this should be .1-.2m over the tag to allow the uav to maneuver
+land_z: .15 # this should be .1-.2m over the tag to allow the uav to maneuver
 land_z_kp: .2
 land_z_kd: 0
 land_z_ki: 0
@@ -57,7 +57,7 @@ land_w_ki: 0
 land_height_threshold: .1
 land_vel_mag: .1
 land_radius: .1
-land_angle_thresh: .13 # pi/24
+land_angle_thresh: .25 # pi/24
 
 #
 # Return Parameters
