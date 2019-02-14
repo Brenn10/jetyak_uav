@@ -121,6 +121,7 @@ private:
 		double settleRadiusSquared = 1;
 		double tagTime;
 		double tagLossThresh;
+		double maxVel;
 		enum Stage
 		{
 			UP,

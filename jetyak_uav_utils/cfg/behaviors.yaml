@@ -10,14 +10,14 @@ takeoff_threshold: .25
 # Follow Parameters
 #
 follow_x: 2.5
-follow_x_kp: .3
-follow_x_kd: .2
-follow_x_ki: 0
+follow_x_kp: .5
+follow_x_kd: .35
+follow_x_ki: .05
 
 follow_y: 0
-follow_y_kp: .3
-follow_y_kd: .2
-follow_y_ki: 0
+follow_y_kp: .5
+follow_y_kd: .35
+follow_y_ki: .05
 
 follow_z: -1
 follow_z_kp: .2
@@ -62,9 +62,10 @@ land_angle_thresh: .25 # pi/24
 #
 # Return Parameters
 #
-return_gotoHeight: 5
-return_finalHeight: 3
+return_gotoHeight: 10
+return_finalHeight: 5
 return_downRadius: 1
 return_settleRadius: .5
 return_tagTime: 1
 return_tagLossThresh: 1
+return_maxVel: 3.0

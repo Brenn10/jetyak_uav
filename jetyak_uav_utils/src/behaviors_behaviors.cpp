@@ -227,7 +227,11 @@ void Behaviors::returnBehavior()
 		else
 		{
 			double z_correction = follow_.kp.z * (return_.gotoHeight - uavHeight_);
-
+			double mag = sqrt(east*east+north*north);
+			if(mag > return_.maxVel) {
+				east = east*return_.maxVel/mag;
+				north = north*return_.maxVel/mag;
+			}
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(east);
 			cmd.axes.push_back(north);

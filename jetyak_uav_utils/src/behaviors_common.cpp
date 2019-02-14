@@ -198,6 +198,7 @@ void Behaviors::uploadParams(std::string ns_param)
 	ros::param::set(ns + "return_tagTime", return_.tagTime);
 	ros::param::set(ns + "return_tagLossThresh", return_.tagLossThresh);
 	return_.settleRadiusSquared = settleRadius * settleRadius;
+	ros::param::set(ns + "return_maxVel", return_.maxVel);
 }
 
 void Behaviors::assignPublishers()
