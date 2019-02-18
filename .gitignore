@@ -47,3 +47,6 @@
 
 # Json
 *.json
+
+# CSV files
+*.csv
