@@ -14,10 +14,10 @@
 
 void Behaviors::createPID(bsc_common::pose4d_t &kp, bsc_common::pose4d_t &ki, bsc_common::pose4d_t &kd)
 {
-	xpid_ = new bsc_common::PID(follow_.kp.x, follow_.ki.x, follow_.kd.x, 0);
-	ypid_ = new bsc_common::PID(follow_.kp.y, follow_.ki.y, follow_.kd.y, 0);
-	zpid_ = new bsc_common::PID(follow_.kp.z, follow_.ki.z, follow_.kd.z, 0);
-	wpid_ = new bsc_common::PID(follow_.kp.w, follow_.ki.w, follow_.kd.w, 0);
+	xpid_ = new bsc_common::PID(follow_.kp.x, follow_.ki.x, follow_.kd.x, integral_size);
+	ypid_ = new bsc_common::PID(follow_.kp.y, follow_.ki.y, follow_.kd.y, integral_size);
+	zpid_ = new bsc_common::PID(follow_.kp.z, follow_.ki.z, follow_.kd.z, integral_size);
+	wpid_ = new bsc_common::PID(follow_.kp.w, follow_.ki.w, follow_.kd.w, integral_size);
 }
 
 void Behaviors::resetPID()
@@ -52,6 +52,12 @@ void Behaviors::downloadParams(std::string ns_param)
 	};
 
 	std::string ns = ns_param;
+
+	/******************
+	* MISC PARAMETERS *
+	******************/
+	if (!ros::param::get(ns + "integral_size", integral_size))
+		ROS_WARN("FAILED: %s", "integral_size");
 
 	/**********************
 	 * LANDING PARAMETERS *

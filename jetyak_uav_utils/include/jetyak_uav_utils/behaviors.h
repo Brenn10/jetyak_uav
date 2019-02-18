@@ -59,6 +59,7 @@ private:
 	/**********************
 	 * INSTANCE VARIABLES
 	 **********************/
+	int integral_size=0;
 	bsc_common::PID *xpid_, *ypid_, *zpid_, *wpid_;	// pid controllers
 	bool behaviorChanged_ = false;
 	JETYAK_UAV::Mode currentMode_;
