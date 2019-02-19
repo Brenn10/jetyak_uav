@@ -49,7 +49,7 @@ void Behaviors::doBehaviorAction()
 
 	simpleTag_.w = bsc_common::util::yaw_from_quat(tagPose_.pose.orientation);
 
-	bsc_common::util::rotate_vector(tagPose_.pose.position.x, tagPose_.pose.position.y, -simpleTag_.w, simpleTag_.x,simpleTag_.y);
+	bsc_common::util::rotate_vector(tagPose_.pose.position.x, tagPose_.pose.position.y, -simpleTag_.w, simpleTag_.x, simpleTag_.y);
 
 	simpleTag_.t = tagPose_.header.stamp.toSec();
 
@@ -107,7 +107,9 @@ void Behaviors::doBehaviorAction()
 	}
 
 	// Publish the current behavior mode
-	modePub_.publish(currentMode_);
+	std_msgs::UInt8 behaviorMode;
+    behaviorMode.data = currentMode_;
+	modePub_.publish(behaviorMode);
 }
 
 int main(int argc, char **argv)
