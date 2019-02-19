@@ -54,8 +54,8 @@ void Behaviors::downloadParams(std::string ns_param)
 	std::string ns = ns_param;
 
 	/******************
-	* MISC PARAMETERS *
-	******************/
+	 * MISC PARAMETERS *
+	 ******************/
 	if (!ros::param::get(ns + "integral_size", integral_size))
 		ROS_WARN("FAILED: %s", "integral_size");
 
@@ -82,12 +82,15 @@ void Behaviors::downloadParams(std::string ns_param)
 	getP(ns, "land_z", land_.goal_pose.z);
 	getP(ns, "land_w", land_.goal_pose.w);
 
-	double radius, velMag;
-	getP(ns, "land_height_threshold", land_.heightThresh);
+	double velMag;
 	getP(ns, "land_vel_mag", velMag);
 	land_.velThreshSqr = velMag * velMag;
-	getP(ns, "land_radius", radius);
-	land_.radiusThreshSqr = radius * radius;
+	getP(ns, "land_x_low", land_.lowX);
+	getP(ns, "land_x_high", land_.highX);
+	getP(ns, "land_y_low", land_.lowX);
+	getP(ns, "land_y_high", land_.highX);
+	getP(ns, "land_z_low", land_.lowX);
+	getP(ns, "land_z_high", land_.highX);
 	getP(ns, "land_angle_thresh", land_.angleThresh);
 
 	/**********************

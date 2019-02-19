@@ -60,9 +60,13 @@ land_w_kp: .4
 land_w_kd: 0
 land_w_ki: 0
 
-land_height_threshold: .1
 land_vel_mag: .1
-land_radius: .15
+land_x_low: .7
+land_x_high: 1.0
+land_y_low: -.1
+land_y_high: .1
+land_z_low: -.15
+land_z_high: .15
 land_angle_thresh: .25 #
 
 #

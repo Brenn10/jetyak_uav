@@ -15,54 +15,23 @@ void Behaviors::takeoffBehavior()
 	/*
 	Get altitude/tagpose
 
-	Start props
-	PID using follow constants to 1 m above takeoff
-	Enter following when altitude above .75m
+	Take off with pilot service
 
 	*/
 	if (!propellorsRunning)
 	{
-		takeoff_.boatz = simpleTag_.z;
 		std_srvs::Trigger srv;
-
 		takeoffSrv_.call(srv);
 		if (srv.response.success)
 		{
-			ROS_INFO("Propellors running");
-			// behaviorChanged_=true;
-			// currentMode_=Mode::FOLLOW;
+			ROS_INFO("Propellors running, switching to follow");
 			propellorsRunning = true;
-
-			resetPID();
-			setPID(follow_.kp, follow_.ki, follow_.kd);
+			this->currentMode_ = JETYAK_UAV::FOLLOW;
+			this->behaviorChanged_ = true;
 		}
 		else
 		{
 			ROS_WARN("Failure to Start props");
-		}
-	}
-	else
-	{
-		if (takeoff_.boatz - simpleTag_.z > takeoff_.height)
-		{
-			ROS_WARN("Switching to Following");
-			behaviorChanged_ = true;
-			this->currentMode_ = JETYAK_UAV::FOLLOW;
-		}
-		else
-		{
-			xpid_->update(land_.goal_pose.x - simpleTag_.x, simpleTag_.t);
-			ypid_->update(land_.goal_pose.y - simpleTag_.y, simpleTag_.t);
-			zpid_->update((takeoff_.boatz - takeoff_.height) - simpleTag_.z, simpleTag_.t);
-			wpid_->update(land_.goal_pose.w - simpleTag_.w, simpleTag_.t);
-
-			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(-xpid_->get_signal());
-			cmd.axes.push_back(-ypid_->get_signal());
-			cmd.axes.push_back(-zpid_->get_signal());
-			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
-			cmdPub_.publish(cmd);
 		}
 	}
 }
@@ -72,7 +41,6 @@ void Behaviors::followBehavior()
 	if (behaviorChanged_)
 	{	// if just changed
 		follow_.lastSpotted = simpleTag_.t;
-		follow_.lostTagCounter = 0;
 		resetPID();
 		setPID(follow_.kp, follow_.ki, follow_.kd);
 		behaviorChanged_ = false;
@@ -83,7 +51,6 @@ void Behaviors::followBehavior()
 		if (follow_.lastSpotted != simpleTag_.t)
 		{	// if time changed
 			follow_.lastSpotted = simpleTag_.t;
-			follow_.lostTagCounter = 0;
 
 			// line up with pad
 			xpid_->update(follow_.goal_pose.x - simpleTag_.x, simpleTag_.t);
@@ -101,12 +68,10 @@ void Behaviors::followBehavior()
 		}
 		else
 		{	// if time is same
-			follow_.lostTagCounter++;
 
-			if (follow_.lostTagCounter > 10)
-			{	// if time has been same for over 3 tick
-
-				ROS_WARN("Tag Lost");
+			if (ros::Time::now().toSec() - follow_.lastSpotted > 1)
+			{
+				ROS_WARN("Tag Lost for %1.2f seconds", ros::Time::now().toSec() - follow_.lastSpotted);
 				sensor_msgs::Joy cmd;
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
@@ -138,12 +103,16 @@ void Behaviors::returnBehavior()
 	double heading = atan2(north, east);
 	ROS_WARN("Heading: %1.3f", heading);
 
-	if (ros::Time::now().toSec() - tagPose_.header.stamp.toSec() < return_.tagTime)
+	if (ros::Time::now().toSec() - simpleTag_.t < return_.tagTime)
 	{
-		ROS_WARN("Tag Spotted");
+		if (return_.stage != return_.SETTLE)
+		{
+			resetPID();
+			setPID(follow_.kp, follow_.ki, follow_.kd);	// set i to zeroes
+		}
 		return_.stage = return_.SETTLE;
 		if ((pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2) +
-				 pow((-return_.finalHeight) - simpleTag_.z, 2)) < return_.settleRadiusSquared)
+				 pow(follow_.goal_pose.z - simpleTag_.z, 2)) < return_.settleRadiusSquared)
 		{
 			ROS_WARN("Settled, now following");
 			currentMode_ = JETYAK_UAV::FOLLOW;
@@ -151,9 +120,11 @@ void Behaviors::returnBehavior()
 		}
 		else
 		{	// line up with pad
+			ROS_WARN("Settling down, z-error: %1.2f", follow_.goal_pose.z - simpleTag_.z);
+
 			xpid_->update(follow_.goal_pose.x - simpleTag_.x, simpleTag_.t);
 			ypid_->update(follow_.goal_pose.y - simpleTag_.y, simpleTag_.t);
-			zpid_->update((-return_.finalHeight) - simpleTag_.z, simpleTag_.t);
+			zpid_->update(follow_.goal_pose.z - simpleTag_.z, simpleTag_.t);
 			wpid_->update(follow_.goal_pose.w - simpleTag_.w, simpleTag_.t);
 
 			sensor_msgs::Joy cmd;
@@ -161,14 +132,13 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(-ypid_->get_signal());
 			cmd.axes.push_back(-zpid_->get_signal());
 			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
+			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
 			cmdPub_.publish(cmd);
 		}
-		
 	}
-	else if (return_.stage == return_.SETTLE and
-					 ros::Time::now().toSec() - tagPose_.header.stamp.toSec() > return_.tagLossThresh)
+	else if (return_.stage == return_.SETTLE and ros::Time::now().toSec() - simpleTag_.t > return_.tagLossThresh)
 	{
+		ROS_WARN("Tag lost for %1.2f seconds, going back up", ros::Time::now().toSec() - simpleTag_.t);
 		return_.stage = return_.UP;
 	}
 
@@ -182,8 +152,8 @@ void Behaviors::returnBehavior()
 		ROS_WARN("Behavior is now return");
 		resetPID();
 		bsc_common::pose4d_t zero;
-		zero.x=zero.y=zero.z=zero.w=0;
-		setPID(follow_.kp, zero,zero);
+		zero.x = zero.y = zero.z = zero.w = 0;
+		setPID(follow_.kp, zero, zero);
 		behaviorChanged_ = false;
 		return_.stage = return_.UP;
 		ROS_WARN("Going Up");
@@ -197,11 +167,14 @@ void Behaviors::returnBehavior()
 		{
 			ROS_WARN("Changed OVER");
 			return_.stage = return_.OVER;
+
+			std_srvs::Trigger downSrvTmp;
+			lookdownSrv_.call(downSrvTmp);
 		}
 		else
 		{
 			double z_correction = return_.gotoHeight - uavHeight_;
-			ROS_WARN("Goal: %1.3f, Current %1.3f", return_.gotoHeight, uavHeight_);
+			ROS_WARN("Goal: %1.2f, Current %1.2f", return_.gotoHeight, uavHeight_);
 			sensor_msgs::Joy cmd;
 			cmd.axes.push_back(0);
 			cmd.axes.push_back(0);
@@ -226,19 +199,20 @@ void Behaviors::returnBehavior()
 		{
 			ROS_WARN("Changed DOWN");
 			return_.stage = return_.DOWN;
+
+			std_srvs::Trigger downSrvTmp;
+			lookdownSrv_.call(downSrvTmp);
 		}
 		else
 		{
-			double z_correction = follow_.kp.z * (return_.gotoHeight - uavHeight_);
-			/*double mag = sqrt(east*east+north*north);
-			if(mag > return_.maxVel) {
-				east = east*return_.maxVel/mag;
-				north = north*return_.maxVel/mag;
-			}*/
+			double e_c = follow_.kp.x * east;
+			double n_c = follow_.kp.y * north;
+			double u_c = follow_.kp.z * (return_.gotoHeight - uavHeight_);
+
 			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(east);
-			cmd.axes.push_back(north);
-			cmd.axes.push_back(z_correction);
+			cmd.axes.push_back(e_c);
+			cmd.axes.push_back(n_c);
+			cmd.axes.push_back(u_c);
 			cmd.axes.push_back(0);
 			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
 			cmdPub_.publish(cmd);
@@ -258,15 +232,17 @@ void Behaviors::returnBehavior()
 
 		ROS_WARN("Goal: %1.3f, Current %1.3f", return_.finalHeight, uavHeight_);
 
+		double e_c = follow_.kp.x * east;
+		double n_c = follow_.kp.y * north;
+		double u_c = follow_.kp.z * (return_.gotoHeight - uavHeight_);
+
 		sensor_msgs::Joy cmd;
-		cmd.axes.push_back(east);
-		cmd.axes.push_back(north);
-		cmd.axes.push_back(z_correction);
+		cmd.axes.push_back(e_c);
+		cmd.axes.push_back(n_c);
+		cmd.axes.push_back(u_c);
 		cmd.axes.push_back(0);
 		cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
 		cmdPub_.publish(cmd);
-		std_srvs::Trigger downSrvTmp;
-		lookdownSrv_.call(downSrvTmp);
 	}
 	else
 	{
@@ -278,33 +254,7 @@ void Behaviors::returnBehavior()
 void Behaviors::landBehavior()
 {
 	if (behaviorChanged_)
-	{	// if just changedros::Time::now().toSec() - tagPose_.header.stamp.toSec() < return_.tagTime)
-		ROS_WARN("Tag Spotted");
-		return_.stage = return_.SETTLE;
-		if ((pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2) +
-				 pow(follow_.goal_pose.z - simpleTag_.z, 2)) < return_.settleRadiusSquared)
-		{
-			ROS_WARN("Settled, now following");
-			currentMode_ = JETYAK_UAV::FOLLOW;
-			behaviorChanged_ = true;
-		}
-		else
-		{	// line up with pad
-			xpid_->update(follow_.goal_pose.x - simpleTag_.x, simpleTag_.t);
-			ypid_->update(follow_.goal_pose.y - simpleTag_.y, simpleTag_.t);
-			zpid_->update(return_.finalHeight - simpleTag_.z, simpleTag_.t);
-			wpid_->update(follow_.goal_pose.w - simpleTag_.w, simpleTag_.t);
-
-			sensor_msgs::Joy cmd;
-			cmd.axes.push_back(-xpid_->get_signal());
-			cmd.axes.push_back(-ypid_->get_signal());
-			cmd.axes.push_back(-zpid_->get_signal());
-			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
-			cmdPub_.publish(cmd);
-		}
-		land_.lastSpotted = simpleTag_.t;
-		land_.lostTagCounter = 0;
+	{
 		resetPID();
 		setPID(land_.kp, land_.ki, land_.kd);
 		behaviorChanged_ = false;
@@ -312,16 +262,17 @@ void Behaviors::landBehavior()
 	else
 	{	// DO the loop
 
-		if (follow_.lastSpotted != simpleTag_.t)
+		if (land_.lastSpotted != simpleTag_.t)
 		{	// if time changed
 
 			// If pose is within a cylinder of radius .1 and height .1
-			bool inHeightThreshold = land_.goal_pose.z - simpleTag_.z < land_.heightThresh;
-			bool inRadiusThreshhold =
-					pow(land_.goal_pose.x - simpleTag_.x, 2) + pow(land_.goal_pose.y - simpleTag_.y, 2) < land_.radiusThreshSqr;
+			bool inX = land_.lowX < simpleTag_.x and simpleTag_.x < land_.highX;
+			bool inY = land_.lowY < simpleTag_.y and simpleTag_.y < land_.highY;
+			bool inZ = land_.lowZ < simpleTag_.z and simpleTag_.z < land_.highZ;
+
 			bool inVelThreshold = pow(tagVel_.x, 2) + pow(tagVel_.y, 2) + pow(tagVel_.z, 2) < land_.velThreshSqr;
 			bool inAngleThreshhold = abs(simpleTag_.w) < land_.angleThresh;
-			if (inHeightThreshold and inRadiusThreshhold and inVelThreshold and inAngleThreshhold)
+			if (inX and inY and inZ and inVelThreshold and inAngleThreshhold)
 			{
 				std_srvs::Trigger srv;
 				landSrv_.call(srv);
@@ -333,27 +284,20 @@ void Behaviors::landBehavior()
 			}
 
 			land_.lastSpotted = simpleTag_.t;
-			land_.lostTagCounter = 0;
 		}
 		else
 		{	// if time is same
-			follow_.lostTagCounter++;
 
-			if (follow_.lostTagCounter > 3 and follow_.lostTagCounter <= 20)
-			{	// if time has been same for over 3 tick
-				ROS_WARN("No tag update: %i", follow_.lostTagCounter);
-				sensor_msgs::Joy cmd;
-				cmd.axes.push_back(0);
-				cmd.axes.push_back(0);
-				cmd.axes.push_back(.5);	// If tag lost, fly up a bit
-				cmd.axes.push_back(0);
-				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
-				cmdPub_.publish(cmd);
+			if (ros::Time::now().toSec() - land_.lastSpotted > 3)
+			{
+				ROS_WARN("Tag lost %1.2f seconds, switching to return.", ros::Time::now().toSec() - land_.lastSpotted);
+				this->currentMode_ = JETYAK_UAV::RETURN;
+				this->behaviorChanged_ = true;
 				return;
 			}
-			else if (follow_.lostTagCounter > 20)
-			{	// if time has been same for over 10 tick
-				ROS_WARN("Tag Lost");
+			else if (ros::Time::now().toSec() - land_.lastSpotted > .5)
+			{	// if time has been same for over 3 tick
+				ROS_WARN("No tag update: %f", ros::Time::now().toSec() - land_.lastSpotted);
 				sensor_msgs::Joy cmd;
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
@@ -379,7 +323,7 @@ void Behaviors::landBehavior()
 		cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
 		cmdPub_.publish(cmd);
 	}
-};
+}
 
 void Behaviors::rideBehavior()
 {
@@ -397,8 +341,6 @@ void Behaviors::rideBehavior()
 			ROS_WARN("Failed to deactivate arms");
 		}
 	}
-	return_.altitudeOffset =
-			uavGPS_.altitude - boatGPS_.altitude - return_.altitudeOffset;	// update offset TODO: add filter or rolling avg
 }
 
 void Behaviors::hoverBehavior()

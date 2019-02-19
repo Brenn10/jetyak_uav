@@ -25,8 +25,8 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/NavSatFix.h>
-#include <std_msgs/UInt8.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/UInt8.h>
 #include <std_srvs/Trigger.h>
 
 // Jetyak UAV Includes
@@ -60,7 +60,7 @@ private:
 	/**********************
 	 * INSTANCE VARIABLES
 	 **********************/
-	int integral_size=0;
+	int integral_size = 0;
 	bsc_common::PID *xpid_, *ypid_, *zpid_, *wpid_;	// pid controllers
 	bool behaviorChanged_ = false;
 	JETYAK_UAV::Mode currentMode_;
@@ -94,10 +94,9 @@ private:
 		bsc_common::pose4d_t kp, kd, ki;
 		bsc_common::pose4d_t goal_pose;	// landing goal
 		double lastSpotted;
-		int lostTagCounter;
 		double heightGoal;
 		double heightThresh;
-		double radiusThreshSqr;
+		double lowX, highX, lowY, highY, lowZ, highZ;
 		double velThreshSqr;
 		double angleThresh;
 	} land_;
@@ -108,7 +107,6 @@ private:
 		bsc_common::pose4d_t kp, kd, ki;
 		bsc_common::pose4d_t goal_pose;	// follow goal
 		double lastSpotted;
-		int lostTagCounter;
 		double deadzone_radius;
 	} follow_;
 
@@ -116,7 +114,6 @@ private:
 	struct
 	{
 		bsc_common::pose4d_t kp, kd, ki;
-		double altitudeOffset;	// ridingUavGps-boatGPS
 		double gotoHeight;
 		double finalHeight;
 		double downRadius;

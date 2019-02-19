@@ -156,7 +156,6 @@ bool Behaviors::setLandParamsCallback(jetyak_uav_utils::LandParams::Request &req
 																			jetyak_uav_utils::LandParams::Response &res)
 {
 	land_.heightThresh = req.heightThresh;
-	land_.radiusThreshSqr = req.radiusThresh * req.radiusThresh;
 	land_.angleThresh = req.angleThresh;
 	land_.velThreshSqr = req.velThresh * req.velThresh;
 
