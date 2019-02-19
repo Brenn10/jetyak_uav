@@ -105,6 +105,9 @@ void Behaviors::doBehaviorAction()
 			break;
 		}
 	}
+
+	// Publish the current behavior mode
+	modePub_.publish(currentMode_);
 }
 
 int main(int argc, char **argv)

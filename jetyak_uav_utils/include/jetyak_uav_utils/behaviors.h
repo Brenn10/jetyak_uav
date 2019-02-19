@@ -25,6 +25,7 @@
 #include <sensor_msgs/Imu.h>
 #include <sensor_msgs/Joy.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <std_msgs/UInt8>
 #include <std_msgs/Float32.h>
 #include <std_srvs/Trigger.h>
 
@@ -50,7 +51,7 @@ private:
 	 * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
 	 *********************************************/
 	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_, extCmdSub_;
-	ros::Publisher cmdPub_;
+	ros::Publisher cmdPub_, modePub_;
 	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_;
 	ros::ServiceServer setModeService_, getModeService_, setBoatNSService_, setFollowPIDService_, setLandPIDService_,
 			setFollowPosition_, setLandPosition_, setTakeoffParams_, setReturnParams_, setLandParams_;

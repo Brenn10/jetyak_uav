@@ -210,6 +210,7 @@ void Behaviors::uploadParams(std::string ns_param)
 void Behaviors::assignPublishers()
 {
 	cmdPub_ = nh.advertise<sensor_msgs::Joy>("behavior_cmd", 1);
+	modePub_ = nh.advertise<std_msgs::UInt8>("behavior_mode", 1);
 }
 
 void Behaviors::assignServiceClients()
