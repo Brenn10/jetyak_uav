@@ -2,10 +2,10 @@
 
 import numpy as np
 import rospy as rp
+from std_srvs.srv import Trigger, TriggerResponse
 from sensor_msgs.msg import Imu
 from geometry_msgs.msg import PoseStamped, Vector3Stamped
 from data_point import DataPoint
-
 from fusion_ekf import FusionEKF
 
 class FilterNode():
@@ -55,6 +55,10 @@ class FilterNode():
 		# Set up Publishers
 		self.tagVel_pub = rp.Publisher("/jetyak_uav_vision/tag_velocity", Vector3Stamped, queue_size = 1)
 		self.tag_pub = rp.Publisher("/jetyak_uav_vision/filtered_tag", PoseStamped, queue_size = 1)
+
+		# Set up Service Servers
+		self.reset_service = rp.Service(
+			"reset_filter", Trigger, self.reset_callback)
 
 		rp.spin()
 
@@ -132,6 +136,12 @@ class FilterNode():
 				return True
 			else:
 				return False
+	def reset_callback(self, req):
+		# TODO: Do filter Reset
+		print("Resetting")
+		successful=True
+		
+		return TriggerResponse(True,"Successfully reset filter")
 
 # Start Node
 filtered = FilterNode()
