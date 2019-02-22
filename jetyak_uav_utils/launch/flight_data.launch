@@ -6,8 +6,12 @@
 			/jetyak_uav_vision/ar_pose_marker 
 			/jetyak_uav_vision/tag_pose 
 			/jetyak_uav_vision/filtered_tag 
+			/jetyak_uav_vision/tag_velocity 
 			/jetyak_uav_utils/behavior_cmd 
-			/jetyak_uav_utils/behavior_mode
+			/jetyak_uav_utils/behavior_mode 
+			/jetyak2/global_position/global 
+			/jetyak2/imu/data 
+			/jetyak2/rc/in 
 			/dji_sdk/attitude 
 			/dji_sdk/battery_state 
 			/dji_sdk/flight_control_setpoint_generic 
@@ -19,7 +23,8 @@
 			/dji_sdk/gps_position 
 			/dji_sdk/imu 
 			/dji_sdk/rc 
-			/dji_sdk/velocity"
+			/dji_sdk/velocity
+			/dji_sdk/height_above_takeoff"
 	/>
 
 </launch>

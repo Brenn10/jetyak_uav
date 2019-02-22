@@ -85,5 +85,10 @@ class FusionEKF:
 			else:
 				print("Bad ID")
 
+	def resetFilter(self, P):
+		self.P = P
+		self.isInit = False
+		print("Filter reset")
+
 	def getState(self):
 		return self.kalmanF.getState()

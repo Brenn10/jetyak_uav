@@ -3,14 +3,11 @@
 #
 integral_size: 200
 
-
 #
-# takeoff
+# Takeoff
 #
-
 takeoff_height: 0
 takeoff_threshold: .25
-
 
 #
 # Follow Parameters
@@ -38,17 +35,15 @@ follow_w_ki: 0
 #
 # Land Parameters
 #
-
-#These parameters specify the center of the landing area
 land_x: .7
 land_x_kp: .55
-land_x_kd: .4
-land_x_ki: .1
+land_x_kd: .3
+land_x_ki: .15
 
 land_y: 0.12
 land_y_kp: .55
-land_y_kd: .4
-land_y_ki: .1
+land_y_kd: .3
+land_y_ki: .15
 
 land_z: .0 # this should be .1-.2m over the tag to allow the uav to maneuver
 land_z_kp: .25
@@ -67,7 +62,7 @@ land_y_low: -.1
 land_y_high: .1
 land_z_low: -.15
 land_z_high: .15
-land_angle_thresh: .25 #
+land_angle_thresh: .25
 
 #
 # Return Parameters
