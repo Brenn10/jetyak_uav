@@ -58,7 +58,7 @@ class FilterNode():
 
 		# Set up Service Servers
 		self.reset_service = rp.Service(
-			"reset_filter", Trigger, self.reset_callback)
+			"/jetyak_uav_vision/reset_filter", Trigger, self.reset_callback)
 
 		rp.spin()
 
@@ -141,7 +141,7 @@ class FilterNode():
 		print("Resetting")
 		successful=True
 		
-		return TriggerResponse(True,"Successfully reset filter")
+		return TriggerResponse(successful,"Successfully reset filter")
 
 # Start Node
 filtered = FilterNode()

@@ -10,6 +10,7 @@
 // ROS includes
 #include <sensor_msgs/Joy.h>
 #include <std_srvs/Trigger.h>
+#include "std_srvs/SetBool.h"
 
 // DJI SDK includes
 #include <dji_sdk/DroneArmControl.h>
@@ -18,7 +19,6 @@
 #include <dji_sdk/SDKControlAuthority.h>
 #include <dji_sdk/dji_sdk.h>
 
-#include "jetyak_uav_utils/SetBoolean.h"
 #include "jetyak_uav_utils/jetyak_uav.h"
 
 class dji_pilot
@@ -47,10 +47,10 @@ protected:
 	void rcCallback(const sensor_msgs::Joy::ConstPtr &msg);
 
 	// Service Servers
-	bool propServCallback(jetyak_uav_utils::SetBoolean::Request &req, jetyak_uav_utils::SetBoolean::Response &res);
+	bool propServCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res);
 	bool landServCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
 	bool takeoffServCallback(std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res);
-	
+
 	// Functions
 	void setupRCCallback();
 	bool requestControl(int requestFlag);

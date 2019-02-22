@@ -59,6 +59,8 @@ void Behaviors::downloadParams(std::string ns_param)
 	if (!ros::param::get(ns + "integral_size", integral_size))
 		ROS_WARN("FAILED: %s", "integral_size");
 
+	getP(ns, "reset_kalman_threshold", resetFilterTimeThresh);
+
 	/**********************
 	 * LANDING PARAMETERS *
 	 *********************/
@@ -218,10 +220,11 @@ void Behaviors::assignPublishers()
 
 void Behaviors::assignServiceClients()
 {
-	propSrv_ = nh.serviceClient<jetyak_uav_utils::SetBoolean>("prop_enable");
+	propSrv_ = nh.serviceClient<std_srvs::SetBool>("prop_enable");
 	takeoffSrv_ = nh.serviceClient<std_srvs::Trigger>("takeoff");
 	landSrv_ = nh.serviceClient<std_srvs::Trigger>("land");
 	lookdownSrv_ = nh.serviceClient<std_srvs::Trigger>("/jetyak_uav_vision/facedown");
+	resetKalmanSrv_ = nh.serviceClient<std_srvs::Trigger>("/jetyak_uav_vision/reset_filter");
 }
 
 void Behaviors::assignServiceServers()

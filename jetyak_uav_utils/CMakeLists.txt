@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
   sensor_msgs
   std_msgs
+	std_srvs
   tf
   tf2
   dji_sdk
@@ -34,7 +35,6 @@ add_service_files(DIRECTORY srv
   FourAxes.srv
   GetString.srv
   SetString.srv
-  SetBoolean.srv
   TakeoffParams.srv
   LandParams.srv
   ReturnParams.srv

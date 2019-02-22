@@ -43,12 +43,8 @@ dji_pilot::dji_pilot(ros::NodeHandle &nh)
 		extCommand.axes.push_back(0);
 
 	// Initialize default command flag
-	commandFlag = (
-		DJISDK::VERTICAL_VELOCITY |
-		DJISDK::HORIZONTAL_VELOCITY |
-		DJISDK::YAW_RATE |
-		DJISDK::HORIZONTAL_BODY |
-		DJISDK::STABLE_ENABLE);
+	commandFlag = (DJISDK::VERTICAL_VELOCITY | DJISDK::HORIZONTAL_VELOCITY | DJISDK::YAW_RATE | DJISDK::HORIZONTAL_BODY |
+								 DJISDK::STABLE_ENABLE);
 }
 
 dji_pilot::~dji_pilot()
@@ -148,7 +144,7 @@ void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr &msg)
 	}
 }
 
-bool dji_pilot::propServCallback(jetyak_uav_utils::SetBoolean::Request &req, jetyak_uav_utils::SetBoolean::Response &res)
+bool dji_pilot::propServCallback(std_srvs::SetBool::Request &req, std_srvs::SetBool::Response &res)
 {
 	if (autopilotOn)
 	{

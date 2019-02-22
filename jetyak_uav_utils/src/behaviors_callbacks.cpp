@@ -12,8 +12,27 @@
  */
 void Behaviors::tagPoseCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
-	tagPose_.pose = msg->pose;
-	tagPose_.header = msg->header;
+	if (msg->header.stamp.toSec() - tagPose_.header.stamp.toSec() > resetFilterTimeThresh)
+	{
+		ROS_WARN("Tag detected after %1.2f, resetting filter", msg->header.stamp.toSec() - tagPose_.header.stamp.toSec());
+		std_srvs::Trigger srv;
+		resetKalmanSrv_.call(srv);
+		if (srv.response.success)
+		{
+			tagPose_.pose = msg->pose;
+			tagPose_.header = msg->header;
+			ROS_WARN("Filter reset and tag updated");
+		}
+		else
+		{
+			ROS_WARN("Reset failed with message: %s", srv.response.message.c_str());
+		}
+	}
+	else
+	{
+		tagPose_.pose = msg->pose;
+		tagPose_.header = msg->header;
+	}
 }
 
 void Behaviors::tagVelCallback(const geometry_msgs::Vector3Stamped::ConstPtr &msg)
