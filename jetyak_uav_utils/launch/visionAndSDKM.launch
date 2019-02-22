@@ -2,7 +2,11 @@
 	
 	<!-- Start the DJI SDK -->
 	<include file="$(find dji_sdk)/launch/sdkM.launch"/>
-    <node name="filter" pkg="jetyak_uav_utils" type="filter_node.py" output="screen"/>
+
+	<!-- Filter node -->
+	<node name="filter" pkg="jetyak_uav_utils" type="filter_node.py" output="screen"/>
+
+	<!-- Vision node -->
 	<group ns="jetyak_uav_vision">
 
 		<!-- Start the camera and gimbal controller -->
@@ -13,4 +17,5 @@
 			<param name="isM100" type="bool" value="true" />
 		</node>
 	</group>
+
 </launch>

@@ -1,6 +1,6 @@
 <launch>
-	<!-- Launch mavros node -->
 
+	<!-- Launch mavros node -->
 	<arg name="fcu_url" default="/dev/ttyUSB0:115200" />
 	<arg name="gcs_url" default="udp://0.0.0.0:14550@" />
 	<!--arg name="tgt_system" default="1" />
@@ -22,4 +22,5 @@
 		<rosparam command="load" file="$(arg pluginlists_yaml)" />
 		<rosparam command="load" file="$(arg config_yaml)" />
 	</node>
+	
 </launch>

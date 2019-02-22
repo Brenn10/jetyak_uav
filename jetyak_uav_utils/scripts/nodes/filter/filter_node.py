@@ -24,7 +24,7 @@ class FilterNode():
 		F = np.asmatrix(np.eye(n))
 
 		# Process Matrix
-		P = np.asmatrix(1.0e4 * np.eye(n))
+		self.P = np.asmatrix(1.0e4 * np.eye(n))
 
 		# Transition Matrix for Tag measurements
 		Htag = np.matrix(np.zeros((7, n)))
@@ -46,7 +46,7 @@ class FilterNode():
 		N = 1.0
 
 		# Initialize Kalman Filter
-		self.fusionF = FusionEKF(n, F, P, Htag, Himu, Rtag, Rimu, N)
+		self.fusionF = FusionEKF(n, F, self.P, Htag, Himu, Rtag, Rimu, N)
 
 		# Set up Subscribers
 		self.imu_sub = rp.Subscriber("/dji_sdk/imu", Imu, self.imu_callback)
@@ -57,8 +57,7 @@ class FilterNode():
 		self.tag_pub = rp.Publisher("/jetyak_uav_vision/filtered_tag", PoseStamped, queue_size = 1)
 
 		# Set up Service Servers
-		self.reset_service = rp.Service(
-			"/jetyak_uav_vision/reset_filter", Trigger, self.reset_callback)
+		self.reset_service = rp.Service("reset_filter", Trigger, self.reset_callback)
 
 		rp.spin()
 
@@ -136,10 +135,11 @@ class FilterNode():
 				return True
 			else:
 				return False
+
 	def reset_callback(self, req):
-		# TODO: Do filter Reset
 		print("Resetting")
-		successful=True
+		self.fusionF.reseFilter(self.P)
+		successful = True
 		
 		return TriggerResponse(successful,"Successfully reset filter")
 
