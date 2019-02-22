@@ -50,11 +50,11 @@ class FilterNode():
 
 		# Set up Subscribers
 		self.imu_sub = rp.Subscriber("/dji_sdk/imu", Imu, self.imu_callback)
-		self.tag_sub = rp.Subscriber("/jetyak_uav_vision/tag_pose", PoseStamped, self.tag_callback)
+		self.tag_sub = rp.Subscriber("tag_pose", PoseStamped, self.tag_callback)
 
 		# Set up Publishers
-		self.tagVel_pub = rp.Publisher("/jetyak_uav_vision/tag_velocity", Vector3Stamped, queue_size = 1)
-		self.tag_pub = rp.Publisher("/jetyak_uav_vision/filtered_tag", PoseStamped, queue_size = 1)
+		self.tagVel_pub = rp.Publisher("tag_velocity", Vector3Stamped, queue_size = 1)
+		self.tag_pub = rp.Publisher("filtered_tag", PoseStamped, queue_size = 1)
 
 		# Set up Service Servers
 		self.reset_service = rp.Service("reset_filter", Trigger, self.reset_callback)
@@ -138,7 +138,7 @@ class FilterNode():
 
 	def reset_callback(self, req):
 		print("Resetting")
-		self.fusionF.reseFilter(self.P)
+		self.fusionF.resetFilter(self.P)
 		successful = True
 		
 		return TriggerResponse(successful,"Successfully reset filter")

@@ -7,12 +7,12 @@ bag = rosbag.Bag(sys.argv[1])
 xc=[]
 #ts=[]
 tsc=[]
-'''for topic, msg, t in bag.read_messages(topics=['/tag_pose']):
+for topic, msg, t in bag.read_messages(topics=['/jetyak_uav_vision/filtered_tag']):
 	x.append(msg.pose.position.x-3)
-	ts.append(t.to_sec())'''
-for topic, msg, t in bag.read_messages(topics=['/dji_sdk/flight_control_setpoint_generic']):
+	ts.append(t.to_sec())
+'''for topic, msg, t in bag.read_messages(topics=['/dji_sdk/flight_control_setpoint_generic']):
 	xc.append(msg.axes[3])
-	tsc.append(t.to_sec())
+	tsc.append(t.to_sec())'''
 bag.close()
 
 plt.plot(tsc,xc)

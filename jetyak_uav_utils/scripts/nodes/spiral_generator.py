@@ -77,7 +77,7 @@ class SpiralGenerator():
 
 wp_radius = .1
 endradius = .00005
-turns = 5
+turns = 3
 points = 30
 altitude = 10
 
