@@ -77,16 +77,24 @@ void Behaviors::followBehavior()
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
-				cmd.axes.push_back(JE\t\t\tcurrentMode_ = JETYAK_UAV::FOLLOW;folloTYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
+				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
 				cmdPub_.publish(cmd);
 				return;
 			}
 		}
-	}		resetPID();
+	}
+	resetPID();
 }
 
 void Behaviors::leaveBehavior()
 {
+	if (behaviorChanged_)
+	{
+		std_srvs::SetBool enable;
+		enable.request.data = false;
+		enableGimbalSrv_.call(enable);
+		behaviorChanged_ = false;
+	}
 	cmdPub_.publish(leave_.input);
 }
 
@@ -113,7 +121,8 @@ void Behaviors::returnBehavior()
 			setPID(follow_.kp, zero, zero);	// set i to zeroes
 		}
 		return_.stage = return_.SETTLE;
-		if ((pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2)) < return_.settleRadiusSquared)
+		if ((pow(follow_.goal_pose.x - simpleTag_.x, 2) + pow(follow_.goal_pose.y - simpleTag_.y, 2)) <
+				return_.settleRadiusSquared)
 		{
 			ROS_WARN("Settled, now following");
 			currentMode_ = JETYAK_UAV::FOLLOW;
@@ -132,7 +141,7 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(-xpid_->get_signal() * 0.75);
 			cmd.axes.push_back(-ypid_->get_signal() * 0.75);
 			cmd.axes.push_back(0);
-			//cmd.axes.push_back(-zpid_->get_signal());
+			// cmd.axes.push_back(-zpid_->get_signal());
 			cmd.axes.push_back(-wpid_->get_signal());
 			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
 			cmdPub_.publish(cmd);
@@ -230,7 +239,6 @@ void Behaviors::returnBehavior()
 		we wont change the mode here as it should search for the tags and
 		hopefully find one
 	*/
-
 
 		ROS_WARN("Goal: %1.3f, Current %1.3f", return_.finalHeight, uavHeight_);
 

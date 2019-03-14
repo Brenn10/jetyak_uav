@@ -52,7 +52,7 @@ private:
 	 *********************************************/
 	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_, extCmdSub_;
 	ros::Publisher cmdPub_, modePub_;
-	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_, resetKalmanSrv_;
+	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_, resetKalmanSrv_, enableGimbalSrv_;
 	ros::ServiceServer setModeService_, getModeService_, setBoatNSService_, setFollowPIDService_, setLandPIDService_,
 			setFollowPosition_, setLandPosition_, setTakeoffParams_, setReturnParams_, setLandParams_;
 	ros::NodeHandle nh;
