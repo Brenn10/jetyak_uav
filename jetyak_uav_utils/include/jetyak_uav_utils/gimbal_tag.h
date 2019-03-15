@@ -18,10 +18,16 @@
 class gimbal_tag
 {
 public:
+	/** gimbal_tag
+	 * Constructs the node using a node handle
+	 */
 	gimbal_tag(ros::NodeHandle &nh);
 	~gimbal_tag(){};
 
 	// Publisher
+	/** publishTagPose
+	 * If tag found, convert the tag into the UAV body frame and publish.
+	 */
 	void publishTagPose();
 
 private:
@@ -34,11 +40,31 @@ private:
 	ros::Publisher tagBodyPosePub;
 
 	// Functions
+	/** changeTagAxes
+	 * Changes the tag axes to patch FLU conventions.
+	 *
+	 * @param tagBody Quaternion defining the rotation of the tag.
+	 */
 	void changeTagAxes(tf::Quaternion &tagBody);
 
 	// Callbacks
+	/** tagCallback
+	 * Saves the tag and rotates it into the gimbal frame.
+	 *
+	 * @param msg Tag message
+	 */
 	void tagCallback(const ar_track_alvar_msgs::AlvarMarkers &msg);
+
+	/** gimbalCallback
+	 * Saves the orientation of the gimbal.
+	 *
+	 * @param msg gimbal orientation in RPY
+	 */
 	void gimbalCallback(const geometry_msgs::Vector3Stamped &msg);
+
+	/** attitudeCallback
+	 * creates a transform from quaternion of attitude and saves as qVehicle.
+	 */
 	void attitudeCallback(const geometry_msgs::QuaternionStamped &msg);
 
 	// Data

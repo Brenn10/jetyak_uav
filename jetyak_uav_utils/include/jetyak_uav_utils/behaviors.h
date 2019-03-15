@@ -373,9 +373,24 @@ private:
 	 */
 	void createPID(bsc_common::pose4d_t &kp, bsc_common::pose4d_t &ki, bsc_common::pose4d_t &kd);
 
+	/** assignPublishers
+	 * Initialize the ROS Publishers
+	 */
 	void assignPublishers();
+
+	/** assignService Clients
+	 * Initialize the ROS Service clients
+	 */
 	void assignServiceClients();
+
+	/** assignServiceServers
+	 * Initialize the ROS service servers
+	 */
 	void assignServiceServers();
+
+	/** assignSubscribers
+	 * Initialize the ROS Subscribers
+	 */
 	void assignSubscribers();
 
 public:

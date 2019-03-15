@@ -5,14 +5,16 @@
 
 namespace JETYAK_UAV
 {
+// Flag constants. Use these flags internally
 enum Flag : uint8_t
-{	// Flag constants. Use these flags internally
+{
 	BODY_FRAME = 0b10,
 	WORLD_FRAME = 0b00,
 	VELOCITY_CMD = 0b00,
 	POSITION_CMD = 0b01
 };
 
+// Enumerate the modes
 enum Mode : char
 {
 	TAKEOFF,
@@ -24,6 +26,7 @@ enum Mode : char
 	HOVER
 };
 
+// Save the names for human readable display
 static std::string nameFromMode[] = { "TAKEOFF", "FOLLOW", "LEAVE", "RETURN", "LAND", "RIDE", "HOVER" };
 };	// namespace JETYAK_UAV
 
