@@ -63,7 +63,7 @@ void Behaviors::followBehavior()
 			cmd.axes.push_back(-ypid_->get_signal());
 			cmd.axes.push_back(-zpid_->get_signal());
 			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME | JETYAK_UAV::YAW_RATE);
 			cmdPub_.publish(cmd);
 		}
 		else
@@ -77,7 +77,7 @@ void Behaviors::followBehavior()
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
-				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
+				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::YAW_RATE);
 				cmdPub_.publish(cmd);
 				return;
 			}
@@ -143,7 +143,7 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(0);
 			// cmd.axes.push_back(-zpid_->get_signal());
 			cmd.axes.push_back(-wpid_->get_signal());
-			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+			cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME | JETYAK_UAV::YAW_RATE);
 			cmdPub_.publish(cmd);
 		}
 	}
@@ -191,7 +191,7 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(0);
 			cmd.axes.push_back(z_correction);
 			cmd.axes.push_back(0);
-			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
+			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::YAW_RATE);
 			cmdPub_.publish(cmd);
 		}
 		std_srvs::Trigger downSrvTmp;
@@ -225,7 +225,7 @@ void Behaviors::returnBehavior()
 			cmd.axes.push_back(n_c);
 			cmd.axes.push_back(u_c);
 			cmd.axes.push_back(0);
-			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
+			cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::YAW_RATE);
 			cmdPub_.publish(cmd);
 		}
 		std_srvs::Trigger downSrvTmp;
@@ -251,7 +251,7 @@ void Behaviors::returnBehavior()
 		cmd.axes.push_back(n_c);
 		cmd.axes.push_back(u_c);
 		cmd.axes.push_back(simpleTag_.w);
-		cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD);
+		cmd.axes.push_back(JETYAK_UAV::WORLD_FRAME | JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::YAW_RATE);
 		cmdPub_.publish(cmd);
 	}
 	else
@@ -314,7 +314,7 @@ void Behaviors::landBehavior()
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
 				cmd.axes.push_back(0);
-				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
+				cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::YAW_RATE);
 				cmdPub_.publish(cmd);
 				return;
 			}
@@ -331,7 +331,7 @@ void Behaviors::landBehavior()
 		cmd.axes.push_back(-ypid_->get_signal());
 		cmd.axes.push_back(-zpid_->get_signal());
 		cmd.axes.push_back(-wpid_->get_signal());
-		cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME);
+		cmd.axes.push_back(JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::BODY_FRAME | JETYAK_UAV::YAW_RATE);
 		cmdPub_.publish(cmd);
 	}
 }
@@ -361,6 +361,6 @@ void Behaviors::hoverBehavior()
 	cmd.axes.push_back(0);
 	cmd.axes.push_back(0);
 	cmd.axes.push_back(0);
-	cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD);
+	cmd.axes.push_back(JETYAK_UAV::BODY_FRAME | JETYAK_UAV::VELOCITY_CMD | JETYAK_UAV::YAW_RATE);
 	cmdPub_.publish(cmd);
 };

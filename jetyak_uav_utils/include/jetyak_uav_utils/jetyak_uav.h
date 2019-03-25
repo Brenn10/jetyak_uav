@@ -8,10 +8,12 @@ namespace JETYAK_UAV
 // Flag constants. Use these flags internally
 enum Flag : uint8_t
 {
-	BODY_FRAME = 0b10,
-	WORLD_FRAME = 0b00,
-	VELOCITY_CMD = 0b00,
-	POSITION_CMD = 0b01
+	YAW_ANGLE = 0b100,
+	YAW_RATE = 0b000,
+	BODY_FRAME = 0b010,
+	WORLD_FRAME = 0b000,
+	VELOCITY_CMD = 0b000,
+	POSITION_CMD = 0b001
 };
 
 // Enumerate the modes

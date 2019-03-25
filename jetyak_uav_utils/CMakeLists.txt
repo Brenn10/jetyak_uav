@@ -33,6 +33,7 @@ add_message_files(DIRECTORY msg
 add_service_files(DIRECTORY srv
   FILES
   FourAxes.srv
+	Int.srv
   GetString.srv
   SetString.srv
   TakeoffParams.srv
