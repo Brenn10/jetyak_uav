@@ -318,10 +318,10 @@ uint8_t dji_pilot::buildFlag(JETYAK_UAV::Flag flag)
 	else
 		base |= DJISDK::HORIZONTAL_GROUND | DJISDK::STABLE_ENABLE;
 
-	if ((flag & JETYAK_UAV::YAW_RATE) == JETYAK_UAV::YAW_RATE)
-		base |= DJISDK::YAW_RATE;
-	else
+	if ((flag & JETYAK_UAV::YAW_ANGLE) == JETYAK_UAV::YAW_ANGLE)
 		base |= DJISDK::YAW_ANGLE;
+	else
+		base |= DJISDK::YAW_RATE;
 
 	return base;
 }

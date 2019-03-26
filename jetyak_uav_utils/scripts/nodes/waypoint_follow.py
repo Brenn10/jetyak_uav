@@ -20,6 +20,7 @@ def lat_lon_to_m(lat1,lon1,lat2,lon2):
 	dLon = rLon2 - rLon1
 	a = pow(sin(dLat / 2), 2) + cos(rLat1) * cos(rLat2) * pow(sin(dLon / 2), 2)
 	return R * 2 * atan2(sqrt(a), sqrt(1 - a))
+
 def clip(val,low,high):
 	return min(high,max(val,low))
 
@@ -32,30 +33,18 @@ def frange(start, stop, parts):
 	return L
 
 
-class SpiralGenerator():
-	def __init__(self, wp_radius, endradius, turns, points, altitude):
-		self.wp_radius = wp_radius
-		self.endradius = endradius
-		self.turns = turns
-		self.points = points
-		self.altitude = altitude
-
-		self.lon = 0
-		self.lat = 0
-
-
-		self.gps_sub = rospy.Subscriber(
-			"/dji_sdk/gps_position", NavSatFix, self.gps_callback)
-		self.spiral_srv = rospy.Service(
-			"create_spiral", Trigger, self.spiral_callback)
-		self.set_wps_service = rospy.ServiceProxy("set_waypoints", SetWaypoints)
-
-	
-
-	def gps_callback(self, msg):
-		self.lat = msg.latitude
-		self.lon = msg.longitude
-
+def angle_dist(a1,a2):
+	"""
+	Takes 2 angles in rads. 
+	diff
+	normalize to (-pi,pi]
+	"""
+	diff=a1-a2
+	while(diff>pi):
+		diff-=2*pi
+	while(diff<=-pi):
+		diff+=2*pi
+	return diff
 
 
 
@@ -100,7 +89,7 @@ class WaypointFollow():
 
 	def mark_corner_callback(self, req):
 		if req.data in [1, 2, 3]:
-			self.corners[req.data] = (self.lat, self.lon, self.height)
+			self.corners[req.data] = (self.lat, self.lon, self.height,self.yaw)
 			return IntResponse(True,"Corner set")
 		else:
 			return IntResponse(False,"Not a valid ID")
@@ -117,22 +106,33 @@ class WaypointFollow():
 				
 		def norm(L): return math.sqrt(sum(i ** 2 for i in L))
 		def add(v1, v2): return [(v1[i] + v2[i]) for i in range(len(v1))]
+ 		def diff(v1,v2): 
+			ov= [(v2[i]-v1[i]) for i in [0,1,2]]
+			ov.append(angle_dist(v2[3],v1[3]))
+			return ov
 		def scale(v, l): return [v[i]*l for i in range(len(v))]
+			
 
-		v12 = [(self.corners[2][i] - self.corners[1][i]) for i in [0, 1, 2]]
-		v23 = [(self.corners[3][i] - self.corners[2][i]) for i in [0, 1, 2]]
+		v12 = diff(self.corners[1],self.corners[2])
+		
+		v23 = diff(self.corners[2],self.corners[3])
 		self.wps = []
 
 		step = scale(v23, 1/float(n-1))
+		middle = add(self.corners[1],scale(v12,.5))	
+
 		left = [add(self.corners[1], scale(step, i)) for i in range(n)]
 		right = [add(self.corners[2], scale(step, i)) for i in range(n)]
+		mid = [add(middle, scale(step, i)) for i in range(n)]
 		path = []
 		for i in range(len(left)):
 			if(i % 2 == 0):
 				path.append(left.pop(0))
+				path.append(mid.pop(0))
 				path.append(right.pop(0))
 			else:
 				path.append(right.pop(0))
+				path.append(mid.pop(0))
 				path.append(left.pop(0))
 
 		for p in path:
@@ -140,6 +140,7 @@ class WaypointFollow():
 			wp.lat = p[0]
 			wp.lon = p[1]
 			wp.alt = p[2]
+			wp.heading=p[3]
 
 
 			wp.radius = 1
