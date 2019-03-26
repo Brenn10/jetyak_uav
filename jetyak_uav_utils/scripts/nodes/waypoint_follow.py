@@ -81,6 +81,8 @@ class WaypointFollow():
 		self.height_sub = rospy.Subscriber("/dji_sdk/height_above_takeoff", Float32, self.height_callback, queue_size=1)
 		self.wps_service = rospy.Service("set_waypoints", SetWaypoints, self.wps_callback)
 		self.spiral_srv = rospy.Service("create_spiral", Trigger, self.spiral_callback)
+		self.mark_corner_srv = rospy.Service("mark_corner", Int, self.mark_corner_callback)
+		self.spiral_srv = rospy.Service("create_rect", Int, self.rectangle_callback)
 
 
 	def att_callback(self, msg):
@@ -98,10 +100,10 @@ class WaypointFollow():
 
 	def mark_corner_callback(self, req):
 		if req.data in [1, 2, 3]:
-			self.corners[req.data] = (self.lat, self.lon, self.alt)
-			return IntResponse(True)
-		else
-			return IntResponse(False)
+			self.corners[req.data] = (self.lat, self.lon, self.height)
+			return IntResponse(True,"Corner set")
+		else:
+			return IntResponse(False,"Not a valid ID")
 
 	
 		
@@ -135,13 +137,13 @@ class WaypointFollow():
 
 		for p in path:
 			wp = Waypoint()
-			wp.lat = p(0)
-			wp.lon = p(1)
-			wp.alt = p(2)
+			wp.lat = p[0]
+			wp.lon = p[1]
+			wp.alt = p[2]
 
 
 			wp.radius = 1
-			wp.loiter_time = 0
+			wp.loiter_time = 1
 			self.wps.append(wp)
 			
 	def wps_callback(self, req):
@@ -209,7 +211,7 @@ class WaypointFollow():
 					self.cmd_pub.publish(cmd)
 					print("Mission Complete")
 				else:
-					print("Moving to next objective: %f left"%len(self.wps))
+					print("Moving to next objective: %i left"%len(self.wps))
 				return
 		
 		east = lat_lon_to_m(0, self.wps[0].lon, 0, self.lon)
