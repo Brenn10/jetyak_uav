@@ -3,12 +3,11 @@
 	<!-- Start the DJI SDK -->
 	<include file="$(find dji_sdk)/launch/sdkM.launch"/>
 
-	<!-- Filter node -->
-
-
 	<!-- Vision node -->
 	<group ns="jetyak_uav_vision">
-	<node name="filter" pkg="jetyak_uav_utils" type="filter_node.py" output="screen"/>
+		<!-- Filter node -->
+		<node name="filter" pkg="jetyak_uav_utils" type="filter_node.py" output="screen"/>
+
 		<!-- Start the camera and gimbal controller -->
 		<include file="$(find dji_camera)/launch/jetyak2bundle.launch"/>
 
