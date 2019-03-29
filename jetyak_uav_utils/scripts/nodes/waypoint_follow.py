@@ -213,7 +213,7 @@ class WaypointFollow():
 				self.in_waypoint = False
 				if(len(self.wps)==0):
 					cmd = Joy()
-					cmd.axes = [0,0, 0, 0, self.flag]
+					cmd.axes = [0,0, 0, 0, 0b010]
 					#cmd.axes=[east,0,height_diff,0,self.flag]
 					self.cmd_pub.publish(cmd)
 					print("Mission Complete")
