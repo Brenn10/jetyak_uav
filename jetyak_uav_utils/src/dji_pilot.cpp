@@ -298,7 +298,7 @@ void dji_pilot::publishCommand()
 	if (autopilotOn)
 	{
 		// Prepare command
-		sensor_msgs::Joy djiCommand
+		sensor_msgs::Joy djiCommand;
 
 		if (bypassPilot)
 			djiCommand = rcCommand;
@@ -306,7 +306,7 @@ void dji_pilot::publishCommand()
 			djiCommand = extCommand;
 
 		// Get time
-		ros::Time time ros::Time::now();
+		ros::Time time = ros::Time::now();
 		djiCommand.header.stamp = time;
 
 		// Publish command
