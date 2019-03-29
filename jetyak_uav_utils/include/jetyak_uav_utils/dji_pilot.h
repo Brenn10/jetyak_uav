@@ -117,6 +117,7 @@ protected:
 	double vVelocityMaxBody, vVelocityMaxGround, vPosCmdMax, vPosCmdMin, vThrustCmdMax;
 	double yAngleRateMax, yAngleMax;
 	double rcStickThresh;
+	double rcMultiplier;
 
 	bool isM100;
 

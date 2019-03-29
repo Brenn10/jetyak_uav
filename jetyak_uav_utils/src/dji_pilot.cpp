@@ -64,6 +64,9 @@ void dji_pilot::loadPilotParameters()
 	// Platform
 	nh_private.param("isM100", isM100, true);
 
+	// RC velocity multiplier
+	nh_private.param("rcVelocityMultiplier", rcVelocityMultiplier, 1.0);
+
 	// Horizontal velocity thresholds
 	nh_private.param("hVelocityMaxBody", hVelocityMaxBody, 1.0);
 	nh_private.param("hVelocityMaxGround", hVelocityMaxGround, 5.0);
@@ -133,11 +136,11 @@ void dji_pilot::rcCallback(const sensor_msgs::Joy::ConstPtr &msg)
 		{
 			// Clear any previous RC commands
 			rcCommand.axes.clear();
-			rcCommand.axes.push_back(msg->axes[1]);		// Roll
-			rcCommand.axes.push_back(-msg->axes[0]);	// Pitch
-			rcCommand.axes.push_back(msg->axes[3]);		// Altitude
-			rcCommand.axes.push_back(-msg->axes[2]);	// Yaw
-			rcCommand.axes.push_back(commandFlag);		// Command Flag
+			rcCommand.axes.push_back(msg->axes[1] * rcVelocityMultiplier);		// Roll
+			rcCommand.axes.push_back(-msg->axes[0] * rcVelocityMultiplier);	    // Pitch
+			rcCommand.axes.push_back(msg->axes[3] * rcVelocityMultiplier);		// Altitude
+			rcCommand.axes.push_back(-msg->axes[2]);	                        // Yaw
+			rcCommand.axes.push_back(commandFlag);		                        // Command Flag
 
 			bypassPilot = true;
 		}
@@ -294,10 +297,20 @@ void dji_pilot::publishCommand()
 {
 	if (autopilotOn)
 	{
+		// Prepare command
+		sensor_msgs::Joy djiCommand
+
 		if (bypassPilot)
-			controlPub.publish(rcCommand);
+			djiCommand = rcCommand;
 		else
-			controlPub.publish(extCommand);
+			djiCommand = extCommand;
+
+		// Get time
+		ros::Time time ros::Time::now();
+		djiCommand.header.stamp = time;
+
+		// Publish command
+		controlPub.publish(djiCommand);
 
 		// Reset bypass flag
 		bypassPilot = false;
