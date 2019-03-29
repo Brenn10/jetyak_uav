@@ -97,6 +97,7 @@ class WaypointFollow():
 	
 		
 	def rectangle_callback(self, req):
+		intermediate = 5 # TODO: Make this a parameter
 		n=req.data
 		if (n <= 1):
 			return IntResponse(False, "number must be greater than 1")
@@ -119,20 +120,25 @@ class WaypointFollow():
 		self.wps = []
 
 		step = scale(v23, 1/float(n-1))
-		middle = add(self.corners[1],scale(v12,.5))	
+		middle = [add(self.corners[1], scale(v12, i/(intermediate+1.0)))
+                    for i in range(1, intermediate+1)]
 
 		left = [add(self.corners[1], scale(step, i)) for i in range(n)]
 		right = [add(self.corners[2], scale(step, i)) for i in range(n)]
-		mid = [add(middle, scale(step, i)) for i in range(n)]
+		mid = [[add(middle[j], scale(step, i)) for i in range(n)]
+                    for j in range(intermediate)]
+		print mid
 		path = []
 		for i in range(len(left)):
 			if(i % 2 == 0):
 				path.append(left.pop(0))
-				path.append(mid.pop(0))
+				for j in range(intermediate):
+					path.append(mid[j].pop(0))
 				path.append(right.pop(0))
 			else:
 				path.append(right.pop(0))
-				path.append(mid.pop(0))
+				for j in range(intermediate)[::-1]:
+					path.append(mid[j].pop(0))
 				path.append(left.pop(0))
 
 		for p in path:
@@ -143,8 +149,8 @@ class WaypointFollow():
 			wp.heading=p[3]
 
 
-			wp.radius = 1
-			wp.loiter_time = 1
+			wp.radius = .1
+			wp.loiter_time = 0
 			self.wps.append(wp)
 			
 	def wps_callback(self, req):
@@ -207,7 +213,7 @@ class WaypointFollow():
 				self.in_waypoint = False
 				if(len(self.wps)==0):
 					cmd = Joy()
-					cmd.axes = [0,0, 0, 0, self.flag]
+					cmd.axes = [0,0, 0, 0, 0b010]
 					#cmd.axes=[east,0,height_diff,0,self.flag]
 					self.cmd_pub.publish(cmd)
 					print("Mission Complete")
