@@ -350,7 +350,7 @@ int main(int argc, char **argv)
 
 	dji_pilot joydji_pilot(nh);
 
-	ros::Rate rate(30);
+	ros::Rate rate(25);
 
 	while (ros::ok())
 	{
