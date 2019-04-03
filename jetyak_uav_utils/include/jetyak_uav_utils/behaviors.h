@@ -50,7 +50,8 @@ private:
 	/*********************************************
 	 * ROS PUBLISHERS, SUBSCRIBERS, AND SERVICES
 	 *********************************************/
-	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_, extCmdSub_;
+	ros::Subscriber tagPoseSub_, tagVelSub_, boatGPSSub_, boatIMUSub_, uavGPSSub_, uavAttSub_, uavHeightSub_, uavVelSub,
+			extCmdSub_;
 	ros::Publisher cmdPub_, modePub_;
 	ros::ServiceClient propSrv_, takeoffSrv_, landSrv_, lookdownSrv_, resetKalmanSrv_, enableGimbalSrv_;
 	ros::ServiceServer setModeService_, getModeService_, setBoatNSService_, setFollowPIDService_, setLandPIDService_,
@@ -75,9 +76,12 @@ private:
 	sensor_msgs::Imu uavImu_, boatImu_;
 	geometry_msgs::PoseStamped tagPose_ = geometry_msgs::PoseStamped();
 	double uavHeight_ = 0;
+	double vGain;
 
 	bsc_common::pose4d_t simpleTag_ = { 0, 0, 0, 0, 0 };
-	bsc_common::vel3d_t tagVel_ = { 0, 0, 0, 0 };
+	bsc_common::vel3d_t tagVel_ = { 0, 0, 0, 0 };				// body
+	bsc_common::vel3d_t uavWorldVel_ = { 0, 0, 0, 0 };	// world
+	bsc_common::vel3d_t uavBodyVel_ = { 0, 0, 0, 0 };		// world
 
 	/*********************************************
 	 * BEHAVIOR SPECIFIC VARIABLES AND CONSTANTS
@@ -271,6 +275,13 @@ private:
 	 * @param msg gets the Imu reading of the UAV
 	 */
 	void uavImuCallback(const sensor_msgs::Imu::ConstPtr &msg);
+
+	/** uavVelVallback
+	 * Receive the velocity of the UAv in the world frame
+	 *
+	 * @param msg gets the UAV velocity reading
+	 */
+	void uavVelCallback(const geometry_msgs::Vector3Stamped::ConstPtr &msg);
 
 	/** boatIMUCallback
 	 * Listens for updates in the boat's IMU

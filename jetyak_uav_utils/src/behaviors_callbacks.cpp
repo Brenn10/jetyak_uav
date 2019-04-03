@@ -111,6 +111,28 @@ void Behaviors::boatIMUCallback(const sensor_msgs::Imu::ConstPtr &msg)
 	boatImu_.linear_acceleration = msg->linear_acceleration;
 	boatImu_.linear_acceleration_covariance = msg->linear_acceleration_covariance;
 }
+
+void Behaviors::uavVelCallback(const geometry_msgs::Vector3Stamped::ConstPtr &msg)
+{
+	uavWorldVel_.x = msg->vector.x;
+	uavWorldVel_.y = msg->vector.y;
+	uavWorldVel_.z = msg->vector.z;
+	uavWorldVel_.t = msg->header.stamp.toSec();
+	if (uavAttitude_.header.stamp.toSec() != 0)
+	{
+		tf2::Quaternion qRot;
+		tf2::convert(uavAttitude_.quaternion, qRot);
+		tf2::Vector3 wVel;
+		tf2::convert(msg->vector, wVel);
+		tf2::Vector3 bVel = tf2::quatRotate(qRot.inverse(), wVel);
+		uavBodyVel_.x = bVel.getX();
+		uavBodyVel_.y = bVel.getY();
+		uavBodyVel_.z = bVel.getZ();
+		uavBodyVel_.t = uavWorldVel_.t;
+		ROS_WARN("BV\t x: %.2f, y: %.2f, z: %.2f", uavBodyVel_.x, uavBodyVel_.y, uavBodyVel_.z);
+	}
+}
+
 void Behaviors::extCmdCallback(const sensor_msgs::Joy::ConstPtr &msg)
 {
 	leave_.input.header = msg->header;

@@ -3,6 +3,8 @@
 #
 integral_size: 200
 reset_kalman_threshold: 3.0
+vGain: 1.0
+
 #
 # Takeoff
 #

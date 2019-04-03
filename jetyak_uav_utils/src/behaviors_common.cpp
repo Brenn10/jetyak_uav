@@ -60,6 +60,7 @@ void Behaviors::downloadParams(std::string ns_param)
 		ROS_WARN("FAILED: %s", "integral_size");
 
 	getP(ns, "reset_kalman_threshold", resetFilterTimeThresh);
+	getP(ns, "vGain", vGain);
 
 	/**********************
 	 * LANDING PARAMETERS *
@@ -250,6 +251,7 @@ void Behaviors::assignSubscribers()
 	boatGPSSub_ = nh.subscribe("/jetyak2/global_position/global", 1, &Behaviors::boatGPSCallback, this);
 	uavAttSub_ = nh.subscribe("/dji_sdk/attitude", 1, &Behaviors::uavAttitudeCallback, this);
 	boatIMUSub_ = nh.subscribe("/jetyak2/imu/data", 1, &Behaviors::boatIMUCallback, this);
+	uavVelSub = nh.subscribe("/dji_sdk/velocity", 1, &Behaviors::uavVelCallback, this);
 	extCmdSub_ = nh.subscribe("extCommand", 1, &Behaviors::extCmdCallback, this);
 }
 
